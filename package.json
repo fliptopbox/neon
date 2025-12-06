@@ -1,0 +1,53 @@
+{
+  "name": "neon-admin-api",
+  "version": "1.0.0",
+  "description": "Database admin website with public API using Cloudflare Workers",
+  "type": "module",
+  "scripts": {
+    "dev:api": "wrangler dev",
+    "dev:admin": "vite",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:admin\"",
+    "build:api": "esbuild src/api/index.ts --bundle --outfile=dist/api/index.js --format=esm --platform=browser --target=es2022",
+    "build:admin": "vite build",
+    "build": "npm run build:api && npm run build:admin",
+    "deploy:api": "wrangler deploy",
+    "deploy:admin": "wrangler pages deploy dist/admin",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js",
+    "db:reset": "node scripts/reset.js",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
+    "@neondatabase/serverless": "^0.9.0",
+    "@tsndr/cloudflare-worker-jwt": "^3.2.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.6.1",
+    "hono": "^4.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12",
+    "vitest": "^1.2.0",
+    "wrangler": "^4.51.0"
+  }
+}
