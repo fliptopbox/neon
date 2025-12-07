@@ -44,19 +44,14 @@ export default function ModelDialog({ modelId, userId, onClose }: ModelDialogPro
       if (modelId) {
         url = `/api/models/${modelId}`;
       } else if (userId) {
-        // Fetch model by user_id
-        const response = await fetch('/api/models');
-        const models = await response.json() as Model[];
-        const foundModel = models.find(m => m.user_id === userId);
-        if (foundModel) {
-          setModel(foundModel);
-        }
-        setLoading(false);
-        return;
+        url = `/api/models/by-user/${userId}`;
       }
 
       if (url) {
         const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Model not found');
+        }
         const data = await response.json() as Model;
         setModel(data);
       }
@@ -210,6 +205,87 @@ export default function ModelDialog({ modelId, userId, onClose }: ModelDialogPro
               </a>
             )}
             <PhoneIcon sx={{ fontSize: 40, color: '#999', cursor: 'default' }} titleAccess="+44 7XXX XXXXXX" />
+          </div>
+
+          {/* Metadata Section */}
+          <div style={{ 
+            marginTop: '2rem',
+            padding: '1.5rem',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '8px',
+            textAlign: 'left'
+          }}>
+            <h3 style={{ 
+              margin: '0 0 1rem 0',
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              borderBottom: '2px solid #dee2e6',
+              paddingBottom: '0.5rem'
+            }}>
+              Model Information
+            </h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', fontSize: '0.9rem' }}>
+              <div style={{ fontWeight: '600', color: '#666' }}>Gender:</div>
+              <div>{model.sex === 2 ? 'Female' : model.sex === 1 ? 'Male' : 'Not specified'}</div>
+              
+              <div style={{ fontWeight: '600', color: '#666' }}>Status:</div>
+              <div>
+                <span style={{ 
+                  padding: '0.25rem 0.5rem', 
+                  borderRadius: '4px', 
+                  fontSize: '0.75rem',
+                  backgroundColor: model.active ? '#d4edda' : '#f8d7da',
+                  color: model.active ? '#155724' : '#721c24'
+                }}>
+                  {model.active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              
+              {model.instagram && (
+                <>
+                  <div style={{ fontWeight: '600', color: '#666' }}>Model Instagram:</div>
+                  <div>
+                    <a 
+                      href={`https://instagram.com/${model.instagram.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#E4405F', textDecoration: 'none' }}
+                    >
+                      {model.instagram.startsWith('@') ? model.instagram : `@${model.instagram}`}
+                    </a>
+                  </div>
+                </>
+              )}
+              
+              {model.portrait && (
+                <>
+                  <div style={{ fontWeight: '600', color: '#666' }}>Portrait Path:</div>
+                  <div style={{ fontSize: '0.85rem', wordBreak: 'break-all' }}>{model.portrait}</div>
+                </>
+              )}
+              
+              {model.account_holder && (
+                <>
+                  <div style={{ fontWeight: '600', color: '#666' }}>Account Holder:</div>
+                  <div>{model.account_holder}</div>
+                </>
+              )}
+              
+              {model.account_number && (
+                <>
+                  <div style={{ fontWeight: '600', color: '#666' }}>Account Number:</div>
+                  <div>{model.account_number}</div>
+                </>
+              )}
+              
+              {model.account_sortcode && (
+                <>
+                  <div style={{ fontWeight: '600', color: '#666' }}>Sort Code:</div>
+                  <div>{model.account_sortcode}</div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

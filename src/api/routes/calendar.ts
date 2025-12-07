@@ -19,6 +19,7 @@ app.get("/", async (c) => {
         c.start,
         c.duration,
         c.notes,
+        c.tbc,
         ub.fullname,
         v.name as venue_name
       FROM calendar c
@@ -50,6 +51,7 @@ app.get("/:id", async (c) => {
         c.start,
         c.duration,
         c.notes,
+        c.tbc,
         ub.fullname,
         v.name as venue_name
       FROM calendar c
@@ -81,6 +83,7 @@ app.post("/", async (c) => {
       start,
       duration,
       notes,
+      tbc,
     } = await c.req.json();
 
     if (
@@ -98,10 +101,10 @@ app.post("/", async (c) => {
     const sql = neon(c.env.DATABASE_URL);
 
     const result = await sql`
-      INSERT INTO calendar (user_id, venue_id, date, attendance_inperson, attendance_online, start, duration, notes)
+      INSERT INTO calendar (user_id, venue_id, date, attendance_inperson, attendance_online, start, duration, notes, tbc)
       VALUES (${user_id}, ${venue_id}, ${date}, ${attendance_inperson}, ${attendance_online}, ${start}, ${duration}, ${
       notes || null
-    })
+    }, ${tbc || 0})
       RETURNING id
     `;
 
@@ -131,6 +134,7 @@ app.put("/:id", async (c) => {
       start,
       duration,
       notes,
+      tbc,
     } = await c.req.json();
 
     if (
@@ -157,7 +161,8 @@ app.put("/:id", async (c) => {
         attendance_online = ${attendance_online},
         start = ${start},
         duration = ${duration},
-        notes = ${notes || null}
+        notes = ${notes || null},
+        tbc = ${tbc !== undefined ? tbc : 0}
       WHERE id = ${id}
       RETURNING id
     `;

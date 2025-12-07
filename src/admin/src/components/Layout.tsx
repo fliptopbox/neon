@@ -35,10 +35,10 @@ export default function Layout() {
 
   const navItems: NavItem[] = [
     { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-    { path: '/venues', label: 'Venues', icon: <PlaceIcon /> },
-    { path: '/venue-tags', label: 'Venue Tags', icon: <LocalOfferIcon /> },
     { path: '/calendar', label: 'Calendar', icon: <CalendarMonthIcon /> },
     { path: '/models', label: 'Models', icon: <FaceIcon /> },
+    { path: '/venues', label: 'Venues', icon: <PlaceIcon /> },
+    { path: '/venue-tags', label: 'Venue Tags', icon: <LocalOfferIcon /> },
     { path: '/artists', label: 'Artists', icon: <BrushIcon /> },
     { path: '/users', label: 'Users', icon: <PeopleIcon />, adminOnly: true },
     { path: '/profile', label: 'Profile', icon: <PersonIcon /> },

@@ -33,16 +33,24 @@ app.get("/stats", async (c) => {
     `;
     const modelsRecent = await sql`
       SELECT 
-        m.id, 
-        ub.fullname, 
+        m.id,
+        m.user_id,
+        ub.fullname,
+        ub.fullname as firstname,
+        ub.known_as,
+        ub.description,
         m.sex, 
         m.active as is_active, 
         m.created_on as created_at,
+        ub.instagram,
+        u.emailaddress,
+        m.portrait as avatar,
         (SELECT COUNT(*) FROM calendar c WHERE c.user_id = m.user_id) as booking_count
       FROM models m
       LEFT JOIN user_bios ub ON m.user_id = ub.user_id
+      LEFT JOIN users u ON m.user_id = u.id
       ORDER BY m.created_on DESC
-      LIMIT 5
+      LIMIT 8
     `;
 
     // Calendar stats
@@ -52,8 +60,13 @@ app.get("/stats", async (c) => {
       FROM calendar 
       WHERE date >= CURRENT_DATE
     `;
+    const calendarTbc = await sql`
+      SELECT COUNT(*) as count 
+      FROM calendar 
+      WHERE date >= CURRENT_DATE AND tbc = 1
+    `;
     const calendarRecent = await sql`
-      SELECT c.id, c.date, c.start, ub.fullname, v.name as venue_name
+      SELECT c.id, c.date, c.start, c.tbc, ub.fullname, v.name as venue_name
       FROM calendar c
       LEFT JOIN user_bios ub ON c.user_id = ub.user_id
       LEFT JOIN venues v ON c.venue_id = v.id
@@ -106,6 +119,7 @@ app.get("/stats", async (c) => {
       calendar: {
         total: parseInt(calendarTotal[0].count),
         upcoming: parseInt(calendarUpcoming[0].count),
+        tbc: parseInt(calendarTbc[0].count),
         recent: calendarRecent,
       },
       artists: {

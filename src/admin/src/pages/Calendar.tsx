@@ -12,6 +12,7 @@ interface CalendarEvent {
   start: string;
   duration: number;
   notes: string | null;
+  tbc: number;
   fullname?: string;
   venue_name?: string;
 }
@@ -120,7 +121,8 @@ export default function Calendar() {
           attendance_online: 0,
           start: '10:00',
           duration: 2.0,
-          notes: null
+          notes: null,
+          tbc: 0
         })
       });
 
@@ -332,7 +334,7 @@ export default function Calendar() {
               onClick={() => handleDayClick(day)}
               style={{
                 backgroundColor: day.event 
-                  ? '#e3f2fd'  // Light blue for booked days
+                  ? (day.event.tbc ? '#ffcdd2' : '#e3f2fd')  // Pink for TBC, light blue for confirmed
                   : day.isCurrentMonth 
                     ? '#fff'   // White for empty days in current month
                     : '#f5f5f5', // Light gray for days outside current month
@@ -346,14 +348,14 @@ export default function Calendar() {
               }}
               onMouseEnter={(e) => {
                 if (day.event) {
-                  e.currentTarget.style.backgroundColor = '#bbdefb';
+                  e.currentTarget.style.backgroundColor = day.event.tbc ? '#ef9a9a' : '#bbdefb';
                 } else if (day.isCurrentMonth) {
                   e.currentTarget.style.backgroundColor = '#f0f0f0';
                 }
               }}
               onMouseLeave={(e) => {
                 if (day.event) {
-                  e.currentTarget.style.backgroundColor = '#e3f2fd';
+                  e.currentTarget.style.backgroundColor = day.event.tbc ? '#ffcdd2' : '#e3f2fd';
                 } else if (day.isCurrentMonth) {
                   e.currentTarget.style.backgroundColor = '#fff';
                 } else {
@@ -375,7 +377,7 @@ export default function Calendar() {
                   <div style={{
                     fontWeight: 'bold',
                     marginBottom: '0.25rem',
-                    color: '#1976d2',
+                    color: day.event.tbc ? '#d32f2f' : '#1976d2',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'

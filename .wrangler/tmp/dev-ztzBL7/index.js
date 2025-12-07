@@ -12370,6 +12370,7 @@ app8.get("/", async (c) => {
         c.start,
         c.duration,
         c.notes,
+        c.tbc,
         ub.fullname,
         v.name as venue_name
       FROM calendar c
@@ -12398,6 +12399,7 @@ app8.get("/:id", async (c) => {
         c.start,
         c.duration,
         c.notes,
+        c.tbc,
         ub.fullname,
         v.name as venue_name
       FROM calendar c
@@ -12424,15 +12426,16 @@ app8.post("/", async (c) => {
       attendance_online,
       start,
       duration,
-      notes
+      notes,
+      tbc
     } = await c.req.json();
     if (!user_id || !venue_id || !date || attendance_inperson === void 0 || attendance_online === void 0 || !start || !duration) {
       return c.json({ error: "Missing required fields" }, 400);
     }
     const sql = Ys(c.env.DATABASE_URL);
     const result = await sql`
-      INSERT INTO calendar (user_id, venue_id, date, attendance_inperson, attendance_online, start, duration, notes)
-      VALUES (${user_id}, ${venue_id}, ${date}, ${attendance_inperson}, ${attendance_online}, ${start}, ${duration}, ${notes || null})
+      INSERT INTO calendar (user_id, venue_id, date, attendance_inperson, attendance_online, start, duration, notes, tbc)
+      VALUES (${user_id}, ${venue_id}, ${date}, ${attendance_inperson}, ${attendance_online}, ${start}, ${duration}, ${notes || null}, ${tbc || 0})
       RETURNING id
     `;
     return c.json(
@@ -12458,7 +12461,8 @@ app8.put("/:id", async (c) => {
       attendance_online,
       start,
       duration,
-      notes
+      notes,
+      tbc
     } = await c.req.json();
     if (!user_id || !venue_id || !date || attendance_inperson === void 0 || attendance_online === void 0 || !start || !duration) {
       return c.json({ error: "Missing required fields" }, 400);
@@ -12474,7 +12478,8 @@ app8.put("/:id", async (c) => {
         attendance_online = ${attendance_online},
         start = ${start},
         duration = ${duration},
-        notes = ${notes || null}
+        notes = ${notes || null},
+        tbc = ${tbc !== void 0 ? tbc : 0}
       WHERE id = ${id}
       RETURNING id
     `;
@@ -12534,16 +12539,24 @@ app9.get("/stats", async (c) => {
     `;
     const modelsRecent = await sql`
       SELECT 
-        m.id, 
-        ub.fullname, 
+        m.id,
+        m.user_id,
+        ub.fullname,
+        ub.fullname as firstname,
+        ub.known_as,
+        ub.description,
         m.sex, 
         m.active as is_active, 
         m.created_on as created_at,
+        ub.instagram,
+        u.emailaddress,
+        m.portrait as avatar,
         (SELECT COUNT(*) FROM calendar c WHERE c.user_id = m.user_id) as booking_count
       FROM models m
       LEFT JOIN user_bios ub ON m.user_id = ub.user_id
+      LEFT JOIN users u ON m.user_id = u.id
       ORDER BY m.created_on DESC
-      LIMIT 5
+      LIMIT 8
     `;
     const calendarTotal = await sql`SELECT COUNT(*) as count FROM calendar`;
     const calendarUpcoming = await sql`
@@ -12551,8 +12564,13 @@ app9.get("/stats", async (c) => {
       FROM calendar 
       WHERE date >= CURRENT_DATE
     `;
+    const calendarTbc = await sql`
+      SELECT COUNT(*) as count 
+      FROM calendar 
+      WHERE date >= CURRENT_DATE AND tbc = 1
+    `;
     const calendarRecent = await sql`
-      SELECT c.id, c.date, c.start, ub.fullname, v.name as venue_name
+      SELECT c.id, c.date, c.start, c.tbc, ub.fullname, v.name as venue_name
       FROM calendar c
       LEFT JOIN user_bios ub ON c.user_id = ub.user_id
       LEFT JOIN venues v ON c.venue_id = v.id
@@ -12597,6 +12615,7 @@ app9.get("/stats", async (c) => {
       calendar: {
         total: parseInt(calendarTotal[0].count),
         upcoming: parseInt(calendarUpcoming[0].count),
+        tbc: parseInt(calendarTbc[0].count),
         recent: calendarRecent
       },
       artists: {

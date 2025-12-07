@@ -29,6 +29,7 @@ interface CalendarEvent {
   start: string;
   duration: number;
   notes: string | null;
+  tbc: number;
 }
 
 interface BookingEditorProps {
@@ -57,7 +58,8 @@ export default function BookingEditor({
     attendance_online: event.attendance_online.toString(),
     start: event.start,
     duration: event.duration.toString(),
-    notes: event.notes || ''
+    notes: event.notes || '',
+    tbc: event.tbc.toString()
   });
 
   // Get day of week from event date (0 = Sunday, 1 = Monday, etc.)
@@ -130,7 +132,8 @@ export default function BookingEditor({
         attendance_online: parseInt(formData.attendance_online),
         start: formData.start,
         duration: parseFloat(formData.duration),
-        notes: formData.notes || null
+        notes: formData.notes || null,
+        tbc: parseInt(formData.tbc)
       });
     } catch (error) {
       console.error('Error saving:', error);
@@ -206,6 +209,43 @@ export default function BookingEditor({
 
           {/* Booking Details Form */}
           <form onSubmit={handleSubmit} id="booking-form">
+            {/* TBC Toggle Button */}
+            <div className="form-group">
+              <label>Booking Status:</label>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, tbc: formData.tbc === '1' ? '0' : '1' })}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  border: '2px solid',
+                  borderColor: formData.tbc === '1' ? '#ff9800' : '#4caf50',
+                  backgroundColor: formData.tbc === '1' ? '#fff3e0' : '#e8f5e9',
+                  color: formData.tbc === '1' ? '#e65100' : '#2e7d32',
+                  borderRadius: '4px',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                <span style={{ fontSize: '1.2rem' }}>
+                  {formData.tbc === '1' ? '⚠️' : '✓'}
+                </span>
+                {formData.tbc === '1' ? 'To Be Confirmed (TBC)' : 'Confirmed'}
+              </button>
+            </div>
+
             <div className="form-group">
               <label htmlFor="venue_id">Venue:</label>
               {loadingVenues ? (
