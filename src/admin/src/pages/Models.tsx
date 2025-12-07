@@ -188,16 +188,20 @@ export default function Models() {
       </div>
 
       <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
-        gap: '1.5rem' 
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '1rem'
       }}>
         {models.map((model) => (
-          <ModelCard
-            key={model.id}
-            model={model}
-            onClick={() => openEditModal(model)}
-          />
+          <div key={model.id} style={{ 
+            flex: '1 1 calc(50% - 0.5rem)',
+            minWidth: '300px'
+          }}>
+            <ModelCard
+              model={model}
+              onClick={() => openEditModal(model)}
+            />
+          </div>
         ))}
       </div>
 

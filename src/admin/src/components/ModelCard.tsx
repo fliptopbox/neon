@@ -40,94 +40,103 @@ export default function ModelCard({ model, onClick, className = '' }: ModelCardP
       className={`card ${className}`}
       onClick={onClick}
       style={{ 
-        padding: '1.5rem', 
+        padding: '1rem', 
         cursor: onClick ? 'pointer' : 'default', 
-        transition: 'transform 0.2s' 
+        transition: 'transform 0.2s',
+        display: 'flex',
+        gap: '1.5rem',
+        alignItems: 'start'
       }}
       onMouseEnter={(e) => onClick && (e.currentTarget.style.transform = 'translateY(-2px)')}
       onMouseLeave={(e) => onClick && (e.currentTarget.style.transform = 'translateY(0)')}
     >
-      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+      {/* Portrait */}
+      <div style={{ flexShrink: 0 }}>
         <img 
-          src={modelPortrait(model.portrait)} 
+          src={modelPortrait(model.portrait, 120, 160)} 
           alt={model.fullname}
           style={{ 
-            width: '100%', 
-            aspectRatio: '3/4',
+            width: '120px', 
+            height: '160px',
             objectFit: 'cover', 
-            borderRadius: '8px',
-            marginBottom: '1rem'
+            borderRadius: '8px'
           }}
         />
+      </div>
+      
+      {/* Info Column */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
+        {/* Full Name */}
         <h3 style={{ 
-          margin: '0 0 0.25rem 0', 
-          fontSize: '1.25rem',
-          fontWeight: 'bold'
+          margin: 0, 
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          lineHeight: 1.2
         }}>
           {model.fullname}
         </h3>
+        
+        {/* Phone Number */}
         <div style={{ 
           fontSize: '0.875rem',
-          color: '#666',
-          marginBottom: '0.5rem'
+          color: '#666'
         }}>
           +44 7XXX XXXXXX
         </div>
+        
+        {/* Icon Links Row */}
+        <ul style={{ 
+          listStyle: 'none', 
+          padding: 0, 
+          margin: 0,
+          display: 'flex',
+          gap: '0.75rem'
+        }}>
+          {instagramHandle !== 'Not provided' && (
+            <li>
+              <a 
+                href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{ color: '#E4405F', display: 'flex', alignItems: 'center' }}
+                title={instagramHandle}
+              >
+                <InstagramIcon sx={{ fontSize: 28 }} />
+              </a>
+            </li>
+          )}
+          {model.email && (
+            <li>
+              <a 
+                href={`mailto:${model.email}`}
+                onClick={(e) => e.stopPropagation()}
+                style={{ color: '#007bff', display: 'flex', alignItems: 'center' }}
+                title={model.email}
+              >
+                <EmailIcon sx={{ fontSize: 28 }} />
+              </a>
+            </li>
+          )}
+          {websites.length > 0 && (
+            <li>
+              <a 
+                href={websites[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{ color: '#007bff', display: 'flex', alignItems: 'center' }}
+                title={websites.join(', ')}
+              >
+                <LanguageIcon sx={{ fontSize: 28 }} />
+              </a>
+            </li>
+          )}
+          <li>
+            <PhoneIcon sx={{ fontSize: 28, color: '#999', cursor: 'default' }} titleAccess="+44 7XXX XXXXXX" />
+          </li>
+        </ul>
       </div>
-      
-      <ul style={{ 
-        listStyle: 'none', 
-        padding: 0, 
-        margin: 0,
-        fontSize: '0.875rem',
-        display: 'flex',
-        gap: '0.75rem',
-        justifyContent: 'center'
-      }}>
-        {instagramHandle !== 'Not provided' && (
-          <li>
-            <a 
-              href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              style={{ color: '#007bff', display: 'flex', alignItems: 'center' }}
-              title={instagramHandle}
-            >
-              <InstagramIcon sx={{ fontSize: 48 }} />
-            </a>
-          </li>
-        )}
-        {model.email && (
-          <li>
-            <a 
-              href={`mailto:${model.email}`}
-              onClick={(e) => e.stopPropagation()}
-              style={{ color: '#007bff', display: 'flex', alignItems: 'center' }}
-              title={model.email}
-            >
-              <EmailIcon sx={{ fontSize: 48 }} />
-            </a>
-          </li>
-        )}
-        {websites.length > 0 && (
-          <li>
-            <a 
-              href={websites[0]}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              style={{ color: '#007bff', display: 'flex', alignItems: 'center' }}
-              title={websites.join(', ')}
-            >
-              <LanguageIcon sx={{ fontSize: 48 }} />
-            </a>
-          </li>
-        )}
-        <li>
-          <PhoneIcon sx={{ fontSize: 48, color: '#999', cursor: 'default' }} titleAccess="+44 7XXX XXXXXX" />
-        </li>
-      </ul>
     </div>
   );
 }
