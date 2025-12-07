@@ -7,7 +7,7 @@
     "dev:api": "wrangler dev",
     "dev:admin": "vite",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:admin\"",
-    "build:api": "esbuild src/api/index.ts --bundle --outfile=dist/api/index.js --format=esm --platform=browser --target=es2022",
+    "build:api": "esbuild src/api/index.ts --bundle --outfile=dist/api/index.js --format=esm --platform=neutral --target=es2022 --external:node:*",
     "build:admin": "vite build",
     "build": "npm run build:api && npm run build:admin",
     "deploy:api": "wrangler deploy --env production",

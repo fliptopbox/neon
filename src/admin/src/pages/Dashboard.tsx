@@ -142,7 +142,7 @@ export default function Dashboard() {
       });
       
       if (response.ok) {
-        const venues = await response.json();
+        const venues = await response.json() as any[];
         
         // Group by day of week
         const dayCount: { [key: number]: number } = {};

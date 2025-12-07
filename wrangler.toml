@@ -1,5 +1,5 @@
 name = "neon-api"
-main = "src/api/index.ts"
+main = "dist/api/index.js"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
