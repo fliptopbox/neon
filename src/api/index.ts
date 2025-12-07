@@ -22,15 +22,18 @@ app.use(
       if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
         return origin;
       }
-      // Allow Cloudflare Pages domains
-      if (origin.endsWith(".pages.dev")) {
+      // Allow Cloudflare Pages domains (neon-admin.pages.dev)
+      if (
+        origin.endsWith(".neon-admin.pages.dev") ||
+        origin === "https://neon-admin.pages.dev"
+      ) {
         return origin;
       }
       // Allow your custom domain if you set one
       if (origin.includes("your-domain.com")) {
         return origin;
       }
-      return origin; // Allow all for now - tighten this in production
+      return null; // Reject other origins in production
     },
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
