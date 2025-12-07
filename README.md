@@ -78,29 +78,33 @@ npm run build
 
 ## 🚀 Deployment
 
-### Configure Wrangler Secrets
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment instructions.
+
+### Quick Deploy
 
 ```bash
-# Set database URL
-wrangler secret put DATABASE_URL
-# Paste your Neon connection string
+# Set production secrets
+wrangler secret put DATABASE_URL --env production
+wrangler secret put JWT_SECRET --env production
 
-# Set JWT secret
-wrangler secret put JWT_SECRET
-# Enter a secure random string
-```
-
-### Deploy API to Cloudflare Workers
-
-```bash
+# Build and deploy everything
+npm run build
 npm run deploy:api
-```
-
-### Deploy Admin to Cloudflare Pages
-
-```bash
 npm run deploy:admin
 ```
+
+### Environment Variables
+
+**API (Cloudflare Workers secrets):**
+
+- `DATABASE_URL` - Neon PostgreSQL connection string
+- `JWT_SECRET` - Secret for signing JWTs
+
+**Admin UI (src/admin/.env.production):**
+
+- `VITE_API_URL` - Your deployed API URL
+
+See `.env.example` files for templates.
 
 ## 📁 Project Structure
 

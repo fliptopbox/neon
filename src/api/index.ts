@@ -14,7 +14,29 @@ import dashboardRoutes from "./routes/dashboard";
 const app = new Hono<{ Bindings: Env }>();
 
 // Middleware
-app.use("/*", cors());
+app.use(
+  "/*",
+  cors({
+    origin: (origin) => {
+      // Allow localhost for development
+      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+        return origin;
+      }
+      // Allow Cloudflare Pages domains
+      if (origin.endsWith(".pages.dev")) {
+        return origin;
+      }
+      // Allow your custom domain if you set one
+      if (origin.includes("your-domain.com")) {
+        return origin;
+      }
+      return origin; // Allow all for now - tighten this in production
+    },
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 // Health check
 app.get("/health", (c) =>

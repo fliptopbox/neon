@@ -5,7 +5,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-Tmc3KM/checked-fetch.js
+// .wrangler/tmp/bundle-TdGliy/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -12641,7 +12641,26 @@ var dashboard_default = app9;
 
 // src/api/index.ts
 var app10 = new Hono2();
-app10.use("/*", cors());
+app10.use(
+  "/*",
+  cors({
+    origin: /* @__PURE__ */ __name((origin) => {
+      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+        return origin;
+      }
+      if (origin.endsWith(".pages.dev")) {
+        return origin;
+      }
+      if (origin.includes("your-domain.com")) {
+        return origin;
+      }
+      return origin;
+    }, "origin"),
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+  })
+);
 app10.get(
   "/health",
   (c) => c.json({ status: "ok", timestamp: (/* @__PURE__ */ new Date()).toISOString() })
@@ -12703,7 +12722,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-Tmc3KM/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-TdGliy/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -12735,7 +12754,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-Tmc3KM/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-TdGliy/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
