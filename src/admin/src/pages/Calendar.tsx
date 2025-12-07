@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import ModelSelectionDialog from '../components/ModelSelectionDialog';
 import BookingEditor from '../components/BookingEditor';
+import { getApiUrl } from '../config/api';
 
 interface CalendarEvent {
   id: number;
@@ -47,7 +48,7 @@ export default function Calendar() {
   const fetchVenues = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/venues', {
+      const response = await fetch(getApiUrl('/api/venues'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -66,7 +67,7 @@ export default function Calendar() {
   const fetchEvents = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/calendar', {
+      const response = await fetch(getApiUrl('/api/calendar'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -107,7 +108,7 @@ export default function Calendar() {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/calendar', {
+      const response = await fetch(getApiUrl('/api/calendar'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,7 +155,7 @@ export default function Calendar() {
 
   const fetchEventsSync = async () => {
     const token = localStorage.getItem('token');
-    const response = await fetch('/api/calendar', {
+    const response = await fetch(getApiUrl('/api/calendar'), {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -167,7 +168,7 @@ export default function Calendar() {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/calendar/${editingEvent.id}`, {
+      const response = await fetch(getApiUrl(`/api/calendar/${editingEvent.id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +196,7 @@ export default function Calendar() {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/calendar/${editingEvent.id}`, {
+      const response = await fetch(getApiUrl(`/api/calendar/${editingEvent.id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

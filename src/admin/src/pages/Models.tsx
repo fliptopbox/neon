@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ModelCard from '../components/ModelCard';
+import { getApiUrl } from '../config/api';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import EmailIcon from '@mui/icons-material/Email';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -67,7 +68,7 @@ export default function Models() {
 
   const fetchModels = async () => {
     try {
-      const response = await fetch('/api/models');
+      const response = await fetch(getApiUrl('/api/models'));
       const data = await response.json() as Model[];
       setModels(data);
     } catch (error) {
@@ -134,7 +135,7 @@ export default function Models() {
     e.preventDefault();
 
     try {
-      const url = editingModel ? `/api/models/${editingModel.id}` : '/api/models';
+      const url = editingModel ? getApiUrl(`/api/models/${editingModel.id}`) : getApiUrl('/api/models');
       const method = editingModel ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -163,7 +164,7 @@ export default function Models() {
     if (!confirm('Are you sure you want to delete this model?')) return;
 
     try {
-      await fetch(`/api/models/${id}`, {
+      await fetch(getApiUrl(`/api/models/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

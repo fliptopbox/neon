@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getApiUrl } from '../config/api';
 
 interface User {
   id: number;
@@ -38,7 +39,7 @@ export default function Users() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/users', {
+      const response = await fetch(getApiUrl('/api/users'), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json() as User[];
@@ -84,7 +85,7 @@ export default function Users() {
         setShowModal(false);
       } else {
         // Create new user via register endpoint
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch(getApiUrl('/api/auth/register'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -113,7 +114,7 @@ export default function Users() {
 
   const toggleUser = async (id: number) => {
     try {
-      await fetch(`/api/users/${id}/toggle`, {
+      await fetch(getApiUrl(`/api/users/${id}/toggle`), {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -125,7 +126,7 @@ export default function Users() {
 
   const toggleAdmin = async (id: number) => {
     try {
-      await fetch(`/api/users/${id}/toggle-admin`, {
+      await fetch(getApiUrl(`/api/users/${id}/toggle-admin`), {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -139,7 +140,7 @@ export default function Users() {
     if (!confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) return;
 
     try {
-      await fetch(`/api/users/${id}`, {
+      await fetch(getApiUrl(`/api/users/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

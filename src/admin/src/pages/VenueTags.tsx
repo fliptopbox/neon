@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getApiUrl } from '../config/api';
 
 interface VenueTag {
   id: string;
@@ -23,7 +24,7 @@ export default function VenueTags() {
   const fetchTags = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/venue-tags', {
+      const response = await fetch(getApiUrl('/api/venue-tags'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -70,8 +71,8 @@ export default function VenueTags() {
     try {
       const token = localStorage.getItem('token');
       const url = editingTag 
-        ? `/api/venue-tags/${editingTag.id}`
-        : '/api/venue-tags';
+        ? getApiUrl(`/api/venue-tags/${editingTag.id}`)
+        : getApiUrl('/api/venue-tags');
       
       const method = editingTag ? 'PUT' : 'POST';
       
@@ -104,7 +105,7 @@ export default function VenueTags() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/venue-tags/${id}`, {
+      const response = await fetch(getApiUrl(`/api/venue-tags/${id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getApiUrl } from '../config/api';
 
 interface ProfileData {
   fullname: string;
@@ -26,7 +27,7 @@ export default function Profile() {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch('/api/users/me', {
+      const response = await fetch(getApiUrl('/api/users/me'), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -49,7 +50,7 @@ export default function Profile() {
     setMessage('');
 
     try {
-      await fetch('/api/users/me/bio', {
+      await fetch(getApiUrl('/api/users/me/bio'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

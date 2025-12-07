@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ModelCard from './ModelCard';
+import { getApiUrl } from '../config/api';
 
 interface Model {
   id: number;
@@ -73,7 +74,7 @@ export default function BookingEditor({
 
   const fetchModel = async () => {
     try {
-      const response = await fetch(`/api/models/by-user/${event.user_id}`);
+      const response = await fetch(getApiUrl(`/api/models/by-user/${event.user_id}`));
       if (response.ok) {
         const data = await response.json();
         setModel(data);
@@ -88,7 +89,7 @@ export default function BookingEditor({
   const fetchVenues = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/venues', {
+      const response = await fetch(getApiUrl('/api/venues'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }

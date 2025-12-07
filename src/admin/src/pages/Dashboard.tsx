@@ -4,6 +4,7 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import EmailIcon from '@mui/icons-material/Email';
 import { modelPortrait } from '../helpers/imageKit';
 import ModelDialog from '../components/ModelDialog';
+import { getApiUrl } from '../config/api';
 
 interface RecentVenue {
   id: number;
@@ -116,7 +117,7 @@ export default function Dashboard() {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/dashboard/stats', {
+      const response = await fetch(getApiUrl('/api/dashboard/stats'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -137,7 +138,7 @@ export default function Dashboard() {
   const fetchVenueChartData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/venues', {
+      const response = await fetch(getApiUrl('/api/venues'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       

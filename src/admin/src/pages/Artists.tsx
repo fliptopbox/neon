@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getApiUrl } from '../config/api';
 
 interface Artist {
   id: number;
@@ -22,7 +23,7 @@ export default function Artists() {
 
   const fetchArtists = async () => {
     try {
-      const response = await fetch('/api/artists');
+      const response = await fetch(getApiUrl('/api/artists'));
       const data = await response.json() as Artist[];
       setArtists(data);
     } catch (error) {
@@ -46,7 +47,7 @@ export default function Artists() {
     e.preventDefault();
 
     try {
-      const url = editingArtist ? `/api/artists/${editingArtist.id}` : '/api/artists';
+      const url = editingArtist ? getApiUrl(`/api/artists/${editingArtist.id}`) : getApiUrl('/api/artists');
       const method = editingArtist ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -75,7 +76,7 @@ export default function Artists() {
     if (!confirm('Are you sure you want to delete this artist?')) return;
 
     try {
-      await fetch(`/api/artists/${id}`, {
+      await fetch(getApiUrl(`/api/artists/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ModelCard from './ModelCard';
+import { getApiUrl } from '../config/api';
 
 interface Model {
   id: number;
@@ -36,7 +37,7 @@ export default function ModelSelectionDialog({
 
   const fetchModels = async () => {
     try {
-      const response = await fetch('/api/models');
+      const response = await fetch(getApiUrl('/api/models'));
       const data = await response.json();
       
       // Sort: unbooked models first, then booked models

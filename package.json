@@ -8,7 +8,7 @@
     "dev:admin": "vite",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:admin\"",
     "build:api": "esbuild src/api/index.ts --bundle --outfile=dist/api/index.js --format=esm --platform=neutral --target=es2022 --external:node:*",
-    "build:admin": "vite build",
+    "build:admin": "cd src/admin && VITE_API_URL=https://neon-api-production.fliptopbox.workers.dev vite build --mode production",
     "build": "npm run build:api && npm run build:admin",
     "deploy:api": "wrangler deploy --env production",
     "deploy:admin": "wrangler pages deploy dist/admin --project-name=neon-admin",

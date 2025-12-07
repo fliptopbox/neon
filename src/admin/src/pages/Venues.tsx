@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getApiUrl } from '../config/api';
 
 interface Venue {
   id: number;
@@ -67,7 +68,7 @@ export default function Venues() {
 
   const fetchVenues = async () => {
     try {
-      const response = await fetch('/api/venues');
+      const response = await fetch(getApiUrl('/api/venues'));
       const data = await response.json() as Venue[];
       setVenues(data);
     } catch (error) {
@@ -133,7 +134,7 @@ export default function Venues() {
     };
 
     try {
-      const url = editingVenue ? `/api/venues/${editingVenue.id}` : '/api/venues';
+      const url = editingVenue ? getApiUrl(`/api/venues/${editingVenue.id}`) : getApiUrl('/api/venues');
       const method = editingVenue ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -162,7 +163,7 @@ export default function Venues() {
     if (!confirm('Are you sure you want to delete this venue?')) return;
 
     try {
-      await fetch(`/api/venues/${id}`, {
+      await fetch(getApiUrl(`/api/venues/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

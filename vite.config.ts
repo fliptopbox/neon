@@ -5,6 +5,7 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   root: "./src/admin",
+  envDir: "./src/admin",
   build: {
     outDir: "../../dist/admin",
     emptyOutDir: true,
