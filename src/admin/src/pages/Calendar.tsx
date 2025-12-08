@@ -298,11 +298,11 @@ export default function Calendar() {
       <div className="card" style={{ marginBottom: '1rem', padding: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button onClick={previousMonth} className="button button-secondary">
-            ← Previous
+            ←
           </button>
           <h2 style={{ margin: 0 }}>{monthYear}</h2>
           <button onClick={nextMonth} className="button button-secondary">
-            Next →
+            →
           </button>
         </div>
       </div>
@@ -379,14 +379,14 @@ export default function Calendar() {
                     fontWeight: 'bold',
                     marginBottom: '0.25rem',
                     color: day.event.tbc ? '#d32f2f' : '#1976d2',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    hyphens: 'auto'
                   }}>
                     {day.event.fullname || 'Unknown'}
                   </div>
                   <div style={{ color: '#666' }}>
-                    {day.event.start}
+                    {day.event.start.substring(0, 5)}
                   </div>
                   {(day.event.attendance_inperson > 0 || day.event.attendance_online > 0) && (
                     <div style={{ color: '#666', marginTop: '0.25rem' }}>
@@ -395,35 +395,9 @@ export default function Calendar() {
                     </div>
                   )}
                 </div>
-              ) : (
-                <div style={{
-                  fontSize: '0.75rem',
-                  color: '#999',
-                  fontStyle: 'italic'
-                }}>
-                  {day.isCurrentMonth && 'Available'}
-                </div>
-              )}
+              ) : null}
             </div>
           ))}
-        </div>
-      </div>
-
-      <div className="card" style={{ marginTop: '1rem', padding: '1rem' }}>
-        <h3 style={{ marginTop: 0 }}>Legend</h3>
-        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: '20px', height: '20px', backgroundColor: '#e3f2fd', border: '1px solid #ddd' }}></div>
-            <span>Booked - Click to edit</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: '20px', height: '20px', backgroundColor: '#fff', border: '1px solid #ddd' }}></div>
-            <span>Available - Click to book</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: '20px', height: '20px', backgroundColor: '#fff', border: '2px solid #007bff' }}></div>
-            <span>Today</span>
-          </div>
         </div>
       </div>
 

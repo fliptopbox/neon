@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getApiUrl } from '../config/api';
 
@@ -24,6 +24,8 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { token } = useAuth();
 
   const [formData, setFormData] = useState<UserFormData>({
@@ -35,6 +37,8 @@ export default function Users() {
 
   useEffect(() => {
     fetchUsers();
+    // Focus search input on mount
+    setTimeout(() => searchInputRef.current?.focus(), 100);
   }, []);
 
   const fetchUsers = async () => {
@@ -150,6 +154,28 @@ export default function Users() {
     }
   };
 
+  // Filter and sort users
+  const filteredUsers = users.filter((user) => {
+    if (searchQuery.length < 1) return true;
+    
+    const query = searchQuery.toLowerCase();
+    const nameMatch = user.fullname?.toLowerCase().startsWith(query);
+    const emailMatch = user.emailaddress?.toLowerCase().startsWith(query);
+    const knownAsMatch = user.known_as?.toLowerCase().startsWith(query);
+    
+    return nameMatch || emailMatch || knownAsMatch;
+  });
+
+  // Sort: admins first (alphabetically), then regular users (alphabetically)
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    // If one is admin and the other isn't, admin comes first
+    if (a.is_admin && !b.is_admin) return -1;
+    if (!a.is_admin && b.is_admin) return 1;
+    
+    // Both are same role, sort alphabetically by name
+    return (a.fullname || '').localeCompare(b.fullname || '');
+  });
+
   if (loading) return <div className="loading">Loading users...</div>;
 
   return (
@@ -161,7 +187,47 @@ export default function Users() {
         </button>
       </div>
 
-      <div className="card">
+      {/* Search Input */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <input
+          ref={searchInputRef}
+          type="text"
+          placeholder="Search by name, email, or known as..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setSearchQuery('');
+            }
+          }}
+          style={{
+            width: '100%',
+            padding: '0.75rem',
+            fontSize: '1rem',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            outline: 'none'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#007bff'}
+          onBlur={(e) => e.target.style.borderColor = '#ddd'}
+        />
+        {searchQuery.length >= 1 && (
+          <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+            Found {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="card desktop-table" style={{ display: 'block' }}>
+        <style>{`
+          @media (max-width: 768px) {
+            .desktop-table { display: none !important; }
+          }
+          @media (min-width: 769px) {
+            .users-mobile-list { display: none !important; }
+          }
+        `}</style>
         <table className="table">
           <thead>
             <tr>
@@ -175,8 +241,29 @@ export default function Users() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
+            {sortedUsers.map((user, index) => {
+              // Check if we need to add a separator
+              const prevUser = index > 0 ? sortedUsers[index - 1] : null;
+              const showSeparator = prevUser && prevUser.is_admin && !user.is_admin;
+              
+              return (
+                <>
+                  {showSeparator && (
+                    <tr key={`separator-${user.id}`}>
+                      <td colSpan={7} style={{ 
+                        backgroundColor: '#f8f9fa', 
+                        padding: '0.5rem 1rem',
+                        fontWeight: 'bold',
+                        fontSize: '0.875rem',
+                        color: '#666',
+                        borderTop: '2px solid #dee2e6',
+                        borderBottom: '2px solid #dee2e6'
+                      }}>
+                        Regular Users
+                      </td>
+                    </tr>
+                  )}
+                  <tr key={user.id}>
                 <td>{user.emailaddress}</td>
                 <td>{user.fullname}</td>
                 <td>{user.known_as || '-'}</td>
@@ -225,9 +312,114 @@ export default function Users() {
                   </button>
                 </td>
               </tr>
-            ))}
+                </>
+              );
+            })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="users-mobile-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {sortedUsers.map((user, index) => {
+          // Check if we need to add a separator
+          const prevUser = index > 0 ? sortedUsers[index - 1] : null;
+          const showSeparator = prevUser && prevUser.is_admin && !user.is_admin;
+          
+          return (
+            <>
+              {showSeparator && (
+                <div key={`separator-${user.id}`} style={{
+                  backgroundColor: '#f8f9fa',
+                  padding: '0.75rem 1rem',
+                  fontWeight: 'bold',
+                  fontSize: '0.875rem',
+                  color: '#666',
+                  borderTop: '2px solid #dee2e6',
+                  borderBottom: '2px solid #dee2e6',
+                  borderRadius: '4px',
+                  textAlign: 'center'
+                }}>
+                  Regular Users
+                </div>
+              )}
+              <div key={user.id} className="card" style={{ padding: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 'bold', fontSize: '1rem', marginBottom: '0.25rem' }}>
+                  {user.fullname}
+                </div>
+                <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.25rem' }}>
+                  {user.emailaddress}
+                </div>
+                {user.known_as && (
+                  <div style={{ fontSize: '0.875rem', color: '#666', fontStyle: 'italic' }}>
+                    Known as: {user.known_as}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ 
+                  padding: '0.25rem 0.5rem', 
+                  borderRadius: '4px', 
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  background: user.is_admin ? '#007bff' : '#6c757d',
+                  color: 'white'
+                }}>
+                  {user.is_admin ? 'Admin' : 'User'}
+                </span>
+                <span style={{ 
+                  padding: '0.25rem 0.5rem', 
+                  borderRadius: '4px', 
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  background: user.active ? '#28a745' : '#6c757d',
+                  color: 'white'
+                }}>
+                  {user.active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+            </div>
+            
+            <div style={{ fontSize: '0.75rem', color: '#999', marginBottom: '0.75rem' }}>
+              Joined: {new Date(user.created_on).toLocaleDateString()}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => openEditModal(user)}
+                className="button button-primary"
+                style={{ fontSize: '0.875rem', padding: '0.5rem 0.75rem', flex: '1 1 auto' }}
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => toggleAdmin(user.id)}
+                className="button"
+                style={{ fontSize: '0.875rem', padding: '0.5rem 0.75rem', flex: '1 1 auto' }}
+              >
+                Toggle Admin
+              </button>
+              <button
+                onClick={() => toggleUser(user.id)}
+                className="button"
+                style={{ fontSize: '0.875rem', padding: '0.5rem 0.75rem', flex: '1 1 auto' }}
+              >
+                Toggle Status
+              </button>
+              <button
+                onClick={() => deleteUser(user.id)}
+                className="button button-danger"
+                style={{ fontSize: '0.875rem', padding: '0.5rem 0.75rem', flex: '1 1 auto' }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+            </>
+          );
+        })}
       </div>
 
       {showModal && (

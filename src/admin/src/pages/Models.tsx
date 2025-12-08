@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ModelCard from '../components/ModelCard';
 import { getApiUrl } from '../config/api';
@@ -6,6 +6,9 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import EmailIcon from '@mui/icons-material/Email';
 import LanguageIcon from '@mui/icons-material/Language';
 import PhoneIcon from '@mui/icons-material/Phone';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import SortByAlphaIcon from '@mui/icons-material/SortByAlpha';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 interface Model {
   id: number;
@@ -45,6 +48,9 @@ export default function Models() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingModel, setEditingModel] = useState<Model | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<'date' | 'alpha' | 'reverse'>('date');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { token } = useAuth();
 
   const [formData, setFormData] = useState<ModelFormData>({
@@ -64,6 +70,8 @@ export default function Models() {
 
   useEffect(() => {
     fetchModels();
+    // Focus the search input when component mounts
+    searchInputRef.current?.focus();
   }, []);
 
   const fetchModels = async () => {
@@ -176,6 +184,29 @@ export default function Models() {
 
   const sexLabels = ['Not specified', 'Male', 'Female'];
 
+  // Filter models based on search query
+  const filteredModels = models.filter((model) => {
+    if (searchQuery.length < 1) return true;
+    
+    const query = searchQuery.toLowerCase();
+    const fullnameMatch = model.fullname?.toLowerCase().startsWith(query);
+    const instagramMatch = model.instagram?.toLowerCase().startsWith(query) || 
+                          model.bio_instagram?.toLowerCase().startsWith(query);
+    
+    return fullnameMatch || instagramMatch;
+  });
+
+  // Sort filtered models
+  const sortedModels = [...filteredModels].sort((a, b) => {
+    if (sortOrder === 'alpha') {
+      return (a.fullname || '').localeCompare(b.fullname || '');
+    } else if (sortOrder === 'reverse') {
+      return (b.fullname || '').localeCompare(a.fullname || '');
+    }
+    // Default: by date (id - assuming higher id = more recent)
+    return b.id - a.id;
+  });
+
   if (loading) return <div className="loading">Loading models...</div>;
 
   return (
@@ -187,12 +218,103 @@ export default function Models() {
         </button>
       </div>
 
+      {/* Search Input with Sort Icons */}
+      <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+        <div style={{ flex: 1 }}>
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Search by name or Instagram..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setSearchQuery('');
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              fontSize: '1rem',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              outline: 'none'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#007bff'}
+            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+          />
+          {searchQuery.length >= 1 && (
+            <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+              Found {filteredModels.length} model{filteredModels.length !== 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
+        
+        {/* Sort Icons */}
+        <div style={{ display: 'flex', gap: '0.25rem' }}>
+          <button
+            onClick={() => setSortOrder('date')}
+            title="Sort by date added (newest first)"
+            style={{
+              padding: '0.75rem',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              backgroundColor: sortOrder === 'date' ? '#007bff' : 'white',
+              color: sortOrder === 'date' ? 'white' : '#666',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s'
+            }}
+          >
+            <AccessTimeIcon sx={{ fontSize: 20 }} />
+          </button>
+          <button
+            onClick={() => setSortOrder('alpha')}
+            title="Sort alphabetically (A-Z)"
+            style={{
+              padding: '0.75rem',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              backgroundColor: sortOrder === 'alpha' ? '#007bff' : 'white',
+              color: sortOrder === 'alpha' ? 'white' : '#666',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s'
+            }}
+          >
+            <SortByAlphaIcon sx={{ fontSize: 20 }} />
+          </button>
+          <button
+            onClick={() => setSortOrder('reverse')}
+            title="Sort reverse alphabetically (Z-A)"
+            style={{
+              padding: '0.75rem',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              backgroundColor: sortOrder === 'reverse' ? '#007bff' : 'white',
+              color: sortOrder === 'reverse' ? 'white' : '#666',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s'
+            }}
+          >
+            <ArrowDownwardIcon sx={{ fontSize: 20 }} />
+          </button>
+        </div>
+      </div>
+
       <div style={{ 
         display: 'flex',
         flexWrap: 'wrap',
         gap: '1rem'
       }}>
-        {models.map((model) => (
+        {sortedModels.map((model) => (
           <div key={model.id} style={{ 
             flex: '1 1 calc(50% - 0.5rem)',
             minWidth: '300px'

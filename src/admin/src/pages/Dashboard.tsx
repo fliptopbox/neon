@@ -186,7 +186,7 @@ export default function Dashboard() {
     });
   };
 
-  const weekDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const weekDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
   const dayColors = [
     '#FF6384', // Sunday - Pink
@@ -210,17 +210,17 @@ export default function Dashboard() {
           const startAngle = currentAngle;
           currentAngle += angle;
           
-          const x1 = 100 + 80 * Math.cos((Math.PI * startAngle) / 180);
-          const y1 = 100 + 80 * Math.sin((Math.PI * startAngle) / 180);
-          const x2 = 100 + 80 * Math.cos((Math.PI * currentAngle) / 180);
-          const y2 = 100 + 80 * Math.sin((Math.PI * currentAngle) / 180);
+          const x1 = 100 + 95 * Math.cos((Math.PI * startAngle) / 180);
+          const y1 = 100 + 95 * Math.sin((Math.PI * startAngle) / 180);
+          const x2 = 100 + 95 * Math.cos((Math.PI * currentAngle) / 180);
+          const y2 = 100 + 95 * Math.sin((Math.PI * currentAngle) / 180);
           
           const largeArc = angle > 180 ? 1 : 0;
           
           const pathData = [
             `M 100 100`,
             `L ${x1} ${y1}`,
-            `A 80 80 0 ${largeArc} 1 ${x2} ${y2}`,
+            `A 95 95 0 ${largeArc} 1 ${x2} ${y2}`,
             `Z`
           ].join(' ');
           
@@ -234,11 +234,11 @@ export default function Dashboard() {
             />
           );
         })}
-        <circle cx="100" cy="100" r="40" fill="white" />
-        <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="20" fontWeight="bold">
+        <circle cx="100" cy="100" r="50" fill="white" />
+        <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="24" fontWeight="bold">
           {total}
         </text>
-        <text x="100" y="115" textAnchor="middle" dominantBaseline="middle" fontSize="10" fill="#666">
+        <text x="100" y="120" textAnchor="middle" dominantBaseline="middle" fontSize="12" fill="#666">
           Events
         </text>
       </svg>
@@ -254,54 +254,39 @@ export default function Dashboard() {
       );
     }
     
+    // Sort venues alphabetically by name
+    const sortedVenues = [...venuesTimePrice].sort((a, b) => a.name.localeCompare(b.name));
+    
     return (
       <div>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Time</th>
-              <th>Cost</th>
-            </tr>
-          </thead>
-          <tbody>
-            {venuesTimePrice.map((venue, index) => {
-              const hasInperson = venue.price_inperson > 0;
-              const hasOnline = venue.price_online > 0;
-              
-              return (
-                <tr key={index}>
-                  <td>{venue.name}</td>
-                  <td>
-                    <div style={{ fontWeight: 'bold' }}>
-                      {venue.start_time.substring(0, 5)}
-                    </div>
-                    <div style={{ fontSize: '0.85em', color: '#666' }}>
-                      {venue.duration} min
-                    </div>
-                  </td>
-                  <td>
-                    {!hasInperson && !hasOnline ? (
-                      <span style={{ color: '#999' }}>Free</span>
-                    ) : (
-                      <span style={{ 
-                        padding: '0.25rem 0.5rem', 
-                        borderRadius: '4px', 
-                        backgroundColor: '#d4edda',
-                        color: '#155724',
-                        fontWeight: 'bold'
-                      }}>
-                        {hasInperson && `£${(venue.price_inperson / 100).toFixed(2)}`}
-                        {hasInperson && hasOnline && ' | '}
-                        {hasOnline && `£${(venue.price_online / 100).toFixed(2)}`}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        {sortedVenues.map((venue, index) => {
+          const hasInperson = venue.price_inperson > 0;
+          const hasOnline = venue.price_online > 0;
+          
+          return (
+            <div key={index} style={{ 
+              padding: '0.75rem 0', 
+              borderBottom: index < sortedVenues.length - 1 ? '1px solid #eee' : 'none'
+            }}>
+              <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                {venue.name}
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#666' }}>
+                {venue.start_time.substring(0, 5)}
+                {' • '}
+                {!hasInperson && !hasOnline ? (
+                  <span>Free</span>
+                ) : (
+                  <span>
+                    {hasInperson && `£${(venue.price_inperson / 100).toFixed(2)}`}
+                    {hasInperson && hasOnline && ' / '}
+                    {hasOnline && `£${(venue.price_online / 100).toFixed(2)}`}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -392,7 +377,7 @@ export default function Dashboard() {
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
-          gap: '1rem' 
+          gap: '0.5rem' 
         }}>
           {stats?.models.recent.slice(0, 8).map((model) => (
             <div 
@@ -400,7 +385,7 @@ export default function Dashboard() {
               onClick={() => setSelectedModelUserId(model.user_id)}
               style={{
                 cursor: 'pointer',
-                padding: '1rem',
+                padding: '0.5rem',
                 borderRadius: '8px',
                 border: '1px solid #e0e0e0',
                 transition: 'all 0.2s',
@@ -408,7 +393,7 @@ export default function Dashboard() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '0.5rem'
+                gap: '0.25rem'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
@@ -419,23 +404,23 @@ export default function Dashboard() {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              <div style={{ marginBottom: '0.5rem' }}>
+              <div style={{ marginBottom: '0.25rem' }}>
                 {model.avatar ? (
                   <img 
-                    src={modelPortrait(model.avatar, 150, 150)} 
+                    src={modelPortrait(model.avatar, 200, 200)} 
                     alt={model.firstname || 'Model'}
                     style={{
-                      width: '100px',
-                      height: '100px',
-                      borderRadius: '50%',
+                      width: '150px',
+                      height: '120px',
+                      borderRadius: '4px',
                       objectFit: 'cover'
                     }}
                   />
                 ) : (
                   <div style={{
-                    width: '100px',
-                    height: '100px',
-                    borderRadius: '50%',
+                    width: '150px',
+                    height: '120px',
+                    borderRadius: '4px',
                     backgroundColor: '#f0f0f0',
                     display: 'flex',
                     alignItems: 'center',
@@ -451,7 +436,7 @@ export default function Dashboard() {
               <div style={{
                 fontSize: '0.875rem',
                 fontWeight: '600',
-                marginBottom: '0.5rem',
+                marginBottom: '0.25rem',
                 textAlign: 'center'
               }}>
                 {model.firstname || 'N/A'}
@@ -501,13 +486,15 @@ export default function Dashboard() {
         </div>
 
         {/* Charts Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginTop: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '2rem' }}>
           {/* Pie Chart: Events by Day of Week */}
-          <div>
-            <h3 style={{ fontSize: '1rem', marginBottom: '1rem', textAlign: 'center' }}>Events per Day of Week</h3>
+          <div style={{ textAlign: 'center' }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Events per Day of Week</h3>
             {venuesByDay.length > 0 ? (
               <>
-                {renderPieChart()}
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  {renderPieChart()}
+                </div>
                 <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
                   {venuesByDay.map((item) => (
                     <div key={item.week_day} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -531,6 +518,7 @@ export default function Dashboard() {
 
           {/* Classes List */}
           <div>
+            <h3 style={{ fontSize: '1rem', marginBottom: '1rem', textAlign: 'center' }}>Daily Classes</h3>
             {renderTimeChart()}
           </div>
         </div>

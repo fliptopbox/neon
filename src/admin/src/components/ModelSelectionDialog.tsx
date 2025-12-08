@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ModelCard from './ModelCard';
 import { getApiUrl } from '../config/api';
 
@@ -30,9 +30,14 @@ export default function ModelSelectionDialog({
 }: ModelSelectionDialogProps) {
   const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<'date' | 'alpha' | 'reverse'>('date');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchModels();
+    // Focus the search input when dialog opens
+    setTimeout(() => searchInputRef.current?.focus(), 100);
   }, []);
 
   const fetchModels = async () => {
@@ -65,6 +70,29 @@ export default function ModelSelectionDialog({
       day: 'numeric'
     });
   };
+
+  // Filter models based on search query
+  const filteredModels = models.filter((model) => {
+    if (searchQuery.length < 1) return true;
+    
+    const query = searchQuery.toLowerCase();
+    const fullnameMatch = model.fullname?.toLowerCase().startsWith(query);
+    const instagramMatch = model.instagram?.toLowerCase().startsWith(query) || 
+                          model.bio_instagram?.toLowerCase().startsWith(query);
+    
+    return fullnameMatch || instagramMatch;
+  });
+
+  // Sort filtered models
+  const sortedModels = [...filteredModels].sort((a, b) => {
+    if (sortOrder === 'alpha') {
+      return (a.fullname || '').localeCompare(b.fullname || '');
+    } else if (sortOrder === 'reverse') {
+      return (b.fullname || '').localeCompare(a.fullname || '');
+    }
+    // Default: by date (id - assuming higher id = more recent)
+    return b.id - a.id;
+  });
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -102,6 +130,99 @@ export default function ModelSelectionDialog({
           </button>
         </div>
 
+        {/* Search Input with Sort Icons */}
+        <div style={{ padding: '0 1.5rem 1rem 1.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1 }}>
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search by name or Instagram..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setSearchQuery('');
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  fontSize: '1rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  outline: 'none'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#007bff'}
+                onBlur={(e) => e.target.style.borderColor = '#ddd'}
+              />
+              {searchQuery.length >= 1 && (
+                <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+                  Found {filteredModels.length} model{filteredModels.length !== 1 ? 's' : ''}
+                </div>
+              )}
+            </div>
+            
+            {/* Sort Icons */}
+            <div style={{ display: 'flex', gap: '0.25rem' }}>
+              <button
+                onClick={() => setSortOrder('date')}
+                title="Sort by date added (newest first)"
+                style={{
+                  padding: '0.75rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  backgroundColor: sortOrder === 'date' ? '#007bff' : 'white',
+                  color: sortOrder === 'date' ? 'white' : '#666',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+              >
+                ⏰
+              </button>
+              <button
+                onClick={() => setSortOrder('alpha')}
+                title="Sort alphabetically (A-Z)"
+                style={{
+                  padding: '0.75rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  backgroundColor: sortOrder === 'alpha' ? '#007bff' : 'white',
+                  color: sortOrder === 'alpha' ? 'white' : '#666',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+              >
+                🔤
+              </button>
+              <button
+                onClick={() => setSortOrder('reverse')}
+                title="Sort reverse alphabetically (Z-A)"
+                style={{
+                  padding: '0.75rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  backgroundColor: sortOrder === 'reverse' ? '#007bff' : 'white',
+                  color: sortOrder === 'reverse' ? 'white' : '#666',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+              >
+                ⬇️
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Scrollable content area */}
         <div style={{ 
           flex: 1,
@@ -118,7 +239,7 @@ export default function ModelSelectionDialog({
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
               gap: '1rem'
             }}>
-              {models.map(model => {
+              {sortedModels.map(model => {
                 const isBooked = bookedModelIds.includes(model.user_id);
                 return (
                   <div 

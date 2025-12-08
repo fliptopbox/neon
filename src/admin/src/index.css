@@ -29,6 +29,12 @@ code {
   padding: 0;
 }
 
+@media (max-width: 768px) {
+  .container {
+    max-width: 380px;
+  }
+}
+
 .card {
   background: white;
   border-radius: 8px;
