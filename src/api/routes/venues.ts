@@ -2,71 +2,174 @@ import { Hono } from "hono";
 import type { Env } from "../db";
 import { query, queryOne } from "../db";
 import { authMiddleware, adminMiddleware } from "../middleware/auth";
-import type { Venue } from "../db/types";
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Public: List all active venues
+// Public: List all active venues with host and session info
 app.get("/", async (c) => {
-  const venues = await query<Venue>(
+  const venues = await query(
     c.env,
-    `SELECT v.*, ub.fullname as organizer_name 
+    `SELECT 
+      v.id as venue_id,
+      v.address,
+      v.postcode,
+      v.area,
+      v.timezone,
+      v.active as venue_active,
+      h.id as host_id,
+      h.name as host_name,
+      h.description as host_description,
+      h.instagram as host_instagram,
+      h.website as host_website,
+      h.active as host_active,
+      s.id as session_id,
+      s.week_day,
+      s.start_time,
+      s.duration,
+      s.frequency,
+      s.price_inperson,
+      s.price_online,
+      s.tags,
+      s.active as session_active
      FROM venues v
-     LEFT JOIN user_bios ub ON v.user_id = ub.user_id
-     WHERE v.active = 1
-     ORDER BY v.week_day, v.start_time`
+     INNER JOIN hosts h ON v.host_id = h.id
+     LEFT JOIN sessions s ON v.id = s.venue_id
+     WHERE v.active = 1 AND h.active = 1
+     ORDER BY h.name, v.area, s.week_day, s.start_time`
   );
-  return c.json(venues);
+
+  // Group by venue and nest sessions
+  const venueMap = new Map();
+  for (const row of venues) {
+    if (!venueMap.has(row.venue_id)) {
+      venueMap.set(row.venue_id, {
+        id: row.venue_id,
+        address: row.address,
+        postcode: row.postcode,
+        area: row.area,
+        timezone: row.timezone,
+        active: row.venue_active,
+        host: {
+          id: row.host_id,
+          name: row.host_name,
+          description: row.host_description,
+          instagram: row.host_instagram,
+          website: row.host_website,
+          active: row.host_active
+        },
+        sessions: []
+      });
+    }
+    
+    if (row.session_id) {
+      venueMap.get(row.venue_id).sessions.push({
+        id: row.session_id,
+        week_day: row.week_day,
+        start_time: row.start_time,
+        duration: row.duration,
+        frequency: row.frequency,
+        price_inperson: row.price_inperson,
+        price_online: row.price_online,
+        tags: row.tags,
+        active: row.session_active
+      });
+    }
+  }
+
+  return c.json(Array.from(venueMap.values()));
 });
 
-// Public: Get venue by ID
+// Public: Get venue by ID with host and sessions
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
-  const venue = await queryOne<Venue>(
+  const rows = await query(
     c.env,
-    `SELECT v.*, ub.fullname as organizer_name 
+    `SELECT 
+      v.id as venue_id,
+      v.address,
+      v.postcode,
+      v.area,
+      v.timezone,
+      v.active as venue_active,
+      h.id as host_id,
+      h.name as host_name,
+      h.description as host_description,
+      h.instagram as host_instagram,
+      h.website as host_website,
+      h.active as host_active,
+      s.id as session_id,
+      s.week_day,
+      s.start_time,
+      s.duration,
+      s.frequency,
+      s.price_inperson,
+      s.price_online,
+      s.tags,
+      s.active as session_active
      FROM venues v
-     LEFT JOIN user_bios ub ON v.user_id = ub.user_id
-     WHERE v.id = $1 AND v.active = 1`,
+     INNER JOIN hosts h ON v.host_id = h.id
+     LEFT JOIN sessions s ON v.id = s.venue_id
+     WHERE v.id = $1 AND v.active = 1
+     ORDER BY s.week_day, s.start_time`,
     [id]
   );
 
-  if (!venue) {
+  if (rows.length === 0) {
     return c.json({ error: "Venue not found" }, 404);
   }
+
+  const venue = {
+    id: rows[0].venue_id,
+    address: rows[0].address,
+    postcode: rows[0].postcode,
+    area: rows[0].area,
+    timezone: rows[0].timezone,
+    active: rows[0].venue_active,
+    host: {
+      id: rows[0].host_id,
+      name: rows[0].host_name,
+      description: rows[0].host_description,
+      instagram: rows[0].host_instagram,
+      website: rows[0].host_website,
+      active: rows[0].host_active
+    },
+    sessions: rows.filter(r => r.session_id).map(r => ({
+      id: r.session_id,
+      week_day: r.week_day,
+      start_time: r.start_time,
+      duration: r.duration,
+      frequency: r.frequency,
+      price_inperson: r.price_inperson,
+      price_online: r.price_online,
+      tags: r.tags,
+      active: r.session_active
+    }))
+  };
 
   return c.json(venue);
 });
 
-// Admin: Create venue
+// Admin: Create venue (simplified - creates venue only, sessions handled separately)
 app.post("/", authMiddleware, async (c) => {
-  const user = c.get("user");
   const data = await c.req.json();
 
-  const [venue] = await query<Venue>(
+  // Validate required fields
+  if (!data.host_id) {
+    return c.json({ error: "host_id is required" }, 400);
+  }
+
+  const [venue] = await query(
     c.env,
     `INSERT INTO venues (
-      user_id, name, week_day, frequency, instagram, website, 
-      address, timezone, start_time, duration, postcode, area,
-      price_inperson, price_online, tags
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      host_id, address, postcode, area, timezone
+    ) VALUES ($1, $2, $3, $4, $5)
     RETURNING *`,
     [
-      user.userId,
-      data.name,
-      data.week_day,
-      data.frequency || "weekly",
-      data.instagram,
-      data.website,
-      data.address,
-      data.timezone,
-      data.start_time,
-      data.duration,
-      data.postcode,
-      data.area,
-      data.price_inperson || 0,
-      data.price_online || 0,
-      JSON.stringify(data.tags || []),
+      data.host_id,
+      data.address || null,
+      data.postcode || null,
+      data.area || null,
+      data.timezone || 'GMT'
     ]
   );
 
@@ -78,31 +181,18 @@ app.put("/:id", authMiddleware, async (c) => {
   const id = c.req.param("id");
   const data = await c.req.json();
 
-  const [venue] = await query<Venue>(
+  const [venue] = await query(
     c.env,
     `UPDATE venues SET 
-      name = $1, week_day = $2, frequency = $3, instagram = $4,
-      website = $5, address = $6, timezone = $7, start_time = $8,
-      duration = $9, postcode = $10, area = $11, price_inperson = $12,
-      price_online = $13, tags = $14, modified_on = NOW()
-    WHERE id = $15
+      address = $1, postcode = $2, area = $3, timezone = $4, modified_on = NOW()
+    WHERE id = $5
     RETURNING *`,
     [
-      data.name,
-      data.week_day,
-      data.frequency,
-      data.instagram,
-      data.website,
       data.address,
-      data.timezone,
-      data.start_time,
-      data.duration,
       data.postcode,
       data.area,
-      data.price_inperson,
-      data.price_online,
-      JSON.stringify(data.tags || []),
-      id,
+      data.timezone,
+      id
     ]
   );
 

@@ -917,6 +917,26 @@
         "sentOn": "",
         "createdOn": "2025-11-24T22:26:31.389Z",
         "location": "Europe/London"
+      },
+      {
+        "emailaddress": "malvikapathak@gmail.com",
+        "fullname": "Malvika Pathak",
+        "tester": "",
+        "id": "recB3B8AC45821C",
+        "unsubscribeOn": "",
+        "sentOn": "",
+        "createdOn": "2025-12-02T20:16:19.191Z",
+        "location": "Europe/London"
+      },
+      {
+        "emailaddress": "malvikapathak@gmail.com",
+        "fullname": "Malvika Pathak",
+        "tester": "",
+        "id": "recB3B8AC458221",
+        "unsubscribeOn": "",
+        "sentOn": "",
+        "createdOn": "2025-12-02T20:16:21.599Z",
+        "location": "Europe/London"
       }
     ]
   },
@@ -4001,9 +4021,9 @@
         "portrait": "hanna-mezheva/hanna-mezheva-8778.jpg",
         "phone": "07423709443",
         "website": "",
-        "account_holder": "",
-        "account": "",
-        "sortcode": "",
+        "account_holder": "Hanna Mezheva",
+        "account": "60528768",
+        "sortcode": "30-65-85",
         "dateAdded": "2025-04-16T21:04:02.101Z"
       },
       {
@@ -4679,6 +4699,70 @@
         "account": "",
         "sortcode": "",
         "dateAdded": "2025-11-29T14:00:58.379Z"
+      },
+      {
+        "fullname": "Joana Cuiko",
+        "confirmed": "0",
+        "hosted": "0",
+        "refs": "",
+        "sex": "",
+        "instagram": "joanacuiko",
+        "email": "joanacuiko@gmail.com",
+        "portrait": "joana-cuiko/joana-cuiko-1591.jpg",
+        "phone": "0624348571",
+        "website": "",
+        "account_holder": "Joana Cuiko",
+        "account": "",
+        "sortcode": "",
+        "dateAdded": "2025-11-30T22:53:49.663Z"
+      },
+      {
+        "fullname": "Jodie Stone",
+        "confirmed": "0",
+        "hosted": "0",
+        "refs": "",
+        "sex": "",
+        "instagram": "_jodders",
+        "email": "jodiestone15@gmail.com",
+        "portrait": "jodie-stone/jodie-stone-0287.jpg",
+        "phone": "07398227033",
+        "website": "",
+        "account_holder": "Jodie Stone",
+        "account": "",
+        "sortcode": "",
+        "dateAdded": "2025-12-04T15:31:10.464Z"
+      },
+      {
+        "fullname": "Gabi Barrios Lumbreras",
+        "confirmed": "0",
+        "hosted": "0",
+        "refs": "",
+        "sex": "",
+        "instagram": "arapiente",
+        "email": "gbarlum@gmail.com",
+        "portrait": "gabriel-barrios-lumbreras/gabriel-lumbreras-6266.jpg",
+        "phone": "07751225360",
+        "website": "",
+        "account_holder": "Gabriel Barrios Lumbreras",
+        "account": "",
+        "sortcode": "",
+        "dateAdded": "2025-12-11T14:51:32.611Z"
+      },
+      {
+        "fullname": "Ice Si",
+        "confirmed": "0",
+        "hosted": "-",
+        "refs": "",
+        "sex": "",
+        "instagram": "iz9t9si",
+        "email": "isata.sidi@gmail.com",
+        "portrait": "ice-si/ice-si-7950.jpg",
+        "phone": "16175046390",
+        "website": "",
+        "account_holder": "Ice Si",
+        "account": "",
+        "sortcode": "",
+        "dateAdded": "2025-12-17T17:31:55.956Z"
       }
     ]
   },
@@ -6001,10 +6085,10 @@
         "fullname": "Fiona Cunningham",
         "sex": "f",
         "flag": "",
-        "inperson": "0",
+        "inperson": "7",
         "online": "0",
-        "income": "£0.00",
-        "profit": "-",
+        "income": "£105.00",
+        "profit": "-£82.78",
         "start": "19",
         "duration": "2"
       },
@@ -6014,10 +6098,10 @@
         "fullname": "Hanna Mezheva",
         "sex": "f",
         "flag": "",
-        "inperson": "0",
-        "online": "0",
-        "income": "£0.00",
-        "profit": "-",
+        "inperson": "13",
+        "online": "1",
+        "income": "£201.50",
+        "profit": "£13.72",
         "start": "19",
         "duration": "2"
       },
@@ -6061,10 +6145,10 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 08 Jan - Available • (OPEN CALL)",
+        "pk": "Thu 08 Jan - James Price",
         "date": "Thu, 08 Jan 26 ",
-        "fullname": "",
-        "sex": "",
+        "fullname": "James Price",
+        "sex": "m",
         "flag": "",
         "inperson": "0",
         "online": "0",
@@ -6074,10 +6158,10 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 15 Jan - India Martin",
+        "pk": "Thu 15 Jan - Vanesa Palacios (TBC)",
         "date": "Thu, 15 Jan 26 ",
-        "fullname": "India Martin",
-        "sex": "",
+        "fullname": "Vanesa Palacios (TBC)",
+        "sex": "f",
         "flag": "",
         "inperson": "0",
         "online": "0",
@@ -6087,10 +6171,10 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 22 Jan - Available • (OPEN CALL)",
+        "pk": "Thu 22 Jan - India Martin (TBC)",
         "date": "Thu, 22 Jan 26 ",
-        "fullname": "",
-        "sex": "",
+        "fullname": "India Martin (TBC)",
+        "sex": "f",
         "flag": "",
         "inperson": "0",
         "online": "0",
@@ -6103,7 +6187,7 @@
         "pk": "Thu 29 Jan - Jemima Jayne",
         "date": "Thu, 29 Jan 26 ",
         "fullname": "Jemima Jayne",
-        "sex": "",
+        "sex": "f",
         "flag": "",
         "inperson": "0",
         "online": "0",
@@ -6113,10 +6197,10 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 05 Feb - Available • (OPEN CALL)",
+        "pk": "Thu 05 Feb - Fiona Cunningham",
         "date": "Thu, 05 Feb 26 ",
-        "fullname": "",
-        "sex": "",
+        "fullname": "Fiona Cunningham",
+        "sex": "f",
         "flag": "",
         "inperson": "0",
         "online": "0",
@@ -6126,10 +6210,10 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 12 Feb - Available • (OPEN CALL)",
+        "pk": "Thu 12 Feb - Nova Storm",
         "date": "Thu, 12 Feb 26 ",
-        "fullname": "",
-        "sex": "",
+        "fullname": "Nova Storm",
+        "sex": "f",
         "flag": "",
         "inperson": "0",
         "online": "0",

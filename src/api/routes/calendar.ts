@@ -21,10 +21,12 @@ app.get("/", async (c) => {
         c.notes,
         c.tbc,
         ub.fullname,
-        v.name as venue_name
+        h.name as venue_name,
+        v.area as venue_area
       FROM calendar c
       LEFT JOIN user_bios ub ON c.user_id = ub.user_id
       LEFT JOIN venues v ON c.venue_id = v.id
+      LEFT JOIN hosts h ON v.host_id = h.id
       ORDER BY c.date DESC
     `;
     return c.json(events);
@@ -53,10 +55,12 @@ app.get("/:id", async (c) => {
         c.notes,
         c.tbc,
         ub.fullname,
-        v.name as venue_name
+        h.name as venue_name,
+        v.area as venue_area
       FROM calendar c
       LEFT JOIN user_bios ub ON c.user_id = ub.user_id
       LEFT JOIN venues v ON c.venue_id = v.id
+      LEFT JOIN hosts h ON v.host_id = h.id
       WHERE c.id = ${id}
     `;
 

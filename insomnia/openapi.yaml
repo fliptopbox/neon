@@ -1,0 +1,1483 @@
+openapi: 3.0.3
+info:
+  title: Neon Life Drawing API
+  description: |
+    API for managing life drawing classes, models, venues, and calendar bookings.
+    
+    ## Authentication
+    Most endpoints require a JWT Bearer token. Obtain one via the `/api/auth/login` or `/api/auth/register` endpoints.
+    
+    ## Base URLs
+    - Production: `https://neon-api-production.fliptopbox.workers.dev`
+    - Local: `http://localhost:8787`
+  version: 1.0.0
+  contact:
+    name: Neon API Support
+
+servers:
+  - url: https://neon-api-production.fliptopbox.workers.dev
+    description: Production server
+  - url: http://localhost:8787
+    description: Local development server
+
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: Users
+    description: User management
+  - name: Models
+    description: Life drawing models
+  - name: Artists
+    description: Artists management
+  - name: Venues
+    description: Venue management
+  - name: Calendar
+    description: Calendar bookings
+  - name: Dashboard
+    description: Dashboard statistics
+  - name: Venue Tags
+    description: Venue tag management
+  - name: Images
+    description: Image management
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login or register
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type: array
+          items:
+            type: object
+          description: Validation error details (optional)
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT authentication token
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+            email:
+              type: string
+            isAdmin:
+              type: boolean
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        emailaddress:
+          type: string
+        active:
+          type: integer
+        created_on:
+          type: string
+          format: date-time
+        login_on:
+          type: string
+          format: date-time
+        is_admin:
+          type: boolean
+        fullname:
+          type: string
+        known_as:
+          type: string
+        description:
+          type: string
+
+    UserBio:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        fullname:
+          type: string
+        known_as:
+          type: string
+        description:
+          type: string
+        instagram:
+          type: string
+        websites:
+          type: array
+          items:
+            type: string
+
+    Model:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        sex:
+          type: integer
+          description: "0: Not specified, 1: Male, 2: Female, 3: Non-binary"
+        instagram:
+          type: string
+        portrait:
+          type: string
+          description: URL to portrait image
+        account_holder:
+          type: string
+        account_number:
+          type: string
+        account_sortcode:
+          type: string
+        active:
+          type: integer
+        created_on:
+          type: string
+          format: date-time
+        modified_on:
+          type: string
+          format: date-time
+        fullname:
+          type: string
+        known_as:
+          type: string
+        description:
+          type: string
+        bio_instagram:
+          type: string
+        websites:
+          type: array
+          items:
+            type: string
+        phone:
+          type: string
+        email:
+          type: string
+
+    Artist:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        active:
+          type: integer
+        created_on:
+          type: string
+          format: date-time
+        modified_on:
+          type: string
+          format: date-time
+        fullname:
+          type: string
+        known_as:
+          type: string
+        description:
+          type: string
+        instagram:
+          type: string
+        websites:
+          type: array
+          items:
+            type: string
+
+    Venue:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        name:
+          type: string
+        week_day:
+          type: integer
+          description: "0: Sunday, 1: Monday, ..., 6: Saturday"
+        frequency:
+          type: string
+          enum: [weekly, biweekly, monthly]
+        instagram:
+          type: string
+        website:
+          type: string
+        address:
+          type: string
+        timezone:
+          type: string
+        start_time:
+          type: string
+          description: Time in HH:MM format
+        duration:
+          type: integer
+          description: Duration in minutes
+        postcode:
+          type: string
+        area:
+          type: string
+        price_inperson:
+          type: integer
+          description: Price in pence
+        price_online:
+          type: integer
+          description: Price in pence
+        active:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        created_on:
+          type: string
+          format: date-time
+        modified_on:
+          type: string
+          format: date-time
+        organizer_name:
+          type: string
+
+    CalendarEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        venue_id:
+          type: integer
+        date:
+          type: string
+          format: date
+        attendance_inperson:
+          type: integer
+        attendance_online:
+          type: integer
+        start:
+          type: string
+          description: Start time
+        duration:
+          type: integer
+          description: Duration in minutes
+        notes:
+          type: string
+        tbc:
+          type: integer
+          description: "1 if to be confirmed"
+        fullname:
+          type: string
+          description: Model name
+        venue_name:
+          type: string
+
+    VenueTag:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Lowercase tag identifier
+        description:
+          type: string
+
+    Image:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        type_id:
+          type: integer
+        src:
+          type: string
+          description: Image URL
+        active:
+          type: integer
+        created_on:
+          type: string
+          format: date-time
+        modified_on:
+          type: string
+          format: date-time
+        type_name:
+          type: string
+
+    DashboardStats:
+      type: object
+      properties:
+        venues:
+          type: object
+          properties:
+            total:
+              type: integer
+            active:
+              type: integer
+            recent:
+              type: array
+              items:
+                $ref: '#/components/schemas/Venue'
+        models:
+          type: object
+          properties:
+            total:
+              type: integer
+            active:
+              type: integer
+            notBooked:
+              type: integer
+            recent:
+              type: array
+              items:
+                $ref: '#/components/schemas/Model'
+        calendar:
+          type: object
+          properties:
+            total:
+              type: integer
+            upcoming:
+              type: integer
+            tbc:
+              type: integer
+            recent:
+              type: array
+              items:
+                $ref: '#/components/schemas/CalendarEvent'
+        artists:
+          type: object
+          properties:
+            total:
+              type: integer
+            recent:
+              type: array
+              items:
+                $ref: '#/components/schemas/Artist'
+        users:
+          type: object
+          properties:
+            total:
+              type: integer
+            admin:
+              type: integer
+            recent:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+        tags:
+          type: object
+          properties:
+            total:
+              type: integer
+            recent:
+              type: array
+              items:
+                $ref: '#/components/schemas/VenueTag'
+
+paths:
+  # Auth endpoints
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - fullname
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                fullname:
+                  type: string
+            example:
+              email: user@example.com
+              password: password123
+              fullname: John Doe
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error or email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+            example:
+              email: lifedrawing@gmx.com
+              password: pa55word
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Users endpoints
+  /api/users:
+    get:
+      tags:
+        - Users
+      summary: List all users (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+
+  /api/users/me:
+    get:
+      tags:
+        - Users
+      summary: Get current user profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+
+  /api/users/me/bio:
+    put:
+      tags:
+        - Users
+      summary: Update current user bio
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                known_as:
+                  type: string
+                description:
+                  type: string
+                instagram:
+                  type: string
+                websites:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Bio updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserBio'
+        '401':
+          description: Unauthorized
+
+  /api/users/{id}/toggle:
+    patch:
+      tags:
+        - Users
+      summary: Toggle user active status (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Status toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+
+  /api/users/{id}/toggle-admin:
+    patch:
+      tags:
+        - Users
+      summary: Toggle user admin status (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Admin status toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+
+  /api/users/{id}:
+    delete:
+      tags:
+        - Users
+      summary: Delete user (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+
+  # Models endpoints
+  /api/models:
+    get:
+      tags:
+        - Models
+      summary: List all active models
+      responses:
+        '200':
+          description: List of models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Model'
+    post:
+      tags:
+        - Models
+      summary: Create or update model profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                known_as:
+                  type: string
+                description:
+                  type: string
+                bio_instagram:
+                  type: string
+                websites:
+                  type: string
+                  description: Newline-separated URLs
+                sex:
+                  type: integer
+                instagram:
+                  type: string
+                portrait:
+                  type: string
+                account_holder:
+                  type: string
+                account_number:
+                  type: string
+                account_sortcode:
+                  type: string
+      responses:
+        '201':
+          description: Model created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+        '401':
+          description: Unauthorized
+
+  /api/models/by-user/{userId}:
+    get:
+      tags:
+        - Models
+      summary: Get model by user ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Model details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+        '404':
+          description: Model not found
+
+  /api/models/{id}:
+    get:
+      tags:
+        - Models
+      summary: Get model by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Model details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+        '404':
+          description: Model not found
+    put:
+      tags:
+        - Models
+      summary: Update model
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                known_as:
+                  type: string
+                description:
+                  type: string
+                bio_instagram:
+                  type: string
+                websites:
+                  type: string
+                sex:
+                  type: integer
+                instagram:
+                  type: string
+                portrait:
+                  type: string
+                account_holder:
+                  type: string
+                account_number:
+                  type: string
+                account_sortcode:
+                  type: string
+      responses:
+        '200':
+          description: Model updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Model not found
+    delete:
+      tags:
+        - Models
+      summary: Delete model (Admin only, soft delete)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Model deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+
+  # Artists endpoints
+  /api/artists:
+    get:
+      tags:
+        - Artists
+      summary: List all active artists
+      responses:
+        '200':
+          description: List of artists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Artist'
+    post:
+      tags:
+        - Artists
+      summary: Create artist profile
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Artist created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artist'
+        '401':
+          description: Unauthorized
+
+  /api/artists/{id}:
+    get:
+      tags:
+        - Artists
+      summary: Get artist by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Artist details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artist'
+        '404':
+          description: Artist not found
+    put:
+      tags:
+        - Artists
+      summary: Update artist
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Artist updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artist'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Artist not found
+    delete:
+      tags:
+        - Artists
+      summary: Delete artist (Admin only, soft delete)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Artist deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+
+  # Venues endpoints
+  /api/venues:
+    get:
+      tags:
+        - Venues
+      summary: List all active venues
+      responses:
+        '200':
+          description: List of venues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Venue'
+    post:
+      tags:
+        - Venues
+      summary: Create venue
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - week_day
+                - start_time
+                - duration
+              properties:
+                name:
+                  type: string
+                week_day:
+                  type: integer
+                frequency:
+                  type: string
+                  default: weekly
+                instagram:
+                  type: string
+                website:
+                  type: string
+                address:
+                  type: string
+                timezone:
+                  type: string
+                start_time:
+                  type: string
+                duration:
+                  type: integer
+                postcode:
+                  type: string
+                area:
+                  type: string
+                price_inperson:
+                  type: integer
+                price_online:
+                  type: integer
+                tags:
+                  type: array
+                  items:
+                    type: string
+            example:
+              name: Life Drawing at The Studio
+              week_day: 3
+              frequency: weekly
+              start_time: "19:00"
+              duration: 180
+              address: 123 Art Street
+              postcode: E1 1AA
+              area: East London
+              price_inperson: 1500
+              price_online: 1000
+              tags: ["clothed", "portrait"]
+      responses:
+        '201':
+          description: Venue created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Venue'
+        '401':
+          description: Unauthorized
+
+  /api/venues/{id}:
+    get:
+      tags:
+        - Venues
+      summary: Get venue by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Venue details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Venue'
+        '404':
+          description: Venue not found
+    put:
+      tags:
+        - Venues
+      summary: Update venue
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                week_day:
+                  type: integer
+                frequency:
+                  type: string
+                instagram:
+                  type: string
+                website:
+                  type: string
+                address:
+                  type: string
+                timezone:
+                  type: string
+                start_time:
+                  type: string
+                duration:
+                  type: integer
+                postcode:
+                  type: string
+                area:
+                  type: string
+                price_inperson:
+                  type: integer
+                price_online:
+                  type: integer
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Venue updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Venue'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Venue not found
+    delete:
+      tags:
+        - Venues
+      summary: Delete venue (Admin only, soft delete)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Venue deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+
+  # Calendar endpoints
+  /api/calendar:
+    get:
+      tags:
+        - Calendar
+      summary: List all calendar events
+      responses:
+        '200':
+          description: List of calendar events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalendarEvent'
+    post:
+      tags:
+        - Calendar
+      summary: Create calendar event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - venue_id
+                - date
+                - attendance_inperson
+                - attendance_online
+                - start
+                - duration
+              properties:
+                user_id:
+                  type: integer
+                venue_id:
+                  type: integer
+                date:
+                  type: string
+                  format: date
+                attendance_inperson:
+                  type: integer
+                attendance_online:
+                  type: integer
+                start:
+                  type: string
+                duration:
+                  type: integer
+                notes:
+                  type: string
+                tbc:
+                  type: integer
+            example:
+              user_id: 1
+              venue_id: 5
+              date: "2025-01-15"
+              attendance_inperson: 20
+              attendance_online: 5
+              start: "19:00"
+              duration: 180
+              notes: "Figure drawing session"
+              tbc: 0
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  id:
+                    type: integer
+        '400':
+          description: Missing required fields or invalid references
+
+  /api/calendar/{id}:
+    get:
+      tags:
+        - Calendar
+      summary: Get calendar event by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Calendar event details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEvent'
+        '404':
+          description: Event not found
+    put:
+      tags:
+        - Calendar
+      summary: Update calendar event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - venue_id
+                - date
+                - attendance_inperson
+                - attendance_online
+                - start
+                - duration
+              properties:
+                user_id:
+                  type: integer
+                venue_id:
+                  type: integer
+                date:
+                  type: string
+                  format: date
+                attendance_inperson:
+                  type: integer
+                attendance_online:
+                  type: integer
+                start:
+                  type: string
+                duration:
+                  type: integer
+                notes:
+                  type: string
+                tbc:
+                  type: integer
+      responses:
+        '200':
+          description: Event updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Missing required fields or invalid references
+        '404':
+          description: Event not found
+    delete:
+      tags:
+        - Calendar
+      summary: Delete calendar event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Event deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Event not found
+
+  # Dashboard endpoints
+  /api/dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: Get dashboard statistics
+      responses:
+        '200':
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardStats'
+
+  # Venue Tags endpoints
+  /api/venue-tags:
+    get:
+      tags:
+        - Venue Tags
+      summary: List all venue tags
+      responses:
+        '200':
+          description: List of venue tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VenueTag'
+    post:
+      tags:
+        - Venue Tags
+      summary: Create venue tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - description
+              properties:
+                id:
+                  type: string
+                  pattern: '^[a-z]+$'
+                  description: Lowercase letters only
+                description:
+                  type: string
+            example:
+              id: portrait
+              description: Portrait and head studies
+      responses:
+        '201':
+          description: Tag created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Invalid tag ID format
+        '409':
+          description: Tag ID already exists
+
+  /api/venue-tags/{id}:
+    put:
+      tags:
+        - Venue Tags
+      summary: Update venue tag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - description
+              properties:
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Tag updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Tag not found
+    delete:
+      tags:
+        - Venue Tags
+      summary: Delete venue tag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tag deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Tag not found
+
+  # Images endpoints
+  /api/images/user/{userId}:
+    get:
+      tags:
+        - Images
+      summary: Get images by user ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of user images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Image'
+
+  /api/images:
+    post:
+      tags:
+        - Images
+      summary: Upload image
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type_id
+                - src
+              properties:
+                type_id:
+                  type: integer
+                src:
+                  type: string
+                  description: Image URL
+      responses:
+        '201':
+          description: Image uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+        '401':
+          description: Unauthorized
+
+  /api/images/{id}:
+    delete:
+      tags:
+        - Images
+      summary: Delete image (soft delete)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Image deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized

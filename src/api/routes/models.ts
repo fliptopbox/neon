@@ -11,7 +11,7 @@ app.get("/", async (c) => {
   const models = await query<Model>(
     c.env,
     `SELECT m.*, ub.fullname, ub.known_as, ub.description, ub.instagram as bio_instagram,
-     ub.websites, u.emailaddress as email
+     ub.websites, ub.phone, u.emailaddress as email, m.sells_online
      FROM models m
      LEFT JOIN user_bios ub ON m.user_id = ub.user_id
      LEFT JOIN users u ON m.user_id = u.id
@@ -27,7 +27,7 @@ app.get("/by-user/:userId", async (c) => {
   const model = await queryOne<Model>(
     c.env,
     `SELECT m.*, ub.fullname, ub.known_as, ub.description, ub.instagram as bio_instagram,
-     ub.websites, u.emailaddress as email
+     ub.websites, ub.phone, u.emailaddress as email, m.sells_online
      FROM models m
      LEFT JOIN user_bios ub ON m.user_id = ub.user_id
      LEFT JOIN users u ON m.user_id = u.id
@@ -47,9 +47,11 @@ app.get("/:id", async (c) => {
   const id = c.req.param("id");
   const model = await queryOne<Model>(
     c.env,
-    `SELECT m.*, ub.fullname, ub.known_as, ub.description, ub.instagram as bio_instagram
+    `SELECT m.*, ub.fullname, ub.known_as, ub.description, ub.instagram as bio_instagram,
+     ub.websites, ub.phone, u.emailaddress as email, m.sells_online
      FROM models m
      LEFT JOIN user_bios ub ON m.user_id = ub.user_id
+     LEFT JOIN users u ON m.user_id = u.id
      WHERE m.id = $1 AND m.active = 1`,
     [id]
   );
@@ -87,22 +89,23 @@ app.post("/", authMiddleware, async (c) => {
       c.env,
       `UPDATE user_bios SET
          fullname = $1, known_as = $2, description = $3,
-         instagram = $4, websites = $5::jsonb, modified_on = NOW()
-       WHERE user_id = $6`,
+         instagram = $4, websites = $5::jsonb, phone = $6, modified_on = NOW()
+       WHERE user_id = $7`,
       [
         data.fullname,
         data.known_as || null,
         data.description || null,
         data.bio_instagram || null,
         websitesJson,
+        data.phone || null,
         user.userId,
       ]
     );
   } else {
     await query(
       c.env,
-      `INSERT INTO user_bios (user_id, fullname, known_as, description, instagram, websites)
-       VALUES ($1, $2, $3, $4, $5, $6::jsonb)`,
+      `INSERT INTO user_bios (user_id, fullname, known_as, description, instagram, websites, phone)
+       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)`,
       [
         user.userId,
         data.fullname,
@@ -110,6 +113,7 @@ app.post("/", authMiddleware, async (c) => {
         data.description || null,
         data.bio_instagram || null,
         websitesJson,
+        data.phone || null,
       ]
     );
   }
@@ -153,13 +157,34 @@ app.put("/:id", authMiddleware, async (c) => {
     return c.json({ error: "Model not found" }, 404);
   }
 
-  // Parse websites array from newline-separated string
+  // Handle websites (array or string)
   let websitesJson = "[]";
-  if (data.websites) {
-    const websitesArray = data.websites
-      .split("\n")
-      .filter((url: string) => url.trim());
-    websitesJson = JSON.stringify(websitesArray);
+  try {
+    if (Array.isArray(data.websites)) {
+        websitesJson = JSON.stringify(data.websites);
+    } else if (typeof data.websites === 'string') {
+        if (data.websites.startsWith('[')) {
+            // Already JSON string
+            websitesJson = data.websites;
+        } else {
+             // Newline separated
+            const websitesArray = data.websites
+            .split("\n")
+            .filter((url: string) => url.trim());
+            websitesJson = JSON.stringify(websitesArray);
+        }
+    }
+  } catch (e) {
+      console.error("Error parsing websites", e);
+  }
+
+  // 1. Update users (email) if provided
+  if (data.email) {
+      await query(
+          c.env,
+          `UPDATE users SET emailaddress = $1 WHERE id = $2`,
+          [data.email, existingModel.user_id]
+      );
   }
 
   // Update user_bios
@@ -174,22 +199,23 @@ app.put("/:id", authMiddleware, async (c) => {
       c.env,
       `UPDATE user_bios SET
          fullname = $1, known_as = $2, description = $3,
-         instagram = $4, websites = $5::jsonb, modified_on = NOW()
-       WHERE user_id = $6`,
+         instagram = $4, websites = $5::jsonb, phone = $6, modified_on = NOW()
+       WHERE user_id = $7`,
       [
         data.fullname,
         data.known_as || null,
         data.description || null,
         data.bio_instagram || null,
         websitesJson,
+        data.phone || null,
         existingModel.user_id,
       ]
     );
   } else {
     await query(
       c.env,
-      `INSERT INTO user_bios (user_id, fullname, known_as, description, instagram, websites)
-       VALUES ($1, $2, $3, $4, $5, $6::jsonb)`,
+      `INSERT INTO user_bios (user_id, fullname, known_as, description, instagram, websites, phone)
+       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)`,
       [
         existingModel.user_id,
         data.fullname,
@@ -197,6 +223,7 @@ app.put("/:id", authMiddleware, async (c) => {
         data.description || null,
         data.bio_instagram || null,
         websitesJson,
+        data.phone || null,
       ]
     );
   }
@@ -206,8 +233,8 @@ app.put("/:id", authMiddleware, async (c) => {
     c.env,
     `UPDATE models SET 
       sex = $1, instagram = $2, portrait = $3, account_holder = $4,
-      account_number = $5, account_sortcode = $6, active = $7, modified_on = NOW()
-    WHERE id = $8
+      account_number = $5, account_sortcode = $6, active = $7, sells_online = $8, modified_on = NOW()
+    WHERE id = $9
     RETURNING *`,
     [
       data.sex,
@@ -217,6 +244,7 @@ app.put("/:id", authMiddleware, async (c) => {
       data.account_number,
       data.account_sortcode,
       data.active !== undefined ? data.active : 1,
+      data.sells_online !== undefined ? data.sells_online : 0,
       id,
     ]
   );

@@ -1,0 +1,28 @@
+{
+  "subscribers": {
+    "title": "Subscribers",
+    "filename": "/Users/bruce/Projects/github/lifedrawing/build/db/cached/subscribers.json",
+    "records": [
+      {
+        "emailaddress": "malvikapathak@gmail.com",
+        "fullname": "Malvika Pathak",
+        "tester": "",
+        "id": "recB3B8AC45821C",
+        "unsubscribeOn": "",
+        "sentOn": "",
+        "createdOn": "2025-12-02T20:16:19.191Z",
+        "location": "Europe/London"
+      },
+      {
+        "emailaddress": "malvikapathak@gmail.com",
+        "fullname": "Malvika Pathak",
+        "tester": "",
+        "id": "recB3B8AC458221",
+        "unsubscribeOn": "",
+        "sentOn": "",
+        "createdOn": "2025-12-02T20:16:21.599Z",
+        "location": "Europe/London"
+      }
+    ]
+  }
+}
