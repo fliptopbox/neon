@@ -1,0 +1,216 @@
+{
+  "version": "1.0.0",
+  "darkMode": true,
+  "gridEnabling": false,
+  "detailLevel": "All",
+  "tablePositions": [
+    {
+      "name": "users",
+      "schemaName": "public",
+      "x": 544,
+      "y": 696
+    },
+    {
+      "name": "user_profiles",
+      "schemaName": "public",
+      "x": 208,
+      "y": 560
+    },
+    {
+      "name": "venues",
+      "schemaName": "public",
+      "x": 520,
+      "y": 48
+    },
+    {
+      "name": "calendar",
+      "schemaName": "public",
+      "x": 1360,
+      "y": 1080
+    },
+    {
+      "name": "models",
+      "schemaName": "public",
+      "x": 1064,
+      "y": 392
+    },
+    {
+      "name": "hosts",
+      "schemaName": "public",
+      "x": 93.34422880490297,
+      "y": 978.5985699693565
+    },
+    {
+      "name": "events",
+      "schemaName": "public",
+      "x": 800,
+      "y": 1064
+    },
+    {
+      "name": "exchange_rates",
+      "schemaName": "public",
+      "x": 448,
+      "y": 1080
+    },
+    {
+      "name": "tracking",
+      "schemaName": "public",
+      "x": -76.52649093746876,
+      "y": 658.9997439587684
+    }
+  ],
+  "tableGroupCollapseStates": [],
+  "stickyNoteLayouts": [],
+  "referencePaths": [
+    {
+      "firstFieldNames": [
+        "event_id"
+      ],
+      "firstTableName": "calendar",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "id"
+      ],
+      "secondTableName": "events",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "model_id"
+      ],
+      "firstTableName": "calendar",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "id"
+      ],
+      "secondTableName": "models",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "host_user_id"
+      ],
+      "firstTableName": "events",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "user_profile_id"
+      ],
+      "secondTableName": "hosts",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "currency_code"
+      ],
+      "firstTableName": "hosts",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "currency_code"
+      ],
+      "secondTableName": "exchange_rates",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "user_profile_id"
+      ],
+      "firstTableName": "hosts",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "id"
+      ],
+      "secondTableName": "user_profiles",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "currency_code"
+      ],
+      "firstTableName": "models",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "currency_code"
+      ],
+      "secondTableName": "exchange_rates",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "user_profile_id"
+      ],
+      "firstTableName": "models",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "id"
+      ],
+      "secondTableName": "user_profiles",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "user_id"
+      ],
+      "firstTableName": "user_profiles",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "id"
+      ],
+      "secondTableName": "users",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "users",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "user_id"
+      ],
+      "secondTableName": "tracking",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "venues",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "venue_id"
+      ],
+      "secondTableName": "events",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-HA61y5/checked-fetch.js
+// .wrangler/tmp/bundle-IKJ9eL/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -11974,16 +11974,6 @@ async function generateToken(env, payload) {
   return await sign(payload, env.JWT_SECRET, { expiresIn: "7d" });
 }
 __name(generateToken, "generateToken");
-var app = new Hono2();
-var registerSchema = external_exports.object({
-  email: external_exports.string().email(),
-  password: external_exports.string().min(8),
-  fullname: external_exports.string().min(1)
-});
-var loginSchema = external_exports.object({
-  email: external_exports.string().email(),
-  password: external_exports.string()
-});
 async function hashPassword({
   email,
   password
@@ -12001,6 +11991,16 @@ async function verifyPassword(data, hash) {
   return passwordHash === hash;
 }
 __name(verifyPassword, "verifyPassword");
+var app = new Hono2();
+var registerSchema = external_exports.object({
+  email: external_exports.string().email(),
+  password: external_exports.string().min(8),
+  fullname: external_exports.string().min(1)
+});
+var loginSchema = external_exports.object({
+  email: external_exports.string().email(),
+  password: external_exports.string()
+});
 app.post("/register", async (c) => {
   try {
     const body = await c.req.json();
@@ -12571,15 +12571,47 @@ app5.get("/:id", async (c) => {
 app5.post("/", authMiddleware, async (c) => {
   const user = c.get("user");
   const data = await c.req.json();
+  let targetUserId = user.userId;
+  if (user.isAdmin && data.email) {
+    const existingUser = await queryOne(
+      c.env,
+      `SELECT id FROM users WHERE emailaddress = $1`,
+      [data.email]
+    );
+    if (existingUser) {
+      targetUserId = existingUser.id;
+    } else {
+      const tempPassword = data.password || "temp_password_change_me";
+      const hashedPassword = await hashPassword({ email: data.email, password: tempPassword });
+      const [newUser] = await query(
+        c.env,
+        `INSERT INTO users (emailaddress, password, active, created_on, login_on) 
+               VALUES ($1, $2, 1, NOW(), NOW()) 
+               RETURNING id`,
+        [data.email, hashedPassword]
+      );
+      targetUserId = newUser.id;
+    }
+  }
   let websitesJson = "[]";
-  if (data.websites) {
-    const websitesArray = data.websites.split("\n").filter((url) => url.trim());
-    websitesJson = JSON.stringify(websitesArray);
+  try {
+    console.log("Websites payload:", data.websites, "Type:", typeof data.websites, "IsArray:", Array.isArray(data.websites));
+    if (Array.isArray(data.websites)) {
+      websitesJson = JSON.stringify(data.websites);
+    } else if (typeof data.websites === "string") {
+      const websitesArray = data.websites.split("\n").filter((url) => url.trim());
+      websitesJson = JSON.stringify(websitesArray);
+    } else {
+      websitesJson = "[]";
+    }
+  } catch (e) {
+    console.error("Error parsing websites", e);
+    websitesJson = "[]";
   }
   const existingBio = await queryOne(
     c.env,
     `SELECT id FROM user_bios WHERE user_id = $1`,
-    [user.userId]
+    [targetUserId]
   );
   if (existingBio) {
     await query(
@@ -12595,16 +12627,16 @@ app5.post("/", authMiddleware, async (c) => {
         data.bio_instagram || null,
         websitesJson,
         data.phone || null,
-        user.userId
+        targetUserId
       ]
     );
   } else {
     await query(
       c.env,
-      `INSERT INTO user_bios (user_id, fullname, known_as, description, instagram, websites, phone)
-       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)`,
+      `INSERT INTO user_bios (user_id, fullname, known_as, description, instagram, websites, phone, created_on, modified_on)
+       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, NOW(), NOW())`,
       [
-        user.userId,
+        targetUserId,
         data.fullname,
         data.known_as || null,
         data.description || null,
@@ -12620,9 +12652,9 @@ app5.post("/", authMiddleware, async (c) => {
       user_id, sex, instagram, portrait, account_holder,
       account_number, account_sortcode, active
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    RETURNING *`,
+     RETURNING *`,
     [
-      user.userId,
+      targetUserId,
       data.sex || 0,
       data.instagram,
       data.portrait,
@@ -13389,7 +13421,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-HA61y5/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-IKJ9eL/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -13421,7 +13453,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-HA61y5/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-IKJ9eL/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

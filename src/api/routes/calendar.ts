@@ -91,7 +91,7 @@ app.post("/", async (c) => {
     } = await c.req.json();
 
     if (
-      !user_id ||
+      (user_id === undefined || user_id === null) ||
       !venue_id ||
       !date ||
       attendance_inperson === undefined ||
@@ -142,7 +142,7 @@ app.put("/:id", async (c) => {
     } = await c.req.json();
 
     if (
-      !user_id ||
+      (user_id === undefined || user_id === null) ||
       !venue_id ||
       !date ||
       attendance_inperson === undefined ||

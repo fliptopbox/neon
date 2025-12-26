@@ -4,6 +4,7 @@ import type { Env } from "../db";
 import { query, queryOne } from "../db";
 import { generateToken } from "../middleware/auth";
 import type { User } from "../db/types";
+import { hashPassword, verifyPassword } from "../utils/security";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -17,31 +18,6 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
 });
-
-// Simple password hashing using Web Crypto API
-// async function hashPassword(data): Promise<string> {
-async function hashPassword({
-  email,
-  password,
-}: {
-  email: string;
-  password: string;
-}): Promise<string> {
-  const encoder = new TextEncoder();
-  const tokenSalt = email.trim().toLowerCase() + ":" + password;
-  const data = encoder.encode(tokenSalt);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-async function verifyPassword(
-  data: { email: string; password: string },
-  hash: string
-): Promise<boolean> {
-  const passwordHash = await hashPassword(data);
-  return passwordHash === hash;
-}
 
 // Register
 app.post("/register", async (c) => {

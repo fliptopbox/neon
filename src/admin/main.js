@@ -167,7 +167,7 @@ function getFabForView(view) {
                 </button>`;
     }
     if (view === 'calendar') {
-        return `<button class="fab" onclick="handleDateClick(new Date().getDate(), false)">
+        return `<button class="fab" onclick="openNewBooking()">
                     <span class="material-symbols-outlined">add</span>
                     <span class="fab-label">Book Now</span>
                 </button>`;
@@ -275,7 +275,7 @@ function renderModels() {
         <div class="content">
             <div class="content-header">
                 <h1>Models</h1>
-                <button class="btn-primary" onclick="alert('Feature coming soon')">
+                <button class="btn-primary" onclick="openModelCreateModal()">
                     <span class="material-symbols-outlined">add</span> Add Model
                 </button>
             </div>
@@ -522,24 +522,70 @@ function renderModelModal() {
                     <input type="hidden" id="edit-model-id" name="id">
                     
                     <div class="form-section">
-                        <h3 style="margin-bottom: 1rem; color: var(--md-sys-color-primary);">Basic Info</h3>
+                        <h3 style="margin-bottom: 1rem; color: var(--md-sys-color-primary);">1. User Account</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="edit-model-email" name="email" placeholder="Required for new users">
+                                <span class="form-hint">Used for login and notifications.</span>
+                            </div>
+                            <div class="form-group" id="model-password-group" style="display: none;">
+                                <label>Initial Password</label>
+                                <input type="text" id="edit-model-password" name="password" placeholder="Set initial password">
+                                <span class="form-hint">Visible as text for initial setup.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-divider" style="margin: 2rem 0; border-top: 1px solid var(--md-sys-color-outline-variant);"></div>
+
+                    <div class="form-section">
+                        <h3 style="margin-bottom: 1rem; color: var(--md-sys-color-primary);">2. Public Profile (User Bio)</h3>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Full Name</label>
                                 <input type="text" id="edit-model-fullname" name="fullname" required>
                             </div>
-                             <div class="form-group">
-                                <label>Status</label>
-                                <select id="edit-model-active" name="active">
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
-                                </select>
+                            <div class="form-group">
+                                <label>Known As (Stage Name)</label>
+                                <input type="text" id="edit-model-known_as" name="known_as">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Known As (Stage Name)</label>
-                                <input type="text" id="edit-model-known_as" name="known_as">
+                                <label>Bio Instagram</label>
+                                <input type="text" id="edit-model-bio-instagram" name="bio_instagram" placeholder="Legacy bio instagram">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="edit-model-phone" name="phone">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Websites</label>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input type="url" id="edit-model-website-1" name="website_1" placeholder="Website URL 1">
+                                <input type="url" id="edit-model-website-2" name="website_2" placeholder="Website URL 2">
+                                <input type="url" id="edit-model-website-3" name="website_3" placeholder="Website URL 3">
+                            </div>
+                        </div>
+                         <div class="form-group">
+                            <label>Bio / Description</label>
+                            <textarea id="edit-model-description" name="description" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-divider" style="margin: 2rem 0; border-top: 1px solid var(--md-sys-color-outline-variant);"></div>
+
+                    <div class="form-section">
+                        <h3 style="margin-bottom: 1rem; color: var(--md-sys-color-primary);">3. Model Configuration</h3>
+                         <div class="form-row">
+                            <div class="form-group">
+                                <label>Active Status</label>
+                                <select id="edit-model-active" name="active">
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Sex</label>
@@ -550,57 +596,26 @@ function renderModelModal() {
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Portrait Image Filename</label>
-                            <input type="text" id="edit-model-portrait" name="portrait">
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h3 style="margin-bottom: 1rem; color: var(--md-sys-color-primary);">Contact & Social</h3>
                         <div class="form-row">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" id="edit-model-email" name="email">
-                            </div>
-                            <div class="form-group">
-                                <label>Phone</label>
-                                <input type="tel" id="edit-model-phone" name="phone">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
+                             <div class="form-group">
                                 <label>Model Instagram</label>
-                                <input type="text" id="edit-model-instagram" name="instagram">
+                                <input type="text" id="edit-model-instagram" name="instagram" placeholder="Model specific portfolio">
                             </div>
                             <div class="form-group">
-                                <label>Bio Instagram</label>
-                                <input type="text" id="edit-model-bio-instagram" name="bio_instagram">
+                                <label>Portrait Image Filename</label>
+                                <input type="text" id="edit-model-portrait" name="portrait">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Website URL 1</label>
-                            <input type="url" id="edit-model-website-1" name="website_1">
-                        </div>
-                        <div class="form-group">
-                            <label>Website URL 2</label>
-                            <input type="url" id="edit-model-website-2" name="website_2">
-                        </div>
-                        <div class="form-group">
-                            <label>Website URL 3</label>
-                            <input type="url" id="edit-model-website-3" name="website_3">
-                        </div>
-                        <div class="form-group">
+                        
+                        <div class="form-group" style="background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px;">
                              <label>Sells Online (Auto-calculated)</label>
                              <div style="display: flex; align-items: center; gap: 10px;">
                                 <input type="text" id="edit-model-sells-online" name="sells_online_display" disabled style="width: 100px;">
-                                <span class="form-hint">Set to "Yes" if URLs contain gumroad, patreon, etsy, or onlyfans.</span>
+                                <span class="form-hint">Yes if URLs contain gumroad, patreon, etsy, or onlyfans.</span>
                              </div>
                         </div>
-                    </div>
 
-                     <div class="form-section">
-                        <h3 style="margin-bottom: 1rem; color: var(--md-sys-color-primary);">Bank Details</h3>
+                        <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase;">Bank Details</h4>
                         <div class="form-group">
                             <label>Account Holder</label>
                             <input type="text" id="edit-model-account-holder" name="account_holder">
@@ -615,18 +630,6 @@ function renderModelModal() {
                                 <input type="text" id="edit-model-account-sortcode" name="account_sortcode">
                             </div>
                         </div>
-                     </div>
-
-                     <div class="form-section">
-                        <h3 style="margin-bottom: 1rem; color: var(--md-sys-color-primary);">Details</h3>
-                        <div class="form-group">
-                            <label>Location (Deprecated)</label>
-                             <input type="text" id="edit-model-location" name="location" disabled placeholder="Not stored in DB">
-                        </div>
-                        <div class="form-group">
-                            <label>Bio / Description</label>
-                            <textarea id="edit-model-description" name="description" rows="4"></textarea>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -639,8 +642,60 @@ function renderModelModal() {
     `;
 }
 
+// Open Model Modal for Create
+window.openModelCreateModal = function () {
+    // Change Title
+    const header = document.querySelector('#model-modal h2');
+    if (header) header.textContent = 'Add New Model';
+
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+    };
+
+    setVal('edit-model-id', '');
+    setVal('edit-model-fullname', '');
+    setVal('edit-model-email', '');
+    setVal('edit-model-password', ''); // Clear password
+
+    // Show password field for new models
+    const pwdGroup = document.getElementById('model-password-group');
+    if (pwdGroup) pwdGroup.style.display = 'block';
+
+    setVal('edit-model-known_as', '');
+    setVal('edit-model-sex', '0');
+    setVal('edit-model-portrait', '');
+    setVal('edit-model-active', '1');
+    setVal('edit-model-email', '');
+    setVal('edit-model-phone', '');
+    setVal('edit-model-instagram', '');
+    setVal('edit-model-bio-instagram', '');
+
+    setVal('edit-model-sells-online', '');
+
+    setVal('edit-model-account-holder', '');
+    setVal('edit-model-account-number', '');
+    setVal('edit-model-account-sortcode', '');
+
+    setVal('edit-model-location', '');
+    setVal('edit-model-description', '');
+
+    setVal('edit-model-website-1', '');
+    setVal('edit-model-website-2', '');
+    setVal('edit-model-website-3', '');
+
+    showModal('model-modal');
+};
+
 // Open Model Modal
 window.viewModel = function (id) {
+    const header = document.querySelector('#model-modal h2');
+    if (header) header.textContent = 'Edit Model';
+
+    // Hide password field for editing
+    const pwdGroup = document.getElementById('model-password-group');
+    if (pwdGroup) pwdGroup.style.display = 'none';
+
     const model = state.data.models.find(m => m.id == id);
     if (!model) {
         console.error('Model not found:', id);
@@ -722,6 +777,7 @@ window.saveModel = async function (e) {
         portrait: formData.get('portrait'),
         active: parseInt(formData.get('active')),
         email: formData.get('email'),
+        password: formData.get('password'), // Add password to payload
         phone: formData.get('phone'),
         instagram: formData.get('instagram'),
         bio_instagram: formData.get('bio_instagram'),
@@ -735,10 +791,20 @@ window.saveModel = async function (e) {
     };
 
     try {
-        await apiCall(`/api/models/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
+        if (id) {
+            await apiCall(`/api/models/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+        } else {
+            if (!data.email) {
+                throw new Error("Email is required for creating a new model user");
+            }
+            await apiCall(`/api/models`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+        }
 
         await loadData('models');
         // Manually close since we're not using render() to close
@@ -879,6 +945,14 @@ window.handleEventClick = async function (eventId) {
     }
 };
 
+// Open New Booking (FAB) - Default to Today
+window.openNewBooking = function () {
+    state.calendar.selectedDate = new Date();
+    state.calendar.selectedEvent = null;
+    render(); // Ensure modal exists
+    showModal('booking-modal');
+};
+
 // Modal functions
 window.showModal = function (modalId) {
     // render(); // Refactor: Don't re-render everything, just show the modal?
@@ -904,6 +978,15 @@ window.closeModal = function (modalId) {
     }
     state.calendar.selectedDate = null;
     state.calendar.selectedEvent = null;
+};
+
+// Handle booking date change - maintain local date
+window.handleBookingDateChange = function (e) {
+    if (!e.target.value) return;
+    const [y, m, d] = e.target.value.split('-').map(Number);
+    state.calendar.selectedDate = new Date(y, m - 1, d);
+    render();
+    showModal('booking-modal');
 };
 
 // Render booking modal
@@ -933,12 +1016,15 @@ function renderBookingModal() {
         <div id="booking-modal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>${isEdit ? 'Edit Booking' : 'New Booking'} - ${selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</h2>
+                    <h2>${isEdit ? 'Edit Booking' : 'New Booking'}</h2>
                     <button class="modal-close" onclick="closeModal('booking-modal')">×</button>
                 </div>
                 <div class="modal-body">
                     <form id="booking-form" onsubmit="saveBooking(event)">
-                        <input type="hidden" name="date" value="${dateStr}">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" name="date" value="${dateStr}" onchange="window.handleBookingDateChange(event)" required ${isPast ? 'disabled' : ''}>
+                        </div>
                             <input type="hidden" name="tbc" id="tbc-value" value="${isTBC ? '1' : '0'}">
 
                             <div class="form-group" style="position: relative;">
@@ -961,6 +1047,8 @@ function renderBookingModal() {
                                                onkeydown="window.handleBookingModelKey(event)"
                                                onfocus="window.filterBookingModels(event)"
                                                onclick="window.filterBookingModels(event)"
+                                               onblur="setTimeout(() => { document.getElementById('booking-model-results').style.display='none'; }, 200)"
+                                               autocomplete="off"
                                                onblur="setTimeout(() => { document.getElementById('booking-model-results').style.display='none'; }, 200)"
                                                autocomplete="off"
                                                ${isPast ? 'disabled' : ''}
@@ -1203,15 +1291,21 @@ window.setBookingModelStatus = function (status) {
     const idInput = document.getElementById('booking-model-id');
     const nameInput = document.getElementById('booking-model-search');
 
-    if (status === -1) {
-        idInput.value = '-1';
-        nameInput.value = 'Closed';
-    } else if (status === 0) {
-        idInput.value = '0';
-        nameInput.value = 'Unconfirmed';
+    let displayText = '';
+    if (status === -1) displayText = 'Closed';
+    else if (status === 0) displayText = 'Unconfirmed';
+
+    if (displayText) {
+        // Directly set the ID and text value
+        // We do NOT search the models list because -1 and 0 are special "magic" IDs 
+        // that likely don't correspond to real user records in the database.
+        idInput.value = status;
+        nameInput.value = displayText;
     }
+
     // Clear dropdown
-    document.getElementById('booking-model-results').style.display = 'none';
+    const results = document.getElementById('booking-model-results');
+    if (results) results.style.display = 'none';
 };
 
 window.toggleBookingUnbooked = function () {
@@ -1300,7 +1394,7 @@ window.saveBooking = async function (e) {
 
     try {
         const isEdit = !!state.calendar.selectedEvent;
-        const endpoint = isEdit ? `/ api / calendar / ${state.calendar.selectedEvent.id} ` : '/api/calendar';
+        const endpoint = isEdit ? `/api/calendar/${state.calendar.selectedEvent.id}` : '/api/calendar';
         const method = isEdit ? 'PUT' : 'POST';
 
         await apiCall(endpoint, {
@@ -1321,7 +1415,7 @@ window.deleteBooking = async function (id) {
     if (!confirm('Are you sure you want to delete this booking?')) return;
 
     try {
-        await apiCall(`/ api / calendar / ${id} `, { method: 'DELETE' });
+        await apiCall(`/api/calendar/${id}`, { method: 'DELETE' });
         await loadData('calendar');
         closeModal('booking-modal');
     } catch (error) {

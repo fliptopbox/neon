@@ -2,9 +2,11 @@ import { Hono } from "hono";
 import type { Env } from "../db";
 import { query, queryOne } from "../db";
 import { authMiddleware, adminMiddleware } from "../middleware/auth";
+import type { JWTPayload } from "../middleware/auth";
 import type { Model } from "../db/types";
+import { hashPassword } from "../utils/security";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { user: JWTPayload } }>();
 
 // Public: List all active models
 app.get("/", async (c) => {
@@ -67,21 +69,63 @@ app.get("/:id", async (c) => {
 app.post("/", authMiddleware, async (c) => {
   const user = c.get("user");
   const data = await c.req.json();
+  
+  let targetUserId = user.userId;
 
-  // Parse websites array from newline-separated string
-  let websitesJson = "[]";
-  if (data.websites) {
-    const websitesArray = data.websites
-      .split("\n")
-      .filter((url: string) => url.trim());
-    websitesJson = JSON.stringify(websitesArray);
+  // If Admin and email is provided, we might be creating for another user
+  if (user.isAdmin && data.email) {
+      // Check if user exists
+      const existingUser = await queryOne<{id: number}>(
+        c.env, 
+        `SELECT id FROM users WHERE emailaddress = $1`, 
+        [data.email]
+      );
+      
+      if (existingUser) {
+          targetUserId = existingUser.id;
+      } else {
+          // Create new user
+          const tempPassword = data.password || 'temp_password_change_me';
+          const hashedPassword = await hashPassword({ email: data.email, password: tempPassword });
+          
+          const [newUser] = await query<{id: number}>(
+              c.env,
+              `INSERT INTO users (emailaddress, password, active, created_on, login_on) 
+               VALUES ($1, $2, 1, NOW(), NOW()) 
+               RETURNING id`,
+              [data.email, hashedPassword] 
+          );
+          targetUserId = newUser.id;
+      }
   }
 
-  // Insert or update user_bios
+  // Parse websites array
+  let websitesJson = "[]";
+  try {
+      console.log('Websites payload:', data.websites, 'Type:', typeof data.websites, 'IsArray:', Array.isArray(data.websites));
+      
+      if (Array.isArray(data.websites)) {
+          websitesJson = JSON.stringify(data.websites);
+      } else if (typeof data.websites === 'string') {
+         // handle newline separated string if necessary
+         const websitesArray = data.websites
+          .split("\n")
+          .filter((url: string) => url.trim());
+        websitesJson = JSON.stringify(websitesArray);
+      } else {
+          // Fallback for null/undefined or other types
+          websitesJson = "[]";
+      }
+  } catch (e) {
+      console.error("Error parsing websites", e);
+      websitesJson = "[]";
+  }
+
+  // Insert or update user_bios for the target user
   const existingBio = await queryOne(
     c.env,
     `SELECT id FROM user_bios WHERE user_id = $1`,
-    [user.userId]
+    [targetUserId]
   );
 
   if (existingBio) {
@@ -98,16 +142,16 @@ app.post("/", authMiddleware, async (c) => {
         data.bio_instagram || null,
         websitesJson,
         data.phone || null,
-        user.userId,
+        targetUserId,
       ]
     );
   } else {
     await query(
       c.env,
-      `INSERT INTO user_bios (user_id, fullname, known_as, description, instagram, websites, phone)
-       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)`,
+      `INSERT INTO user_bios (user_id, fullname, known_as, description, instagram, websites, phone, created_on, modified_on)
+       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, NOW(), NOW())`,
       [
-        user.userId,
+        targetUserId,
         data.fullname,
         data.known_as || null,
         data.description || null,
@@ -118,16 +162,16 @@ app.post("/", authMiddleware, async (c) => {
     );
   }
 
-  // Insert model
+  // Insert model linked to target user
   const [model] = await query<Model>(
     c.env,
     `INSERT INTO models (
       user_id, sex, instagram, portrait, account_holder,
       account_number, account_sortcode, active
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    RETURNING *`,
+     RETURNING *`,
     [
-      user.userId,
+      targetUserId,
       data.sex || 0,
       data.instagram,
       data.portrait,
