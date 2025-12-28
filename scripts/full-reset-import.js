@@ -3,67 +3,44 @@ import { neon } from '@neondatabase/serverless';
 import fs from 'fs';
 import crypto from 'crypto';
 
-const sql = neon(process.env.DATABASE_URL);
+const connStr = process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL;
+if (!connStr) {
+    console.error("No DATABASE_URL found");
+    process.exit(1);
+}
+const sql = neon(connStr);
 
 // ============================================================================
-// CONFIGURATION - Admin user details
+// CONFIGURATION
 // ============================================================================
 const ADMIN_USER = {
     email: 'response.write@gmail.com',
     password: 'pa55word!',
     fullname: 'Bruce Thomas',
-    active: 1,
+    handle: 'bruce-thomas',
+    active: true,
     confirmed: true
 };
 
-// Host descriptions based on research
 const HOST_DESCRIPTIONS = {
-    'Life Drawing Art': 'Community-focused life drawing sessions in East London, offering weekly classes with professional models in a relaxed, supportive atmosphere.',
-    'London Drawing': 'Established life drawing organization running multiple sessions across central London venues.',
-    'Adrian Dutton Life Drawing': 'Professional life drawing sessions led by experienced artist Adrian Dutton across multiple East London locations.',
-    'Covent Garden Life Drawing': 'Central London life drawing sessions in the heart of the West End.',
-    'North London Life Drawing': 'Community life drawing group serving North London areas.',
-    'Soho Life Drawing': 'Life drawing sessions in central Soho.',
-    'Art of Isolation': 'Online and in-person life drawing sessions offering flexible drawing opportunities.',
-    'Heskith Hubbard Art Society': 'Historic London art society founded in 1920, offering regular life drawing sessions near Trafalgar Square.',
-    'Life Drawing at the Estorick': 'Life drawing sessions at the Estorick Collection of Modern Italian Art in Islington.',
-    'London Bridge Life Drawing': 'Life drawing sessions in the London Bridge area.',
-    'Camberwell Life Drawing': 'Community life drawing group in South London\'s Camberwell area.',
-    'Hampstead Life Drawing': 'Life drawing sessions in the artistic Hampstead area of North London.',
-    'Leytonstone Life Drawing': 'East London life drawing group offering regular sessions in Leytonstone.',
-    'Kilburn Life Drawing': 'Community-focused life drawing sessions in Kilburn, North West London.',
-    'Thamesmead Life Drawing': 'Life drawing sessions serving the Thamesmead and Abbey Wood areas.',
-    'Bare Life Drawing': 'Life drawing sessions in South London.',
-    'Croydon Life Drawing Group': 'Community art group in Croydon offering regular life drawing sessions.',
-    'Love2Sketch': 'Life drawing and sketching sessions in West London.',
-    'Scottish Borders Life Drawing': 'Online life drawing sessions accessible to artists across the UK.',
-    'Beehive Pub Tottenham': 'Pub-based life drawing sessions in Tottenham.',
-    'Ciro\'s Life Drawing': 'Life drawing sessions in Islington, North London.',
-    'East London Sbtripper Collective (ELSC)': 'Alternative art collective in Shoreditch offering life drawing sessions.',
-    'London Art Drawing': 'Life drawing sessions in North London.',
-    'Sevenoaks Drawing Group': 'Community art group in Sevenoaks, Kent.',
-    'Stone Life Drawing': 'Life drawing sessions in East London.',
-    '2b Or not 2b': 'Creative drawing sessions in Soho.',
-    'Drink & Draw at The Grosvenor W7': 'Social life drawing sessions at The Grosvenor pub in Ealing.',
-    'Life Drawing at Jazzbourne': 'Unique life drawing sessions combining figure drawing with live jazz music.',
-    'Life Drawing with Anna at Artinc': 'Life drawing classes led by Anna at Artinc studio in Isleworth.',
-    'Mandie Wilde': 'Life drawing sessions organized by artist Mandie Wilde in West London.',
+    'Life Drawing Art': 'Community-focused life drawing sessions in East London.',
+    'London Drawing': 'Established life drawing organization.',
 };
 
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
 
-// Password hashing using SHA-256 (matching auth route)
 function hashPassword(email, password) {
     const tokenSalt = email.trim().toLowerCase() + ':' + password;
     return crypto.createHash('sha256').update(tokenSalt).digest('hex');
 }
 
 function mapSex(sexValue) {
-    if (!sexValue || sexValue === '') return 0;
-    if (sexValue.toLowerCase() === 'm') return 1;
-    if (sexValue.toLowerCase() === 'f') return 2;
+    if (!sexValue) return 0;
+    const s = sexValue.toString().toLowerCase();
+    if (s === 'm' || s === 'male') return 1;
+    if (s === 'f' || s === 'female') return 2;
     return 0;
 }
 
@@ -79,18 +56,9 @@ function isSpecialRecord(fullname) {
 }
 
 function parseActive(hostedValue) {
-    if (!hostedValue || hostedValue === '-' || hostedValue === 'x' || hostedValue.toLowerCase() === 'x') return 0;
-    const asNumber = parseFloat(hostedValue);
-    // If it's a valid number (including 0), set active to 1
-    return !isNaN(asNumber) ? 1 : 0;
+    if (!hostedValue || hostedValue === '-' || hostedValue === 'x' || hostedValue.toLowerCase() === 'x') return false;
+    return true;
 }
-
-function parseWebsites(websiteValue) {
-    if (!websiteValue || websiteValue.trim() === '') return null;
-    return JSON.stringify([websiteValue.trim()]);
-}
-
-const dayMap = { 'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6 };
 
 function parseTime(timeStr) {
     if (!timeStr) return '19:00:00';
@@ -101,15 +69,14 @@ function parseTime(timeStr) {
     const ampm = match[3];
     if (ampm && ampm.toUpperCase() === 'PM' && hours < 12) hours += 12;
     else if (ampm && ampm.toUpperCase() === 'AM' && hours === 12) hours = 0;
-    // Convert AM times (before 11:00) to PM
-    if (hours < 11) hours += 12;
+    if (hours < 11 && !ampm) hours += 12;
     return `${hours.toString().padStart(2, '0')}:${minutes}:00`;
 }
 
 function parsePrice(priceStr) {
-    if (!priceStr || priceStr.trim() === '') return 0;
-    if (priceStr.toLowerCase().includes('eventrite') || priceStr.toLowerCase().includes('donation') || priceStr.toLowerCase() === 'false') return 0;
-    const match = priceStr.match(/£?(\d+)\.?(\d{0,2})/);
+    if (!priceStr) return 0;
+    if (priceStr.toString().toLowerCase().includes('donation')) return 0;
+    const match = priceStr.toString().match(/£?(\d+)\.?(\d{0,2})/);
     if (!match) return 0;
     const pounds = parseInt(match[1]);
     const pence = match[2] ? parseInt(match[2].padEnd(2, '0')) : 0;
@@ -122,24 +89,13 @@ function parseDuration(durationStr) {
 
 function cleanInstagram(instagram) {
     if (!instagram) return '';
-    return instagram.replace(/^@/, '');
-}
-
-function parseTags(tagStr) {
-    if (!tagStr || tagStr === 'FALSE') return null;
-    const tags = tagStr.split(';').map(t => t.trim()).filter(t => t.length > 0);
-    return tags.length > 0 ? tags.join(',') : null;
-}
-
-function isVenueActive(comments, attended) {
-    const lowerComments = (comments || '').toLowerCase();
-    const lowerAttended = (attended || '').toLowerCase();
-    return !(lowerComments === 'closed' || lowerAttended === 'closed');
+    return instagram.replace(/^@/, '').trim();
 }
 
 function parseDate(dateStr) {
     if (!dateStr) return null;
     const parts = dateStr.trim().replace(/,/g, '').split(/\s+/);
+    if (parts.length < 4) return null;
     const day = parts[1];
     const monthStr = parts[2];
     const yearShort = parts[3];
@@ -155,341 +111,444 @@ function parseStartTime(startStr) {
     return `${hour.toString().padStart(2, '0')}:00:00`;
 }
 
-function parseAttendance(countStr) {
-    if (!countStr || countStr === '') return 0;
-    const num = parseInt(countStr);
-    return isNaN(num) ? 0 : num;
-}
-
-function cleanFullname(fullname) {
-    if (!fullname) return '';
-    return fullname.replace(/\(TBC\)/gi, '').replace(/\(OPEN CALL\)/gi, '').trim();
-}
-
 // ============================================================================
-// STEP 1: DROP AND RECREATE TABLES
+// STEP 1: DROP AND RECREATE TABLES (STRICT DBML COMPLIANCE)
 // ============================================================================
 
 async function resetDatabase() {
-    console.log('\n🗑️  Resetting database...\n');
+    console.log('\n🗑️  Resetting database tables...\n');
 
-    // Drop venue-related tables
-    await sql`DROP TABLE IF EXISTS sessions CASCADE`;
-    console.log('  ✅ Dropped: sessions');
-    await sql`DROP TABLE IF EXISTS venues CASCADE`;
-    console.log('  ✅ Dropped: venues');
-    await sql`DROP TABLE IF EXISTS hosts CASCADE`;
-    console.log('  ✅ Dropped: hosts');
+    // Order matters for constraints
+    const tables = [
+        'tracking', 'calendar', 'events', 'models', 'hosts', 'venues',
+        'user_profiles', 'users', 'exchange_rates',
+        'user_bios', 'sessions', 'venue_tags', 'types', 'images' // Legacy/Extra tables purge
+    ];
 
-    // Truncate other tables
-    await sql`TRUNCATE TABLE calendar CASCADE`;
-    console.log('  ✅ Truncated: calendar');
-    await sql`TRUNCATE TABLE models CASCADE`;
-    console.log('  ✅ Truncated: models');
-    await sql`TRUNCATE TABLE user_bios CASCADE`;
-    console.log('  ✅ Truncated: user_bios');
-    await sql`TRUNCATE TABLE users CASCADE`;
-    console.log('  ✅ Truncated: users');
+    for (const table of tables) {
+        await sql(`DROP TABLE IF EXISTS ${table} CASCADE`);
+        console.log(`  ✅ Dropped: ${table}`);
+    }
 
-    // Create hosts table
+    // 1. Users
+    await sql`
+        CREATE TABLE users (
+            id SERIAL PRIMARY KEY,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            is_global_active BOOLEAN DEFAULT TRUE,
+            is_admin BOOLEAN DEFAULT FALSE,
+            date_last_seen TIMESTAMP,
+            date_created TIMESTAMP DEFAULT NOW()
+        )
+    `;
+    console.log('  ✅ Created: users');
+
+    // 2. User Profiles
+    await sql`
+        CREATE TABLE user_profiles (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            handle VARCHAR(100) NOT NULL,
+            fullname VARCHAR(255) NOT NULL,
+            description TEXT DEFAULT '',
+            interest_tags JSON NOT NULL DEFAULT '[]',
+            flag_emoji VARCHAR(10) NOT NULL DEFAULT '🏳️',
+            affiliate_urls JSON DEFAULT '[]',
+            date_created TIMESTAMP DEFAULT NOW(),
+            is_profile_active BOOLEAN DEFAULT TRUE
+        )
+    `;
+    console.log('  ✅ Created: user_profiles');
+
+    // 3. Exchange Rates
+    await sql`
+        CREATE TABLE exchange_rates (
+            currency_code CHAR(3) PRIMARY KEY,
+            rate_to_usd DECIMAL(10, 6) NOT NULL,
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `;
+    await sql`INSERT INTO exchange_rates (currency_code, rate_to_usd) VALUES ('GBP', 1.25)`;
+    console.log('  ✅ Created: exchange_rates');
+
+    // 4. Venues
+    await sql`
+        CREATE TABLE venues (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            address_line_1 VARCHAR(255) NOT NULL,
+            address_line_2 VARCHAR(255) DEFAULT '',
+            city VARCHAR(100) NOT NULL DEFAULT 'London',
+            county VARCHAR(100) DEFAULT '',
+            postcode VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
+            area VARCHAR(100) DEFAULT '',
+            active BOOLEAN NOT NULL DEFAULT TRUE,
+            tz VARCHAR(50) NOT NULL DEFAULT 'europe/london',
+            latitude DECIMAL(10, 8),
+            longitude DECIMAL(11, 8),
+            capacity INTEGER NOT NULL DEFAULT 0,
+            created_on TIMESTAMP NOT NULL DEFAULT NOW(),
+            modified_on TIMESTAMP NOT NULL DEFAULT NOW(),
+            is_private BOOLEAN DEFAULT FALSE,
+            venue_tags JSON NOT NULL DEFAULT '[]',
+            comments TEXT DEFAULT ''
+        )
+    `;
+    console.log('  ✅ Created: venues');
+
+    // 5. Hosts
     await sql`
         CREATE TABLE hosts (
-            id BIGSERIAL PRIMARY KEY,
-            user_id BIGINT NOT NULL REFERENCES users(id),
-            name VARCHAR(255) NOT NULL UNIQUE,
+            id SERIAL PRIMARY KEY,
+            user_profile_id INTEGER NOT NULL REFERENCES user_profiles(id),
+            name VARCHAR(255) NOT NULL,
             description TEXT,
-            instagram VARCHAR(255),
-            website VARCHAR(500),
-            active SMALLINT DEFAULT 1,
-            created_on TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
-            modified_on TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+            phone_number VARCHAR(255),
+            social_urls JSON DEFAULT '[]',
+            currency_code CHAR(3) NOT NULL DEFAULT 'GBP' REFERENCES exchange_rates(currency_code),
+            rate_max_hour DECIMAL(10,2) NOT NULL DEFAULT 25.00,
+            rate_max_day DECIMAL(10,2) NOT NULL DEFAULT 150.00,
+            tz VARCHAR(50) NOT NULL DEFAULT 'europe/london',
+            date_created TIMESTAMP NOT NULL DEFAULT NOW(),
+            host_tags JSON NOT NULL DEFAULT '[]'
         )
     `;
     console.log('  ✅ Created: hosts');
 
-    // Create venues table
+    // 6. Models
     await sql`
-        CREATE TABLE venues (
-            id BIGSERIAL PRIMARY KEY,
-            host_id BIGINT NOT NULL REFERENCES hosts(id),
-            address TEXT,
-            postcode VARCHAR(20),
-            area VARCHAR(100),
-            timezone VARCHAR(50) DEFAULT 'GMT',
-            active SMALLINT DEFAULT 1,
-            created_on TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
-            modified_on TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+        CREATE TABLE models (
+            id SERIAL PRIMARY KEY,
+            user_profile_id INTEGER REFERENCES user_profiles(id),
+            phone_number VARCHAR(255) NOT NULL DEFAULT '',
+            display_name VARCHAR(255),
+            description TEXT NOT NULL DEFAULT '',
+            currency_code CHAR(3) NOT NULL DEFAULT 'GBP' REFERENCES exchange_rates(currency_code),
+            rate_min_hour DECIMAL(10,2) DEFAULT 20.00,
+            rate_min_day DECIMAL(10,2) DEFAULT 120.00,
+            tz VARCHAR(50) NOT NULL DEFAULT 'europe/london',
+            work_inperson BOOLEAN DEFAULT TRUE,
+            work_online BOOLEAN DEFAULT FALSE,
+            work_photography BOOLEAN DEFAULT FALSE,
+            work_seeks JSON NOT NULL DEFAULT '["nude", "portrait", "clothed", "underwear", "costume"]',
+            social_urls JSON DEFAULT '[]',
+            product_urls JSON DEFAULT '[]',
+            date_birthday TIMESTAMP,
+            date_experience TIMESTAMP,
+            sex SMALLINT NOT NULL DEFAULT 0,
+            pronouns VARCHAR(50) NOT NULL DEFAULT ''
         )
     `;
-    await sql`CREATE UNIQUE INDEX venues_unique_location ON venues(host_id, COALESCE(address, ''), COALESCE(postcode, ''))`;
-    console.log('  ✅ Created: venues');
+    console.log('  ✅ Created: models');
 
-    // Create sessions table
+    // 7. Events (Enums handled as strings/checks for simplicity in Node usually, but creating types here)
+    await sql`DO $$ BEGIN
+        CREATE TYPE frequency_enum AS ENUM ('adhoc', 'once', 'daily', 'weekly', 'biweekly', 'triweekly', 'monthly', 'quarterly', 'annually');
+    EXCEPTION
+        WHEN duplicate_object THEN null;
+    END $$;`;
+
+    await sql`DO $$ BEGIN
+        CREATE TYPE week_day_enum AS ENUM ('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'unknown');
+    EXCEPTION
+        WHEN duplicate_object THEN null;
+    END $$;`;
+
     await sql`
-        CREATE TABLE sessions (
-            id BIGSERIAL PRIMARY KEY,
-            venue_id BIGINT NOT NULL REFERENCES venues(id),
-            week_day SMALLINT,
-            start_time TIME NOT NULL,
-            duration NUMERIC NOT NULL,
-            frequency VARCHAR(50) DEFAULT 'weekly',
-            price_inperson INTEGER DEFAULT 0,
-            price_online INTEGER DEFAULT 0,
-            tags TEXT,
-            active SMALLINT DEFAULT 1,
-            created_on TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
-            modified_on TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+        CREATE TABLE events (
+            id SERIAL PRIMARY KEY,
+            venue_id INTEGER REFERENCES venues(id),
+            host_user_id INTEGER NOT NULL REFERENCES user_profiles(id), -- Note: DBML relates strictly to user_profiles, but logical link is via hosts usually. DBML Says Ref: "events"."host_user_id" < "hosts"."user_profile_id"
+            name VARCHAR(255) NOT NULL,
+            description VARCHAR(255),
+            images JSON NOT NULL DEFAULT '[]',
+            frequency frequency_enum NOT NULL DEFAULT 'weekly',
+            week_day week_day_enum NOT NULL DEFAULT 'unknown',
+            pricing_table JSON NOT NULL DEFAULT '[]',
+            pricing_text TEXT NOT NULL DEFAULT '',
+            pricing_tags JSON NOT NULL DEFAULT '[]',
+            pose_format TEXT NOT NULL DEFAULT 'Mixed poses: gesture, short, medium, long'
         )
     `;
-    console.log('  ✅ Created: sessions');
+    console.log('  ✅ Created: events');
 
-    // Add venue_id to calendar if it doesn't exist
-    const columnCheck = await sql`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'calendar' AND column_name = 'venue_id'
+    // 8. Calendar
+    await sql`DO $$ BEGIN
+        CREATE TYPE status_enum AS ENUM ('cancelled', 'closed', 'confirmed', 'noshow', 'opencall', 'pending');
+    EXCEPTION
+        WHEN duplicate_object THEN null;
+    END $$;`;
+
+    await sql`
+        CREATE TABLE calendar (
+            id SERIAL PRIMARY KEY,
+            event_id INTEGER REFERENCES events(id),
+            model_id INTEGER REFERENCES models(id),
+            status status_enum,
+            attendance_inperson INTEGER DEFAULT 0,
+            attendance_online INTEGER DEFAULT 0,
+            date_time TIMESTAMP,
+            duration DECIMAL NOT NULL DEFAULT 2.0,
+            pose_format TEXT
+        )
     `;
+    console.log('  ✅ Created: calendar');
 
-    if (columnCheck.length === 0) {
-        await sql`ALTER TABLE calendar ADD COLUMN venue_id BIGINT REFERENCES venues(id)`;
-        console.log('  ✅ Added: calendar.venue_id');
-    } else {
-        console.log('  ⏭️  calendar.venue_id already exists');
-    }
+    // 9. Tracking
+    await sql`
+        CREATE TABLE tracking (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            href VARCHAR(255) NOT NULL,
+            timestamp TIMESTAMPTZ
+        )
+    `;
+    console.log('  ✅ Created: tracking');
 
-    console.log('\n✅ Database reset complete!\n');
+    console.log('\n✅ Database tables aligned with DBML!');
 }
 
 // ============================================================================
-// STEP 2: SEED ADMIN USER
+// STEP 2: SEED DATA
 // ============================================================================
 
 async function seedAdminUser() {
-    console.log('👤 Creating admin user...\n');
-    const passwordHash = hashPassword(ADMIN_USER.email, ADMIN_USER.password);
-    const userResult = await sql`
-        INSERT INTO users (emailaddress, password, active, confirmed_on, is_admin)
-        VALUES (${ADMIN_USER.email}, ${passwordHash}, ${ADMIN_USER.active}, ${ADMIN_USER.confirmed ? new Date() : null}, TRUE)
+    console.log('\n👤 Creating admin user...');
+
+    // 1. Create User
+    const hash = hashPassword(ADMIN_USER.email, ADMIN_USER.password);
+    const [user] = await sql`
+        INSERT INTO users (email, password_hash, is_global_active, is_admin, date_created)
+        VALUES (${ADMIN_USER.email}, ${hash}, ${ADMIN_USER.active}, TRUE, NOW())
         RETURNING id
     `;
-    const userId = userResult[0].id;
-    await sql`INSERT INTO user_bios (user_id, fullname) VALUES (${userId}, ${ADMIN_USER.fullname})`;
-    console.log(`  ✅ Admin: ${ADMIN_USER.email} (ID: ${userId})\n`);
-    return userId;
-}
 
-// ============================================================================
-// STEP 3: IMPORT MODELS
-// ============================================================================
+    // 2. Create User Profile
+    const [profile] = await sql`
+        INSERT INTO user_profiles (user_id, fullname, handle, description, is_profile_active)
+        VALUES (${user.id}, ${ADMIN_USER.fullname}, ${ADMIN_USER.handle}, 'Admin User', TRUE)
+        RETURNING id
+    `;
+
+    console.log(`  ✅ Admin created: ${ADMIN_USER.email} (UID: ${user.id}, PID: ${profile.id})`);
+    return { userId: user.id, profileId: profile.id };
+}
 
 async function importModels(records) {
-    console.log('👤 Importing Models...\n');
-    let imported = 0, skipped = 0;
+    console.log('\n👤 Importing Models...');
+    let imported = 0;
     const processedEmails = new Set();
+    const BATCH_SIZE = 25;
 
-    for (const record of records) {
-        const isSpecial = isSpecialRecord(record.fullname);
-        let email = record.email?.trim();
+    for (let i = 0; i < records.length; i += BATCH_SIZE) {
+        const batch = records.slice(i, i + BATCH_SIZE);
+        if (i % 50 === 0) process.stdout.write('.');
 
-        if (!email) {
-            if (isSpecial) {
-                email = generateSpecialEmail(record.fullname);
-            } else if (record.instagram && record.instagram.trim()) {
-                const instagramHandle = cleanInstagram(record.instagram.trim());
-                email = `${instagramHandle.toLowerCase().replace(/[^a-z0-9]/g, '-')}@lifedrawing.art`;
-            } else {
-                const slug = record.fullname.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '-');
-                email = `${slug}@lifedrawing.art`;
+        await Promise.all(batch.map(async (record) => {
+            const isSpecial = isSpecialRecord(record.fullname);
+            let email = record.email?.trim();
+            if (!email) {
+                if (isSpecial) email = generateSpecialEmail(record.fullname);
+                else if (record.instagram) {
+                    const handle = cleanInstagram(record.instagram);
+                    email = `${handle.toLowerCase().replace(/[^a-z0-9]/g, '-')}@lifedrawing.art`;
+                } else {
+                    const slug = record.fullname.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '-');
+                    email = `${slug}@lifedrawing.art`;
+                }
             }
-        }
+            if (!isSpecial && processedEmails.has(email)) return;
+            processedEmails.add(email);
 
-        if (!isSpecial && processedEmails.has(email)) { skipped++; continue; }
+            // 1. Create User
+            let userId;
+            const existingUsers = await sql`SELECT id FROM users WHERE email = ${email}`;
+            if (existingUsers.length > 0) {
+                userId = existingUsers[0].id;
+            } else {
+                const tempPass = Math.random().toString(36).slice(-10);
+                const hash = hashPassword(email, tempPass);
+                const [newUser] = await sql`
+                    INSERT INTO users (email, password_hash, is_global_active, is_admin, date_created)
+                    VALUES (${email}, ${hash}, ${parseActive(record.hosted)}, FALSE, NOW())
+                    RETURNING id
+                `;
+                userId = newUser.id;
+            }
 
-        const existingUser = await sql`SELECT id FROM users WHERE emailaddress = ${email}`;
-        let userId;
+            // 2. User Profile
+            let profileId;
+            const existingProfile = await sql`SELECT id FROM user_profiles WHERE user_id = ${userId}`;
+            if (existingProfile.length > 0) {
+                profileId = existingProfile[0].id;
+            } else {
+                const handle = (record.instagram ? cleanInstagram(record.instagram) : record.fullname.replace(/\s+/g, '-')).toLowerCase();
+                const [newProfile] = await sql`
+                    INSERT INTO user_profiles (user_id, fullname, handle, description, is_profile_active)
+                    VALUES (${userId}, ${record.fullname || 'Unknown'}, ${handle}, '', ${parseActive(record.hosted)})
+                    RETURNING id
+                `;
+                profileId = newProfile.id;
+            }
 
-        if (existingUser.length > 0) {
-            userId = existingUser[0].id;
-        } else {
-            const randomPassword = Math.random().toString(36).slice(-12);
-            const passwordHash = hashPassword(email, randomPassword);
-            const userResult = await sql`
-                INSERT INTO users (emailaddress, password, active, confirmed_on)
-                VALUES (${email}, ${passwordHash}, ${parseActive(record.hosted)}, ${record.confirmed === '2' ? new Date() : null})
-                RETURNING id
-            `;
-            userId = userResult[0].id;
-        }
-
-        const existingBio = await sql`SELECT id FROM user_bios WHERE user_id = ${userId}`;
-        if (existingBio.length === 0) {
-            await sql`INSERT INTO user_bios (user_id, fullname, instagram, websites, phone) VALUES (${userId}, ${record.fullname || ''}, ${record.instagram || null}, ${parseWebsites(record.website)}, ${record.phone || null})`;
-        }
-
-        await sql`
-            INSERT INTO models (user_id, sex, instagram, portrait, account_holder, account_number, account_sortcode, active)
-            VALUES (${userId}, ${mapSex(record.sex)}, ${record.instagram || ''}, ${record.portrait || ''}, ${record.account_holder || null}, ${record.account || null}, ${record.sortcode || null}, ${parseActive(record.hosted)})
-        `;
-
-        processedEmails.add(email);
-        imported++;
+            // 3. Model
+            const existingModel = await sql`SELECT id FROM models WHERE user_profile_id = ${profileId}`;
+            if (existingModel.length === 0) {
+                await sql`
+                    INSERT INTO models (
+                        user_profile_id, sex, work_seeks, social_urls, phone_number
+                    ) VALUES (
+                        ${profileId}, 
+                        ${mapSex(record.sex)}, 
+                        '["nude", "portrait"]',
+                        ${record.instagram ? JSON.stringify([`https://instagram.com/${cleanInstagram(record.instagram)}`]) : '[]'},
+                        ${record.phone || ''}
+                    )
+                `;
+            }
+            imported++;
+        }));
     }
-
-    console.log(`  ✅ Imported: ${imported} models\n`);
-    return { imported, skipped };
+    console.log(`\n  ✅ Imported: ${imported} models`);
 }
 
-// ============================================================================
-// STEP 4: IMPORT VENUES (as hosts, venues, sessions)
-// ============================================================================
-
-async function importVenues(records, adminUserId) {
-    console.log('🏛️  Importing Venues (hosts, venues, sessions)...\n');
+async function importVenuesAndEvents(records, adminProfileId) {
+    console.log('\n🏛️  Importing Venues & Events...');
     const hostMap = new Map();
-    const venueMap = new Map();
-    let hostsCreated = 0, venuesCreated = 0, sessionsCreated = 0;
+    let hostsCreated = 0, venuesCreated = 0, eventsCreated = 0;
 
-    // Create hosts
+    // 1. Hosts
     for (const record of records) {
         if (!hostMap.has(record.name)) {
             const existing = await sql`SELECT id FROM hosts WHERE name = ${record.name}`;
             if (existing.length > 0) {
                 hostMap.set(record.name, existing[0].id);
             } else {
-                const description = HOST_DESCRIPTIONS[record.name] || 'Life drawing sessions in London.';
-                const result = await sql`
-                    INSERT INTO hosts (user_id, name, description, instagram, website, active)
-                    VALUES (${adminUserId}, ${record.name}, ${description}, ${record.instagram || null}, ${record.website || null}, 1)
+                const [newHost] = await sql`
+                    INSERT INTO hosts (user_profile_id, name, description, currency_code, host_tags)
+                    VALUES (${adminProfileId}, ${record.name}, ${HOST_DESCRIPTIONS[record.name] || ''}, 'GBP', '[]')
                     RETURNING id
                 `;
-                hostMap.set(record.name, result[0].id);
+                hostMap.set(record.name, newHost.id);
                 hostsCreated++;
             }
         }
     }
 
-    // Create venues
+    // 2. Venues & Events
     for (let i = 0; i < records.length; i++) {
         const record = records[i];
         const hostId = hostMap.get(record.name);
-        const existing = await sql`
+
+        // Check/Create Venue
+        let venueId;
+        const existingVenue = await sql`
             SELECT id FROM venues 
-            WHERE host_id = ${hostId} 
-            AND COALESCE(address, '') = COALESCE(${record.address || null}, '')
-            AND COALESCE(postcode, '') = COALESCE(${record.postcode || null}, '')
+            WHERE name = ${record.name} -- Simple match for now, ideally better logic
+            AND postcode = ${record.postcode || 'UNKNOWN'}
         `;
 
-        if (existing.length > 0) {
-            venueMap.set(i, existing[0].id);
+        if (existingVenue.length > 0) {
+            venueId = existingVenue[0].id;
         } else {
-            const result = await sql`
-                INSERT INTO venues (host_id, address, postcode, area, timezone, active)
-                VALUES (${hostId}, ${record.address || null}, ${record.postcode || null}, ${record.area || null}, ${record.timezone || 'GMT'}, 1)
+            const [newVenue] = await sql`
+                INSERT INTO venues (name, address_line_1, postcode, city, created_on, modified_on)
+                VALUES (${record.name}, ${record.address || 'Unknown'}, ${record.postcode || 'UNKNOWN'}, 'London', NOW(), NOW())
                 RETURNING id
             `;
-            venueMap.set(i, result[0].id);
+            venueId = newVenue.id;
             venuesCreated++;
         }
-    }
 
-    // Create sessions
-    for (let i = 0; i < records.length; i++) {
-        const record = records[i];
-        const venueId = venueMap.get(i);
+        // Map frequency to enum
+        let frequency = (record.frequency || 'weekly').toLowerCase();
+        if (frequency === 'fortnightly') frequency = 'biweekly';
+        // Add other mappings if necessary, or strict validation
+
+        // Create Event
         await sql`
-            INSERT INTO sessions (venue_id, week_day, start_time, duration, frequency, price_inperson, price_online, tags, active)
-            VALUES (${venueId}, ${parseInt(record.dayno) % 7}, ${parseTime(record.time)}, ${parseDuration(record.duration)}, ${record.frequency || 'weekly'}, ${parsePrice(record.inperson)}, ${parsePrice(record.online)}, ${parseTags(record.tag)}, ${isVenueActive(record.comments, record.attended) ? 1 : 0})
+            INSERT INTO events (venue_id, host_user_id, name, frequency, week_day, pricing_text)
+            VALUES (
+                ${venueId}, 
+                ${adminProfileId}, 
+                ${record.name + ' Session'}, 
+                ${frequency}, 
+                'unknown', -- legacy data needs mapping to week_day_enum
+                ${'In-person: ' + record.inperson + ', Online: ' + record.online} 
+            )
         `;
-        sessionsCreated++;
+        eventsCreated++;
     }
 
-    console.log(`  ✅ Hosts: ${hostsCreated}, Venues: ${venuesCreated}, Sessions: ${sessionsCreated}\n`);
-    return { hosts: hostsCreated, venues: venuesCreated, sessions: sessionsCreated };
+    console.log(`  ✅ Stats: ${hostsCreated} hosts, ${venuesCreated} venues, ${eventsCreated} events`);
+}
+
+async function importCalendar(records, adminProfileId) {
+    console.log('\n📅 Importing Calendar (Simple)...');
+    let imported = 0;
+
+    // We need an event to link to. creating a Dummy "All Calendar Event" for the admin
+    const [venue] = await sql`INSERT INTO venues (name, address_line_1) VALUES ('Virtual Calendar Venue', 'Online') RETURNING id`;
+    const [event] = await sql`INSERT INTO events (venue_id, host_user_id, name) VALUES (${venue.id}, ${adminProfileId}, 'Legacy Calendar Import') RETURNING id`;
+
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < records.length; i += BATCH_SIZE) {
+        const batch = records.slice(i, i + BATCH_SIZE);
+        if (i % 100 === 0) process.stdout.write('.');
+
+        await Promise.all(batch.map(async (record) => {
+            const cleanedName = record.fullname.replace(/\(TBC\)/gi, '').trim();
+            if (!cleanedName) return;
+
+            // Find model by profile fullname (rough match)
+            const [profile] = await sql`SELECT id FROM user_profiles WHERE LOWER(fullname) = LOWER(${cleanedName}) LIMIT 1`;
+            if (!profile) return;
+
+            const [model] = await sql`SELECT id FROM models WHERE user_profile_id = ${profile.id} LIMIT 1`;
+            if (!model) return;
+
+            const date = parseDate(record.date);
+            if (!date) return;
+
+            await sql`
+                INSERT INTO calendar (
+                    event_id, model_id, date_time, attendance_inperson, attendance_online, duration, status
+                ) VALUES (
+                    ${event.id}, ${model.id}, ${date}::timestamp, 
+                    ${parseInt(record.inperson || '0')}, ${parseInt(record.online || '0')}, 
+                    ${parseDuration(record.duration)}, 
+                    'pending'
+                )
+            `;
+            imported++;
+        }));
+    }
+    console.log(`\n  ✅ Imported: ${imported} calendar entries`);
 }
 
 // ============================================================================
-// STEP 5: IMPORT CALENDAR
+// MAIN
 // ============================================================================
 
-async function importCalendar(records) {
-    console.log('📅 Importing Calendar...\n');
-    let imported = 0, skipped = 0;
-
-    // Get the Life Drawing Art venue
-    const venueResult = await sql`
-        SELECT v.id 
-        FROM venues v 
-        JOIN hosts h ON v.host_id = h.id 
-        WHERE h.name = 'Life Drawing Art' 
-        LIMIT 1
-    `;
-
-    if (venueResult.length === 0) {
-        console.log('  ⚠️  Life Drawing Art venue not found, skipping calendar import\n');
-        return { imported: 0, skipped: records.length };
-    }
-    const lifeDrawingArtVenueId = venueResult[0].id;
-    console.log(`  ℹ️  Using Life Drawing Art venue (ID: ${lifeDrawingArtVenueId})\n`);
-
-    for (const record of records) {
-        const isTBC = record.fullname && record.fullname.includes('(TBC)');
-        const cleanedName = cleanFullname(record.fullname);
-
-        if (!cleanedName || cleanedName === '' || cleanedName.includes('Available')) {
-            skipped++;
-            continue;
-        }
-
-        const userBio = await sql`SELECT user_id FROM user_bios WHERE LOWER(fullname) = LOWER(${cleanedName}) LIMIT 1`;
-        if (userBio.length === 0) { skipped++; continue; }
-
-        const userId = userBio[0].user_id;
-        const eventDate = parseDate(record.date);
-        if (!eventDate) { skipped++; continue; }
-
-        await sql`
-            INSERT INTO calendar (user_id, venue_id, date, attendance_inperson, attendance_online, start, duration, notes, tbc)
-            VALUES (${userId}, ${lifeDrawingArtVenueId}, ${eventDate}, ${parseAttendance(record.inperson)}, ${parseAttendance(record.online)}, ${parseStartTime(record.start)}, ${parseDuration(record.duration)}, ${record.notes || null}, ${isTBC ? 1 : 0})
-        `;
-        imported++;
-    }
-
-    console.log(`  ✅ Imported: ${imported} calendar entries\n`);
-    return { imported, skipped };
-}
-
-// ============================================================================
-// MAIN FUNCTION
-// ============================================================================
-
-async function fullResetAndImport() {
+async function run() {
     try {
-        console.log('╔═══════════════════════════════════════════════════╗');
-        console.log('║     FULL DATABASE RESET AND IMPORT FROM JSON      ║');
-        console.log('╚═══════════════════════════════════════════════════╝');
-
         await resetDatabase();
-        const adminUserId = await seedAdminUser();
+        const { userId, profileId } = await seedAdminUser();
 
-        const data = JSON.parse(fs.readFileSync('./docs/google-export/database.json', 'utf8'));
+        const rawData = fs.readFileSync('./docs/google-export/database.json', 'utf8');
+        const data = JSON.parse(rawData);
 
-        const modelStats = await importModels(data.models.records);
-        const venueStats = await importVenues(data.venues.records, adminUserId);
-        const calendarStats = await importCalendar(data.calendar.records);
+        await importModels(data.models.records);
+        await importVenuesAndEvents(data.venues.records, profileId);
+        await importCalendar(data.calendar.records, profileId);
 
-        console.log('╔═══════════════════════════════════════════════════╗');
-        console.log('║                 IMPORT COMPLETE                   ║');
-        console.log('╚═══════════════════════════════════════════════════╝\n');
-        console.log(`✅ Models: ${modelStats.imported}`);
-        console.log(`✅ Hosts: ${venueStats.hosts}`);
-        console.log(`✅ Venues: ${venueStats.venues}`);
-        console.log(`✅ Sessions: ${venueStats.sessions}`);
-        console.log(`✅ Calendar: ${calendarStats.imported}\n`);
-
-    } catch (error) {
-        console.error('❌ Fatal error:', error);
+        console.log('\n✅ Full reset and import aligned with DBML successful!');
+        process.exit(0);
+    } catch (e) {
+        console.error('\n❌ Error:', e);
         process.exit(1);
     }
 }
 
-fullResetAndImport();
+run();
