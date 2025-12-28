@@ -1,0 +1,552 @@
+openapi: 3.0.0
+info:
+  title: Neon API
+  version: 1.0.0
+  description: Public API for Neon Admin
+  contact:
+    name: API Support
+    email: support@example.com
+servers:
+  - url: http://localhost:8787/api
+    description: Local Development Server
+  - url: https://api.lifedrawing.art
+    description: Production Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        is_global_active:
+          type: boolean
+        is_admin:
+          type: boolean
+        date_created:
+          type: string
+          format: date-time
+        date_last_seen:
+          type: string
+          format: date-time
+
+    UserProfile:
+      type: object
+      properties:
+        fullname:
+          type: string
+        handle:
+          type: string
+        description:
+          type: string
+        flag_emoji:
+          type: string
+        is_profile_active:
+          type: boolean
+
+    Model:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_profile_id:
+          type: integer
+        phone_number:
+          type: string
+        display_name:
+          type: string
+        description:
+          type: string
+        currency_code:
+          type: string
+        rate_min_hour:
+          type: number
+        rate_min_day:
+          type: number
+        tz:
+          type: string
+        work_inperson:
+          type: boolean
+        work_online:
+          type: boolean
+        work_photography:
+          type: boolean
+        work_seeks:
+          type: array
+          items:
+            type: string
+        social_urls:
+          type: array
+          items:
+            type: string
+        product_urls:
+          type: array
+          items:
+            type: string
+        date_birthday:
+          type: string
+          format: date-time
+        date_experience:
+          type: string
+          format: date-time
+        sex:
+          type: integer
+        pronouns:
+          type: string
+
+    Host:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_profile_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        phone_number:
+          type: string
+        social_urls:
+          type: array
+          items:
+            type: string
+        currency_code:
+          type: string
+        rate_max_hour:
+          type: number
+        rate_max_day:
+          type: number
+        tz:
+          type: string
+
+    Venue:
+      type: object
+      properties:
+        id:
+          type: integer
+        host_id:
+          type: integer
+        address:
+          type: string
+        postcode:
+          type: string
+        area:
+          type: string
+        timezone:
+          type: string
+        active:
+          type: integer
+          description: 1 for active, 0 for inactive
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+        venue_id:
+          type: integer
+        week_day:
+          type: integer
+        start_time:
+          type: string
+        duration:
+          type: number
+        frequency:
+          type: string
+        price_inperson:
+          type: integer
+        price_online:
+          type: integer
+        tags:
+          type: string
+        active:
+          type: integer
+          description: 1 for active, 0 for inactive
+
+    CalendarEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        venue_id:
+          type: integer
+        date:
+          type: string
+          format: date
+        attendance_inperson:
+          type: integer
+        attendance_online:
+          type: integer
+        start:
+          type: string
+        duration:
+          type: number
+        notes:
+          type: string
+        tbc:
+          type: integer
+        status:
+          type: string
+          enum: [pending, confirmed, cancelled, closed, noshow, opencall]
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, fullname]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                fullname:
+                  type: string
+      responses:
+        200:
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /auth/login:
+    post:
+      summary: Login
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /models:
+    get:
+      summary: List all active models
+      tags: [Models]
+      security: []
+      responses:
+        200:
+          description: List of models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Model'
+                    - type: object
+                      properties:
+                        fullname:
+                          type: string
+                        handle:
+                          type: string
+                        flag_emoji:
+                          type: string
+
+    post:
+      summary: Create a model profile
+      tags: [Models]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Model'
+      responses:
+        201:
+          description: Model created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+
+  /models/{id}:
+    get:
+      summary: Get model by ID
+      tags: [Models]
+      security: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: Model details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+    put:
+      summary: Update model by ID
+      tags: [Models]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Model'
+      responses:
+        200:
+          description: Model updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+    delete:
+      summary: Delete model by ID (Administrative)
+      tags: [Models]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: Model deleted
+
+  /hosts:
+    get:
+      summary: List all active hosts
+      tags: [Hosts]
+      security: []
+      responses:
+        200:
+          description: List of hosts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Host'
+
+    post:
+      summary: Create a host profile
+      tags: [Hosts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                phone_number:
+                  type: string
+                currency_code:
+                  type: string
+                rate_max_hour:
+                  type: number
+                rate_max_day:
+                  type: number
+                social_urls:
+                   type: array
+                   items:
+                     type: string
+                tz:
+                  type: string
+      responses:
+        201:
+          description: Host created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Host'
+
+  /venues:
+    get:
+      summary: List all active venues with sessions
+      tags: [Venues]
+      security: []
+      responses:
+        200:
+          description: List of venues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Venue'
+
+    post:
+      summary: Create a venue
+      tags: [Venues]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [host_id]
+              properties:
+                host_id:
+                  type: integer
+                address:
+                  type: string
+                postcode:
+                  type: string
+                area:
+                  type: string
+                timezone:
+                  type: string
+      responses:
+        201:
+          description: Venue created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Venue'
+
+  /sessions:
+    get:
+      summary: List all active sessions with venue and host info
+      tags: [Sessions]
+      security: []
+      responses:
+        200:
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+
+  /calendar:
+    get:
+      summary: List all calendar events
+      tags: [Calendar]
+      security: []
+      responses:
+        200:
+          description: List of calendar events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalendarEvent'
+
+    post:
+      summary: Create a calendar event
+      tags: [Calendar]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalendarEvent'
+      responses:
+        201:
+          description: Event created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  id:
+                    type: integer
+
+  /users/me:
+    get:
+      summary: Get current user profile
+      tags: [Users]
+      responses:
+        200:
+          description: User profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - $ref: '#/components/schemas/UserProfile'
+
+  /dashboard/stats:
+    get:
+      summary: Get dashboard statistics
+      tags: [Dashboard]
+      responses:
+        200:
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  venues:
+                    type: object
+                  models:
+                    type: object
+                  calendar:
+                    type: object
+                  artists:
+                    type: object
+                  users:
+                    type: object
+                  venueTags:
+                    type: object

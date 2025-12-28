@@ -1,29 +1,33 @@
 export interface User {
   id: number;
-  emailaddress: string;
-  password: string;
-  created_on: Date;
-  active: number;
-  confirmed_on: Date | null;
-  login_on: Date;
-  is_admin?: boolean;
+  email: string;
+  password_hash: string;
+  is_global_active: boolean;
+  is_admin: boolean;
+  date_last_seen: Date | null;
+  date_created: Date;
 }
 
-export interface UserBio {
+export interface UserProfile {
   id: number;
   user_id: number;
-  instagram: string | null;
-  description: string | null;
-  websites: any;
+  handle: string;
   fullname: string;
-  known_as: string | null;
-  created_on: Date;
-  modified_on: Date;
+  description: string;
+  flag_emoji: string;
+  interest_tags: string[];
+  affiliate_urls: string[];
+  date_created: Date;
+  is_profile_active: boolean;
 }
+
+// Legacy alias for compatibility
+export type UserBio = UserProfile;
 
 export interface Model {
   id: number;
   user_id: number;
+  user_profile_id?: number; // Optional until migration confirmed
   sex: number;
   instagram: string;
   portrait: string;
@@ -33,6 +37,25 @@ export interface Model {
   created_on: Date;
   modified_on: Date;
   active: number;
+  
+  // New Metadata Fields
+  display_name?: string;
+  phone_number?: string;
+  description?: string;
+  currency_code: string;
+  rate_min_hour: number;
+  rate_min_day: number;
+  tz: string;
+  work_inperson: boolean;
+  work_online: boolean;
+  work_photography: boolean;
+  work_seeks: string[];
+  social_urls: string[];
+  product_urls: string[];
+  date_birthday?: Date;
+  date_experience?: Date;
+  pronouns: string;
+  sells_online?: number;
 }
 
 export interface Artist {

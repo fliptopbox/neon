@@ -28,7 +28,7 @@ app.post("/register", async (c) => {
     // Check if user exists
     const existing = await queryOne<User>(
       c.env,
-      "SELECT id FROM users WHERE emailaddress = $1",
+      "SELECT id FROM users WHERE email = $1",
       [data.email]
     );
 
@@ -36,32 +36,45 @@ app.post("/register", async (c) => {
       return c.json({ error: "Email already registered" }, 400);
     }
 
+    // Check if this is the first user (will be admin)
+    const userCount = await queryOne<{ count: string }>(
+      c.env,
+      "SELECT COUNT(*) as count FROM users",
+      []
+    );
+    const isFirstUser = parseInt(userCount?.count || "0") === 0;
+
     // Hash password
     const hashedPassword = await hashPassword(data);
 
-    // Create user
+    // Create user (first user becomes admin)
     const [user] = await query<User>(
       c.env,
-      `INSERT INTO users (emailaddress, password, active) 
-       VALUES ($1, $2, 1) 
-       RETURNING id, emailaddress, created_on`,
-      [data.email, hashedPassword]
+      `INSERT INTO users (email, password_hash, is_global_active, is_admin, date_created) 
+       VALUES ($1, $2, true, $3, NOW()) 
+       RETURNING id, email, is_admin, date_created`,
+      [data.email, hashedPassword, isFirstUser]
     );
 
-    // Create user bio
+    // Create user profile
+    const handle = data.fullname.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     await query(
       c.env,
-      `INSERT INTO user_bios (user_id, fullname) VALUES ($1, $2)`,
-      [user.id, data.fullname]
+      `INSERT INTO user_profiles (user_id, fullname, handle, date_created) VALUES ($1, $2, $3, NOW())`,
+      [user.id, data.fullname, handle]
     );
 
     const token = await generateToken(c.env, {
       userId: user.id,
-      email: user.emailaddress,
-      isAdmin: false,
+      email: user.email,
+      isAdmin: isFirstUser,
     });
 
-    return c.json({ token, user: { id: user.id, email: user.emailaddress } });
+    return c.json({ 
+      token, 
+      user: { id: user.id, email: user.email, isAdmin: isFirstUser },
+      message: isFirstUser ? "Admin account created" : "Account created"
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return c.json({ error: "Validation error", details: error.errors }, 400);
@@ -78,7 +91,7 @@ app.post("/login", async (c) => {
 
     const user = await queryOne<User>(
       c.env,
-      "SELECT * FROM users WHERE emailaddress = $1 AND active = 1",
+      "SELECT * FROM users WHERE email = $1 AND is_global_active = true",
       [data.email]
     );
 
@@ -86,19 +99,19 @@ app.post("/login", async (c) => {
       return c.json({ error: "Invalid credentials" }, 401);
     }
 
-    const valid = await verifyPassword(data, user.password);
+    const valid = await verifyPassword(data, user.password_hash);
     if (!valid) {
       return c.json({ error: "Invalid credentials" }, 401);
     }
 
-    // Update login time
-    await query(c.env, "UPDATE users SET login_on = NOW() WHERE id = $1", [
+    // Update last seen time
+    await query(c.env, "UPDATE users SET date_last_seen = NOW() WHERE id = $1", [
       user.id,
     ]);
 
     const token = await generateToken(c.env, {
       userId: user.id,
-      email: user.emailaddress,
+      email: user.email,
       isAdmin: user.is_admin || false,
     });
 
@@ -106,7 +119,7 @@ app.post("/login", async (c) => {
       token,
       user: {
         id: user.id,
-        email: user.emailaddress,
+        email: user.email,
         isAdmin: user.is_admin || false,
       },
     });

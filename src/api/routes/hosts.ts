@@ -1,145 +1,141 @@
+
 import { Hono } from "hono";
-import type { Env } from "../db";
 import { query, queryOne } from "../db";
-import { authMiddleware, adminMiddleware } from "../middleware/auth";
+import { authMiddleware } from "../middleware/auth";
+import type { Env } from "../db";
 
-const app = new Hono<{ Bindings: Env }>();
+type Host = {
+  id: number;
+  user_profile_id: number;
+  name: string;
+  description: string;
+  phone_number: string;
+  social_urls: string[];
+  currency_code: string;
+  rate_max_hour: number;
+  rate_max_day: number;
+  tz: string;
+};
 
-// Public: List all active hosts
+const app = new Hono<{ Bindings: Env; Variables: { user: any } }>();
+
 app.get("/", async (c) => {
   const hosts = await query(
     c.env,
-    `SELECT h.*, ub.fullname as organizer_name 
+    `SELECT h.*, up.fullname as organizer_name 
      FROM hosts h
-     LEFT JOIN user_bios ub ON h.user_id = ub.user_id
-     WHERE h.active = 1
+     LEFT JOIN user_profiles up ON h.user_profile_id = up.id
      ORDER BY h.name`
   );
   return c.json(hosts);
 });
 
-// Public: Get host by ID with venues and sessions
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
-  
   const host = await queryOne(
     c.env,
-    `SELECT h.*, ub.fullname as organizer_name 
+    `SELECT h.*, up.fullname as organizer_name 
      FROM hosts h
-     LEFT JOIN user_bios ub ON h.user_id = ub.user_id
-     WHERE h.id = $1 AND h.active = 1`,
+     LEFT JOIN user_profiles up ON h.user_profile_id = up.id
+     WHERE h.id = $1`,
     [id]
   );
-
-  if (!host) {
-    return c.json({ error: "Host not found" }, 404);
-  }
-
-  // Get venues for this host
-  const venues = await query(
-    c.env,
-    `SELECT v.*, s.id as session_id, s.week_day, s.start_time, s.duration, 
-            s.frequency, s.price_inperson, s.price_online, s.tags, s.active as session_active
-     FROM venues v
-     LEFT JOIN sessions s ON v.id = s.venue_id
-     WHERE v.host_id = $1 AND v.active = 1
-     ORDER BY v.area, s.week_day, s.start_time`,
-    [id]
-  );
-
-  // Group sessions by venue
-  const venueMap = new Map();
-  for (const row of venues) {
-    if (!venueMap.has(row.id)) {
-      venueMap.set(row.id, {
-        id: row.id,
-        address: row.address,
-        postcode: row.postcode,
-        area: row.area,
-        timezone: row.timezone,
-        active: row.active,
-        sessions: []
-      });
-    }
-    
-    if (row.session_id) {
-      venueMap.get(row.id).sessions.push({
-        id: row.session_id,
-        week_day: row.week_day,
-        start_time: row.start_time,
-        duration: row.duration,
-        frequency: row.frequency,
-        price_inperson: row.price_inperson,
-        price_online: row.price_online,
-        tags: row.tags,
-        active: row.session_active
-      });
-    }
-  }
-
-  return c.json({
-    ...host,
-    venues: Array.from(venueMap.values())
-  });
+  if (!host) return c.json({ error: "Host not found" }, 404);
+  return c.json(host);
 });
 
-// Admin: Create host
 app.post("/", authMiddleware, async (c) => {
-  const user = c.get("user") as { userId: number };
-  const data = await c.req.json();
+  try {
+    const user = c.get("user");
+    let data;
+    try {
+        data = await c.req.json();
+    } catch(e) {
+        return c.json({ error: "Invalid JSON body" }, 400);
+    }
 
-  const [host] = await query(
-    c.env,
-    `INSERT INTO hosts (
-      user_id, name, description, instagram, website
-    ) VALUES ($1, $2, $3, $4, $5)
-    RETURNING *`,
-    [
-      user.userId,
-      data.name,
-      data.description || null,
-      data.instagram || null,
-      data.website || null
-    ]
-  );
+    // 1. Get User Profile ID
+    const userProfile = await queryOne<{ id: number }>(
+      c.env,
+      "SELECT id FROM user_profiles WHERE user_id = $1",
+      [user.userId]
+    );
+    
+    if (!userProfile) {
+        return c.json({ error: "User profile not found. Please complete your profile first." }, 400);
+    }
 
-  return c.json(host, 201);
+    // 2. Check if already exists
+    const existing = await queryOne(c.env, "SELECT id FROM hosts WHERE user_profile_id = $1", [userProfile.id]);
+    if (existing) {
+         return c.json({ error: "Host profile already exists." }, 409);
+    }
+
+    // 3. Insert
+    const [host] = await query<Host>(
+      c.env,
+      `INSERT INTO hosts (
+        user_profile_id, name, description, phone_number,
+        currency_code, rate_max_hour, rate_max_day,
+        social_urls, tz
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9)
+      RETURNING *`,
+      [
+        userProfile.id,
+        data.name,
+        data.description || '',
+        data.phone_number || '',
+        data.currency_code || 'GBP',
+        data.rate_max_hour || 25.00,
+        data.rate_max_day || 150.00,
+        JSON.stringify(data.social_urls || []),
+        data.tz || 'Europe/London'
+      ]
+    );
+
+    return c.json(host, 201);
+  } catch (err: any) {
+    console.error("Host Create Error:", err);
+    return c.json({ 
+        error: "Host creation failed: " + err.message, 
+        stack: err.stack
+    }, 500);
+  }
 });
 
-// Admin: Update host
 app.put("/:id", authMiddleware, async (c) => {
   const id = c.req.param("id");
   const data = await c.req.json();
+  const user = c.get("user");
+  
+  // Check ownership
+  const existing = await queryOne<{user_profile_id: number}>(c.env, "SELECT user_profile_id FROM hosts WHERE id = $1", [id]);
+  if (!existing) return c.json({error: "Host not found"}, 404);
+   
+  const up = await queryOne<{id: number}>(c.env, "SELECT id FROM user_profiles WHERE user_id = $1", [user.userId]);
+  if (!up || existing.user_profile_id !== up.id) {
+       return c.json({error: "Unauthorized"}, 403);
+  }
 
   const [host] = await query(
     c.env,
     `UPDATE hosts SET 
-      name = $1, description = $2, instagram = $3, website = $4, modified_on = NOW()
-    WHERE id = $5
+      name = $1, description = $2, phone_number = $3,
+      currency_code = $4, rate_max_hour = $5, rate_max_day = $6
+    WHERE id = $7
     RETURNING *`,
     [
       data.name,
       data.description,
-      data.instagram,
-      data.website,
+      data.phone_number,
+      data.currency_code,
+      data.rate_max_hour,
+      data.rate_max_day,
       id
     ]
   );
 
-  if (!host) {
-    return c.json({ error: "Host not found" }, 404);
-  }
-
   return c.json(host);
-});
-
-// Admin: Delete host (soft delete)
-app.delete("/:id", authMiddleware, adminMiddleware, async (c) => {
-  const id = c.req.param("id");
-
-  await query(c.env, "UPDATE hosts SET active = 0 WHERE id = $1", [id]);
-
-  return c.json({ message: "Host deleted" });
 });
 
 export default app;
