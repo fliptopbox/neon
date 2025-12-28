@@ -7,6 +7,9 @@ yarn-error.log*
 lerna-debug.log*
 .DS*
 
+.wrangler
+docs/ui-ux/
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
