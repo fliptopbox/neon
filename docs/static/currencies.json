@@ -1,0 +1,86 @@
+{
+  "base": "USD",
+  "lastUpdated": "2025-12-28",
+  "currencies": [
+    {
+      "code": "USD",
+      "name": "United States Dollar",
+      "symbol": "$",
+      "rate": 1,
+      "rate_to_usd": 1,
+      "lastUpdated": "2025-12-28"
+    },
+    {
+      "code": "EUR",
+      "name": "Euro",
+      "symbol": "€",
+      "rate": 0.849,
+      "rate_to_usd": 1.1778563015312131,
+      "lastUpdated": "2025-12-28"
+    },
+    {
+      "code": "JPY",
+      "name": "Japanese Yen",
+      "symbol": "¥",
+      "rate": 156.5,
+      "rate_to_usd": 0.006389776357827476,
+      "lastUpdated": "2025-12-28"
+    },
+    {
+      "code": "GBP",
+      "name": "British Pound Sterling",
+      "symbol": "£",
+      "rate": 0.741,
+      "rate_to_usd": 1.349527665317139,
+      "lastUpdated": "2025-12-28"
+    },
+    {
+      "code": "AUD",
+      "name": "Australian Dollar",
+      "symbol": "A$",
+      "rate": 1.49,
+      "rate_to_usd": 0.6711409395973155,
+      "lastUpdated": "2025-12-28"
+    },
+    {
+      "code": "CAD",
+      "name": "Canadian Dollar",
+      "symbol": "C$",
+      "rate": 1.37,
+      "rate_to_usd": 0.7299270072992701,
+      "lastUpdated": "2025-12-28"
+    },
+    {
+      "code": "CHF",
+      "name": "Swiss Franc",
+      "symbol": "CHF",
+      "rate": 0.789,
+      "rate_to_usd": 1.2674271229404308,
+      "lastUpdated": "2025-12-28"
+    },
+    {
+      "code": "CNY",
+      "name": "Chinese Yuan",
+      "symbol": "¥",
+      "rate": 7.02,
+      "rate_to_usd": 0.14245014245014245,
+      "lastUpdated": "2025-12-28"
+    },
+    {
+      "code": "HKD",
+      "name": "Hong Kong Dollar",
+      "symbol": "HK$",
+      "rate": 7.77,
+      "rate_to_usd": 0.1287001287001287,
+      "lastUpdated": "2025-12-28"
+    },
+    {
+      "code": "NZD",
+      "name": "New Zealand Dollar",
+      "symbol": "NZ$",
+      "rate": 1.72,
+      "rate_to_usd": 0.5813953488372093,
+      "lastUpdated": "2025-12-28"
+    }
+  ]
+}

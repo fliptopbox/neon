@@ -1,13 +1,3 @@
-/*
- USERS:
- create an admin user before any other users:
-
- - email: response.write@gmail.com
- - password: pa55word!
- - fullname: Bruce Thomas
- - is_admin: true
-*/
-
 Table users {
   id integer [primary key]
   email varchar [unique, not null]
@@ -16,18 +6,9 @@ Table users {
   is_global_active boolean [default: true]
   is_admin boolean [default: false]
   
-  date_last_seen timestamp
-  date_created timestamp [default: `now()` ]
+  date_last_seen timestamptz
+  date_created timestamptz [default: `now()` ]
 }
-
-/*
-USER_PROFILES:
-Create a user_profile for the admin user (response.write@gmail.com)
-
-- handle: bruce-thomas
-- fullname: Bruce Thomas
-- flag_emoji: 🇿🇦
-*/
 
 Table user_profiles {
   id integer [primary key]
@@ -35,28 +16,18 @@ Table user_profiles {
 
   handle varchar [not null] // eg /u/bruce-thomas
   fullname varchar [not null]
+  phone_number varchar [not null, default: ''] // eg. "07594616416" or "+44 7594 616 416"
   description text [default: '']
-  interest_tags json [not null, default: '[]'] // String[] of interest tags eg. ["drawing", "painting", "sculpture"]
+  avatar_url varchar [default: ''] // no avatar uses fullanme initials eg BT
 
+  currency_code char(3)  [not null, default: 'GBP'] // USD, GBP, EUR
   flag_emoji varchar [not null, default: '🏳️'] // the users country origin
 
-  // Affiliated links (e.g. Gumroad, Etsy) the storefront which will be scraped for product URLs
-  // Gumroad: https://azlifemodel.gumroad.com/
-  // Etsy: https://www.etsy.com/shop/BorodulyaArt
+  payment_methods json [default: '{"monzo": null, "revolut": null, "paypal": null, "bank": { "name": null, "sort_code": null, "account_number": null, "iban": null } }'] // Object of payment methods eg. { "monzo": "https://monzo.me/brucethomas", "revolut": "https://revolut.me/brucethomas", "paypal": "https://paypal.me/brucethomas", "bank": { "name": "Bruce Thomas", "sort_code": "123456", "account_number": "12345678", "iban": "GB1234567812345678" } } 
 
-  affiliate_urls json [default: '[]'] // String[] of affiliate URLs eg. ["https://handle.gumroad.com".com/"]
-
-  date_created timestamp [default: `now()` ]
+  date_created timestamptz [default: `now()` ]
   is_profile_active boolean [default: true]
 }
-
-/*
-VENUES:
-Use the JSON file '/docs/venues.json' for the most complete curated record set.
-the first row is the admin user's venue ("name": "Homerton Library")
-
-The records should correlate to the database.json by matching on postcode, address, or comments
-*/
 
 Table venues {
   id integer [primary key, increment]
@@ -64,27 +35,22 @@ Table venues {
 
   address_line_1 varchar(255) [not null] // eg. "123 Main St"
   address_line_2 varchar(255) [default: ''] // eg. "Suite 456"
-  city varchar(100) [not null, default: 'London'] // eg. "London"
-  county varchar(100) [default: ''] // eg. "London"
-  postcode varchar(20) [not null, default: 'UNKNOWN'] // eg. postcode/zip "SW1A 1AA"
-  area varchar(100) [default: ''] // eg. "Camden"
-  
-  active boolean [not null, default: true]
-  
-  tz varchar(50) [not null, default: 'europe/london'] // eg. "europe/london"
-  
-  latitude decimal(10,8)
-  longitude decimal(11,8)
+  address_city varchar(100) [not null, default: 'London'] // eg. "London"
+  address_county varchar(100) [default: ''] // eg. "London"
+  address_postcode varchar(20) [not null, default: 'UNKNOWN'] // eg. postcode/zip "SW1A 1AA"
+  address_area varchar(100) [default: ''] // eg. "Camden"
+  tz varchar(50) [not null, default: 'Europe/London']
   
   capacity integer [not null, default: 0] // max number of attendees
-
-  created_on timestamp [not null, default: `now()`]
-  modified_on timestamp [not null, default: `now()`]
-  
-  is_private boolean [default: false] // private venues or home addresses to be hidden from the website eg. Ciche and compliments (David Burchan)
-
   venue_tags json [not null, default: '[]'] // eg. ["parking", "step-free", "wheelchair"]
   comments text [default: ''] // eg. Use the entrance on Gravel Road, dial 101 on the innercom and take elevator to 1st floor
+  active boolean [not null, default: true]
+   
+  latitude decimal(10,8)
+  longitude decimal(11,8)
+
+  date_created timestamptz [not null, default: `now()`]
+  date_modified timestamptz [not null, default: `now()`]
 }
 
 Enum status_enum {  
@@ -96,33 +62,10 @@ Enum status_enum {
   pending
 }
 
-/*
-  CALENDAR:
-  Currently all these rows are owned by the admin user (response.write@gmail.com)
-  ensure that the event_id is related to a single events.id (of the admin user)
-  The calendar is a register of sessions occring on a day in a venue with a model with a host.
-  A calendar row without a model_id is presumed CLOSED.
-
-  Any database.json records where 'fullname' value is empty, should be ignored
-
-  Default values for unmatched model_id:
-  - model_id: NULL
-  - status: 'closed'
-
-  Any model with (TBC) in the fullname:
-  - model_id: (match fullname without (TBC))
-  - status: 'opencall'
-
-  Any model with 'closed' in the fullname:
-  - model_id: NULL
-  - status: 'closed'
-
-*/
-
 Table calendar {
   id integer [primary key]
   event_id integer
-  model_id integer
+  user_id integer
 
   status status_enum
 
@@ -138,16 +81,16 @@ Table calendar {
 Table models {
   id integer [primary key]
 
-  user_profile_id integer
-  phone_number varchar [not null, default: ''] // eg. "07594616416" or "+44 7594 616 416"
+  user_id integer [not null]
   display_name varchar // known as Palendromic
   description text [not null, default: '']
 
-  currency_code char(3) [not null, default: 'GBP'] // USD, GBP, EUR  
+  portrait_urls json [default: '[]'] // main profile image
+
   rate_min_hour decimal [default: 20.0]
   rate_min_day decimal [default: 120.0]
   
-  tz varchar(50) [not null, default: 'europe/london'] // eg. "europe/london"
+  tz varchar(50) [not null, default: 'Europe/London']
   
   work_inperson boolean [default: true]
   work_online boolean [default: false]
@@ -155,50 +98,41 @@ Table models {
 
   work_seeks json [not null, default: '["nude", "portrait", "clothed", "underwear", "costume"]'] // String[]: nude, partial, fashion, costume, bodypaint ...
 
-  social_urls json [default: '[]'] // String[] of social URLs eg. ["https://instagram.com/handle", "https://twitter.com/handle", "https://tiktok.com/handle"]
-  
-  product_urls json [default: '[]'] // String[] of product URLs eg. ["https://handle.etsy.com", "https://handle.gumroad.com"]
-  date_birthday timestamp // legal age 20
-  date_experience timestamp // years of experience
+  website_urls json [default: '[]'] // String[] of website URLs eg. ["https://handle.etsy.com", "https://handle.gumroad.com"]
+  social_handles json [default: '{}'] // Object of social handles eg. { "instagram": "handle", "twitter": "handle", "tiktok": "handle" }
 
-  sex tinyint [not null, default: 0] // 0 none, 1 male, 2 female
+  date_birthday timestamptz // legal age 20
+  date_experience timestamptz // years of experience
+
+  sex sex_enum [not null, default: 'unspecified']
   pronouns varchar [not null, default: ''] // he/him she/her they/them
+  date_created timestamptz [not null, default: `now()` ]
 }
 
-/*
-  HOSTS:
-  Create a host row for the admin user (response.write@gmail.com)
-  that matched the user_profile_id of the admin user
-
-  All calendar rows should reference this host
-
-  name: Life Drawing Art
-  phone_number: 07594616416
-  social_urls: ['https://instagram.com/lifedrawing.art','https://lifedrawing.art']
-
-  - Create any missing users and user_profiles for the other hosts 
-  - use placeholder data for the missing fields
-  - each host should have a unique handle and match one or more events
-*/
+Enum sex_enum {
+  unspecified
+  male
+  female
+}
 
 Table hosts {
   id integer [primary key]
-  user_profile_id integer [not null]
+  user_id integer [not null]
 
   name varchar [not null]
   description text
-  phone_number varchar
 
-  social_urls json [default: '[]'] // String[] of social URLs eg. ["https://instagram.com/handle", "https://twitter.com/handle", "https://tiktok.com/handle"]
+  social_handles json [default: '{}'] // String[] of social handles eg. [{ "instagram": "handle" }, { "twitter": "handle" }, { "tiktok": "handle" }]
 
-  currency_code char(3)  [not null, default: 'GBP'] // USD, GBP, EUR
+  default_date_time timestamptz [not null, default: '1970-01-01T00:19:00.000Z'] // eg. 19:00:00
+  default_duration decimal [not null, default: 2.0] // hours
   
   rate_max_hour decimal [not null, default: 25.00] // per hour
   rate_max_day decimal [not null, default: 150.00] // six hours
 
-  tz varchar(50) [not null, default: 'europe/london'] // eg. "europe/london"
+  tz varchar(50) [not null, default: 'Europe/London']
 
-  date_created timestamp [not null, default: `now()`]
+  date_created timestamptz [not null, default: `now()`]
   host_tags json [not null, default: '[]'] // from database.json venues "tag" eg. ["heating", "materials", "lights", "snacks"]
 }
 
@@ -228,7 +162,7 @@ Enum week_day_enum {
 Table events {
   id integer [primary key]
   venue_id integer [null] // nullable for online events
-  host_user_id integer [not null]
+  user_id integer [not null]
   name varchar [not null] //eg. "Drawing in the Library"
   description varchar // eg. "Join us for the weekly session in the Homerton Library"
   images json [not null, default: '[]'] // String[] eg. ["https://domain.com/image.jpg"]
@@ -256,19 +190,11 @@ Table tracking {
   timestamp timestamptz
 }
 
-Ref: "calendar"."event_id" < "events"."id"
-Ref: "calendar"."model_id" < "models"."id"
-
-Ref: "events"."host_user_id" < "hosts"."user_profile_id"
-
-Ref: "hosts"."currency_code" < "exchange_rates"."currency_code"
-Ref: "hosts"."user_profile_id" < "user_profiles"."id"
-
-Ref: "models"."currency_code" < "exchange_rates"."currency_code"
-Ref: "models"."user_profile_id" < "user_profiles"."id"
-
 Ref: "user_profiles"."user_id" < "users"."id"
-
-Ref: "users"."id" < "tracking"."user_id"
-
-Ref: "venues"."id" < "events"."venue_id"
+Ref: "models"."user_id" < "users"."id"
+Ref: "hosts"."user_id" < "users"."id"
+Ref: "events"."user_id" < "users"."id"
+Ref: "events"."venue_id" < "venues"."id"
+Ref: "calendar"."user_id" < "users"."id"
+Ref: "tracking"."user_id" < "users"."id"
+Ref: "calendar"."event_id" < "events"."id"

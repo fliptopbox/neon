@@ -945,7 +945,7 @@
     "filename": "/Users/bruce/Projects/github/lifedrawing/build/db/cached/venues.json",
     "records": [
       {
-        "name": "(ELSC) East London Stripper Collective",
+        "name": "East London Stripper Collective (ELSC)",
         "dayno": "1",
         "day": "monday",
         "frequency": "weekly",
@@ -1859,7 +1859,7 @@
         "dateAdded": "2025-09-08T10:47:27.806Z"
       },
       {
-        "name": "Drop-in Portrait Drawing and Painting Sessions",
+        "name": "Carmine Crimson Drop-in Drawing and Painting Sessions",
         "dayno": "1",
         "day": "monday",
         "frequency": "weekly",
