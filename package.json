@@ -13,9 +13,7 @@
     "deploy:api": "wrangler deploy --env production",
     "deploy:admin": "wrangler pages deploy dist/admin --project-name=neon-admin",
     "db:migrate": "node scripts/migrate.js",
-    "db:seed": "node scripts/seed.js",
-    "db:reset": "node scripts/reset.js",
-    "db:full-reset": "node scripts/full-reset-import.js",
+    "db:setup": "node scripts/migrate.js",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "type-check": "tsc --noEmit"
