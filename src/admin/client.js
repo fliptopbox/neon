@@ -328,6 +328,10 @@ export async function getEvents() {
     return api('/events');
 }
 
+export async function getEvent(id) {
+    return api(`/events/${id}`);
+}
+
 export async function createEvent(data) {
     return api('/events', {
         method: 'POST',
@@ -399,5 +403,14 @@ export async function updateSession(id, data) {
     return api(`/calendar/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
+    });
+}
+
+/**
+ * Delete calendar session
+ */
+export async function deleteSession(id) {
+    return api(`/calendar/${id}`, {
+        method: 'DELETE',
     });
 }

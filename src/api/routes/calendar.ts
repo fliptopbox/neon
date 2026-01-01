@@ -4,188 +4,182 @@ import { neon } from "@neondatabase/serverless";
 
 const app = new Hono<{ Bindings: Env }>();
 
-// GET all calendar events
+// GET all calendar sessions
 app.get("/", async (c) => {
   try {
     const sql = neon(c.env.DATABASE_URL);
-    const events = await sql`
+    // Join with events to get event name, and users/profiles to get model name and host name
+    const sessions = await sql`
       SELECT 
         c.id,
+        c.event_id,
         c.user_id,
-        c.venue_id,
-        c.date,
+        c.status,
         c.attendance_inperson,
         c.attendance_online,
-        c.start,
+        c.date_time,
         c.duration,
-        c.notes,
-        c.tbc,
-        ub.fullname,
-        h.name as venue_name,
-        v.area as venue_area
+        c.pose_format,
+        e.name as event_name,
+        up_model.fullname as model_name,
+        u_model.email as model_email,
+        e.user_id as host_user_id,
+        up_host.fullname as host_name
       FROM calendar c
-      LEFT JOIN user_bios ub ON c.user_id = ub.user_id
-      LEFT JOIN venues v ON c.venue_id = v.id
-      LEFT JOIN hosts h ON v.host_id = h.id
-      ORDER BY c.date DESC
+      LEFT JOIN events e ON c.event_id = e.id
+      LEFT JOIN users u_model ON c.user_id = u_model.id
+      LEFT JOIN user_profiles up_model ON u_model.id = up_model.user_id
+      LEFT JOIN users u_host ON e.user_id = u_host.id
+      LEFT JOIN user_profiles up_host ON u_host.id = up_host.user_id
+      ORDER BY c.date_time DESC
     `;
-    return c.json(events);
+    return c.json(sessions);
   } catch (error) {
-    console.error("Error fetching calendar events:", error);
-    return c.json({ error: "Failed to fetch calendar events" }, 500);
+    console.error("Error fetching calendar sessions:", error);
+    return c.json({ error: "Failed to fetch calendar sessions" }, 500);
   }
 });
 
-// GET single calendar event
+
+
+// GET single calendar session
 app.get("/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
     const sql = neon(c.env.DATABASE_URL);
 
-    const events = await sql`
+    const sessions = await sql`
       SELECT 
         c.id,
+        c.event_id,
         c.user_id,
-        c.venue_id,
-        c.date,
+        c.status,
         c.attendance_inperson,
         c.attendance_online,
-        c.start,
+        c.date_time,
         c.duration,
-        c.notes,
-        c.tbc,
-        ub.fullname,
-        h.name as venue_name,
-        v.area as venue_area
+        c.pose_format,
+        e.name as event_name,
+        up.fullname as model_name
       FROM calendar c
-      LEFT JOIN user_bios ub ON c.user_id = ub.user_id
-      LEFT JOIN venues v ON c.venue_id = v.id
-      LEFT JOIN hosts h ON v.host_id = h.id
+      LEFT JOIN events e ON c.event_id = e.id
+      LEFT JOIN users u ON c.user_id = u.id
+      LEFT JOIN user_profiles up ON u.id = up.user_id
       WHERE c.id = ${id}
     `;
 
-    if (events.length === 0) {
-      return c.json({ error: "Event not found" }, 404);
+    if (sessions.length === 0) {
+      return c.json({ error: "Session not found" }, 404);
     }
 
-    return c.json(events[0]);
+    return c.json(sessions[0]);
   } catch (error) {
-    console.error("Error fetching calendar event:", error);
-    return c.json({ error: "Failed to fetch calendar event" }, 500);
+    console.error("Error fetching calendar session:", error);
+    return c.json({ error: "Failed to fetch calendar session" }, 500);
   }
 });
 
-// POST create new calendar event
+// POST create new calendar session
 app.post("/", async (c) => {
   try {
+    const body = await c.req.json();
     const {
+      event_id,
       user_id,
-      venue_id,
-      date,
+      status,
       attendance_inperson,
       attendance_online,
-      start,
+      date_time,
       duration,
-      notes,
-      tbc,
-    } = await c.req.json();
+      pose_format
+    } = body;
 
-    if (
-      (user_id === undefined || user_id === null) ||
-      !venue_id ||
-      !date ||
-      attendance_inperson === undefined ||
-      attendance_online === undefined ||
-      !start ||
-      !duration
-    ) {
-      return c.json({ error: "Missing required fields" }, 400);
+    // Minimal validation
+    if (!date_time || !duration) {
+      return c.json({ error: "Missing required fields (date_time, duration)" }, 400);
     }
 
     const sql = neon(c.env.DATABASE_URL);
 
     const result = await sql`
-      INSERT INTO calendar (user_id, venue_id, date, attendance_inperson, attendance_online, start, duration, notes, tbc)
-      VALUES (${user_id}, ${venue_id}, ${date}, ${attendance_inperson}, ${attendance_online}, ${start}, ${duration}, ${
-      notes || null
-    }, ${tbc || 0})
+      INSERT INTO calendar (
+        event_id, 
+        user_id, 
+        status, 
+        attendance_inperson, 
+        attendance_online, 
+        date_time, 
+        duration, 
+        pose_format
+      )
+      VALUES (
+        ${event_id || null}, 
+        ${user_id || null}, 
+        ${status || 'pending'}, 
+        ${attendance_inperson || 0}, 
+        ${attendance_online || 0}, 
+        ${date_time}, 
+        ${duration}, 
+        ${pose_format || ''}
+      )
       RETURNING id
     `;
 
     return c.json(
-      { message: "Event created successfully", id: result[0].id },
+      { message: "Session created successfully", id: result[0].id },
       201
     );
   } catch (error: any) {
-    console.error("Error creating calendar event:", error);
-    if (error.message?.includes("foreign key")) {
-      return c.json({ error: "Invalid user_id or venue_id" }, 400);
-    }
-    return c.json({ error: "Failed to create calendar event" }, 500);
+    console.error("Error creating calendar session:", error);
+    return c.json({ error: "Failed to create calendar session" }, 500);
   }
 });
 
-// PUT update calendar event
+// PUT update calendar session
 app.put("/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
+    const body = await c.req.json();
     const {
+      event_id,
       user_id,
-      venue_id,
-      date,
+      status,
       attendance_inperson,
       attendance_online,
-      start,
+      date_time,
       duration,
-      notes,
-      tbc,
-    } = await c.req.json();
-
-    if (
-      (user_id === undefined || user_id === null) ||
-      !venue_id ||
-      !date ||
-      attendance_inperson === undefined ||
-      attendance_online === undefined ||
-      !start ||
-      !duration
-    ) {
-      return c.json({ error: "Missing required fields" }, 400);
-    }
+      pose_format
+    } = body;
 
     const sql = neon(c.env.DATABASE_URL);
 
     const result = await sql`
       UPDATE calendar 
       SET 
-        user_id = ${user_id},
-        venue_id = ${venue_id},
-        date = ${date},
+        event_id = ${event_id || null},
+        user_id = ${user_id || null},
+        status = ${status},
         attendance_inperson = ${attendance_inperson},
         attendance_online = ${attendance_online},
-        start = ${start},
+        date_time = ${date_time},
         duration = ${duration},
-        notes = ${notes || null},
-        tbc = ${tbc !== undefined ? tbc : 0}
+        pose_format = ${pose_format}
       WHERE id = ${id}
       RETURNING id
     `;
 
     if (result.length === 0) {
-      return c.json({ error: "Event not found" }, 404);
+      return c.json({ error: "Session not found" }, 404);
     }
 
-    return c.json({ message: "Event updated successfully" });
+    return c.json({ message: "Session updated successfully" });
   } catch (error: any) {
-    console.error("Error updating calendar event:", error);
-    if (error.message?.includes("foreign key")) {
-      return c.json({ error: "Invalid user_id or venue_id" }, 400);
-    }
-    return c.json({ error: "Failed to update calendar event" }, 500);
+    console.error("Error updating calendar session:", error);
+    return c.json({ error: "Failed to update calendar session" }, 500);
   }
 });
 
-// DELETE calendar event
+// DELETE calendar session
 app.delete("/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
@@ -198,13 +192,13 @@ app.delete("/:id", async (c) => {
     `;
 
     if (result.length === 0) {
-      return c.json({ error: "Event not found" }, 404);
+      return c.json({ error: "Session not found" }, 404);
     }
 
-    return c.json({ message: "Event deleted successfully" });
+    return c.json({ message: "Session deleted successfully" });
   } catch (error) {
-    console.error("Error deleting calendar event:", error);
-    return c.json({ error: "Failed to delete calendar event" }, 500);
+    console.error("Error deleting calendar session:", error);
+    return c.json({ error: "Failed to delete calendar session" }, 500);
   }
 });
 

@@ -19,6 +19,7 @@ import { renderModels, attachModelsHandlers } from './views/models.js';
 import { renderHosts, attachHostsHandlers } from './views/hosts.js';
 import { renderVenues, attachVenuesHandlers } from './views/venues.js';
 import { renderEvents, attachEventsHandlers } from './views/events.js';
+import { renderCalendar, attachCalendarHandlers } from './views/calendar.js';
 import { renderExchangeRates, attachExchangeRatesHandlers } from './views/exchange-rates.js';
 
 // --- Application State ---
@@ -48,6 +49,7 @@ const routes = {
     'hosts': renderHosts,
     'venues': renderVenues,
     'events': renderEvents,
+    'calendar': renderCalendar,
     'exchange-rates': renderExchangeRates,
 };
 
@@ -140,6 +142,7 @@ function renderSidebar(activeView) {
         { id: 'hosts', icon: 'storefront', label: 'Hosts' },
         { id: 'venues', icon: 'location_on', label: 'Venues' },
         { id: 'events', icon: 'event', label: 'Events' },
+        { id: 'calendar', icon: 'calendar_month', label: 'Calendar' },
         { id: 'exchange-rates', icon: 'currency_exchange', label: 'Rates' },
     ];
 
@@ -187,6 +190,7 @@ function getViewTitle(view) {
         'hosts': 'Hosts',
         'venues': 'Venues',
         'events': 'Events',
+        'calendar': 'Calendar',
         'exchange-rates': 'Exchange Rates',
     };
     return titles[view] || 'Neon Admin';
@@ -252,6 +256,9 @@ function attachViewHandlers(view) {
             break;
         case 'events':
             attachEventsHandlers();
+            break;
+        case 'calendar':
+            attachCalendarHandlers();
             break;
         case 'exchange-rates':
             attachExchangeRatesHandlers();
