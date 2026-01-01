@@ -1,5 +1,5 @@
 Table users {
-  id integer [primary key]
+  id integer [primary key, increment]
   email varchar [unique, not null]
   password_hash varchar [not null]
   
@@ -11,7 +11,7 @@ Table users {
 }
 
 Table user_profiles {
-  id integer [primary key]
+  id integer [primary key, increment]
   user_id integer [not null]
 
   handle varchar [not null] // eg /u/bruce-thomas
@@ -63,7 +63,7 @@ Enum status_enum {
 }
 
 Table calendar {
-  id integer [primary key]
+  id integer [primary key, increment]
   event_id integer
   user_id integer
 
@@ -79,7 +79,7 @@ Table calendar {
 }
 
 Table models {
-  id integer [primary key]
+  id integer [primary key, increment]
 
   user_id integer [not null]
   display_name varchar // known as Palendromic
@@ -116,7 +116,7 @@ Enum sex_enum {
 }
 
 Table hosts {
-  id integer [primary key]
+  id integer [primary key, increment]
   user_id integer [not null]
 
   name varchar [not null]
@@ -160,7 +160,7 @@ Enum week_day_enum {
 }
 
 Table events {
-  id integer [primary key]
+  id integer [primary key, increment]
   venue_id integer [null] // nullable for online events
   user_id integer [not null]
   name varchar [not null] //eg. "Drawing in the Library"
@@ -184,7 +184,7 @@ Table exchange_rates {
 }
 
 Table tracking {
-  id integer [primary key]
+  id integer [primary key, increment]
   user_id integer [not null]
   href varchar [not null]
   timestamp timestamptz

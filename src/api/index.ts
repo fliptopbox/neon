@@ -1,3 +1,4 @@
+
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { Env } from "./db";
@@ -12,32 +13,25 @@ import imagesRoutes from "./routes/images";
 import venueTagsRoutes from "./routes/venue-tags";
 import calendarRoutes from "./routes/calendar";
 import dashboardRoutes from "./routes/dashboard";
+import exchangeRatesRoutes from "./routes/exchange-rates";
 
 const app = new Hono<{ Bindings: Env }>();
-
-// Force Rebuild timestamp: 2025-12-21
 
 // Middleware
 app.use(
   "/*",
   cors({
     origin: (origin) => {
-      // Allow localhost for development
       if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
         return origin;
       }
-      // Allow Cloudflare Pages domains (neon-admin.pages.dev)
       if (
         origin.endsWith(".neon-admin.pages.dev") ||
         origin === "https://neon-admin.pages.dev"
       ) {
         return origin;
       }
-      // Allow your custom domain if you set one
-      if (origin.includes("your-domain.com")) {
-        return origin;
-      }
-      return null; // Reject other origins in production
+      return null;
     },
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
@@ -62,6 +56,7 @@ app.route("/api/models", modelsRoutes);
 app.route("/api/artists", artistsRoutes);
 app.route("/api/users", usersRoutes);
 app.route("/api/images", imagesRoutes);
+app.route("/api/exchange-rates", exchangeRatesRoutes);
 
 // 404 handler
 app.notFound((c) => c.json({ error: "Not found" }, 404));

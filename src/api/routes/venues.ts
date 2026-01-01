@@ -5,171 +5,75 @@ import { authMiddleware, adminMiddleware } from "../middleware/auth";
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Public: List all active venues with host and session info
+// Public: List all active venues
 app.get("/", async (c) => {
   const venues = await query(
     c.env,
     `SELECT 
-      v.id as venue_id,
-      v.address,
-      v.postcode,
-      v.area,
-      v.timezone,
-      v.active as venue_active,
-      h.id as host_id,
-      h.name as host_name,
-      h.description as host_description,
-      h.instagram as host_instagram,
-      h.website as host_website,
-      h.active as host_active,
-      s.id as session_id,
-      s.week_day,
-      s.start_time,
-      s.duration,
-      s.frequency,
-      s.price_inperson,
-      s.price_online,
-      s.tags,
-      s.active as session_active
+      v.id,
+      v.name,
+      v.address_line_1,
+      v.address_city,
+      v.address_postcode,
+      v.address_area,
+      v.tz,
+      v.active,
+      v.latitude,
+      v.longitude,
+      v.venue_tags, 
+      (SELECT COUNT(*) FROM events e WHERE e.venue_id = v.id) as event_count
      FROM venues v
-     INNER JOIN hosts h ON v.host_id = h.id
-     LEFT JOIN sessions s ON v.id = s.venue_id
-     WHERE v.active = 1 AND h.active = 1
-     ORDER BY h.name, v.area, s.week_day, s.start_time`
+     WHERE v.active = true
+     ORDER BY v.name`
   );
 
-  // Group by venue and nest sessions
-  const venueMap = new Map();
-  for (const row of venues) {
-    if (!venueMap.has(row.venue_id)) {
-      venueMap.set(row.venue_id, {
-        id: row.venue_id,
-        address: row.address,
-        postcode: row.postcode,
-        area: row.area,
-        timezone: row.timezone,
-        active: row.venue_active,
-        host: {
-          id: row.host_id,
-          name: row.host_name,
-          description: row.host_description,
-          instagram: row.host_instagram,
-          website: row.host_website,
-          active: row.host_active
-        },
-        sessions: []
-      });
-    }
-    
-    if (row.session_id) {
-      venueMap.get(row.venue_id).sessions.push({
-        id: row.session_id,
-        week_day: row.week_day,
-        start_time: row.start_time,
-        duration: row.duration,
-        frequency: row.frequency,
-        price_inperson: row.price_inperson,
-        price_online: row.price_online,
-        tags: row.tags,
-        active: row.session_active
-      });
-    }
-  }
-
-  return c.json(Array.from(venueMap.values()));
+  return c.json(venues.map(v => ({
+      ...v,
+      venue_tags: typeof v.venue_tags === 'string' ? JSON.parse(v.venue_tags) : v.venue_tags
+  })));
 });
 
-// Public: Get venue by ID with host and sessions
+// Public: Get venue by ID
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
-  const rows = await query(
+  const row = await queryOne(
     c.env,
-    `SELECT 
-      v.id as venue_id,
-      v.address,
-      v.postcode,
-      v.area,
-      v.timezone,
-      v.active as venue_active,
-      h.id as host_id,
-      h.name as host_name,
-      h.description as host_description,
-      h.instagram as host_instagram,
-      h.website as host_website,
-      h.active as host_active,
-      s.id as session_id,
-      s.week_day,
-      s.start_time,
-      s.duration,
-      s.frequency,
-      s.price_inperson,
-      s.price_online,
-      s.tags,
-      s.active as session_active
-     FROM venues v
-     INNER JOIN hosts h ON v.host_id = h.id
-     LEFT JOIN sessions s ON v.id = s.venue_id
-     WHERE v.id = $1 AND v.active = 1
-     ORDER BY s.week_day, s.start_time`,
+    `SELECT * FROM venues WHERE id = $1 AND active = true`,
     [id]
   );
 
-  if (rows.length === 0) {
+  if (!row) {
     return c.json({ error: "Venue not found" }, 404);
   }
 
-  const venue = {
-    id: rows[0].venue_id,
-    address: rows[0].address,
-    postcode: rows[0].postcode,
-    area: rows[0].area,
-    timezone: rows[0].timezone,
-    active: rows[0].venue_active,
-    host: {
-      id: rows[0].host_id,
-      name: rows[0].host_name,
-      description: rows[0].host_description,
-      instagram: rows[0].host_instagram,
-      website: rows[0].host_website,
-      active: rows[0].host_active
-    },
-    sessions: rows.filter(r => r.session_id).map(r => ({
-      id: r.session_id,
-      week_day: r.week_day,
-      start_time: r.start_time,
-      duration: r.duration,
-      frequency: r.frequency,
-      price_inperson: r.price_inperson,
-      price_online: r.price_online,
-      tags: r.tags,
-      active: r.session_active
-    }))
-  };
-
-  return c.json(venue);
+  return c.json({
+      ...row,
+      venue_tags: typeof row.venue_tags === 'string' ? JSON.parse(row.venue_tags) : row.venue_tags
+  });
 });
 
-// Admin: Create venue (simplified - creates venue only, sessions handled separately)
+// Admin: Create venue
 app.post("/", authMiddleware, async (c) => {
   const data = await c.req.json();
 
-  // Validate required fields
-  if (!data.host_id) {
-    return c.json({ error: "host_id is required" }, 400);
+  if (!data.name) {
+    return c.json({ error: "Name is required" }, 400);
   }
 
   const [venue] = await query(
     c.env,
     `INSERT INTO venues (
-      host_id, address, postcode, area, timezone
-    ) VALUES ($1, $2, $3, $4, $5)
+      name, address_line_1, address_city, address_postcode, address_area, tz, venue_tags
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING *`,
     [
-      data.host_id,
-      data.address || null,
-      data.postcode || null,
-      data.area || null,
-      data.timezone || 'GMT'
+      data.name,
+      data.address_line_1 || '',
+      data.address_city || 'London',
+      data.address_postcode || 'UNKNOWN',
+      data.address_area || '',
+      data.tz || 'Europe/London',
+      JSON.stringify(data.venue_tags || [])
     ]
   );
 
@@ -184,14 +88,22 @@ app.put("/:id", authMiddleware, async (c) => {
   const [venue] = await query(
     c.env,
     `UPDATE venues SET 
-      address = $1, postcode = $2, area = $3, timezone = $4, modified_on = NOW()
-    WHERE id = $5
+      name = COALESCE($1, name),
+      address_line_1 = COALESCE($2, address_line_1),
+      address_postcode = COALESCE($3, address_postcode),
+      address_area = COALESCE($4, address_area),
+      tz = COALESCE($5, tz),
+      venue_tags = COALESCE($6, venue_tags),
+      date_modified = NOW()
+    WHERE id = $7
     RETURNING *`,
     [
-      data.address,
-      data.postcode,
-      data.area,
-      data.timezone,
+      data.name,
+      data.address_line_1,
+      data.address_postcode,
+      data.address_area,
+      data.tz,
+      data.venue_tags ? JSON.stringify(data.venue_tags) : null,
       id
     ]
   );
@@ -206,9 +118,7 @@ app.put("/:id", authMiddleware, async (c) => {
 // Admin: Delete venue (soft delete)
 app.delete("/:id", authMiddleware, adminMiddleware, async (c) => {
   const id = c.req.param("id");
-
-  await query(c.env, "UPDATE venues SET active = 0 WHERE id = $1", [id]);
-
+  await query(c.env, "UPDATE venues SET active = false WHERE id = $1", [id]);
   return c.json({ message: "Venue deleted" });
 });
 

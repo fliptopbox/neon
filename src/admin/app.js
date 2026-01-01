@@ -13,13 +13,13 @@ import { showModal, closeModal } from './components/modal.js';
 
 // --- Views ---
 import { renderLogin } from './views/login.js';
-import { renderUsers } from './views/users.js';
-import { renderHosts } from './views/hosts.js';
-import { renderModels } from './views/models.js';
-import { renderCalendar } from './views/calendar.js';
-import { renderUserDetail } from './views/user-detail.js';
-import { renderProfile, attachProfileHandlers } from './views/profile.js';
-import { renderDashboard } from './views/dashboard.js';
+import { renderDashboard, attachDashboardHandlers } from './views/dashboard.js';
+import { renderUsers, attachUsersHandlers } from './views/users.js';
+import { renderModels, attachModelsHandlers } from './views/models.js';
+import { renderHosts, attachHostsHandlers } from './views/hosts.js';
+import { renderVenues, attachVenuesHandlers } from './views/venues.js';
+import { renderEvents, attachEventsHandlers } from './views/events.js';
+import { renderExchangeRates, attachExchangeRatesHandlers } from './views/exchange-rates.js';
 
 // --- Application State ---
 export const state = {
@@ -32,6 +32,8 @@ export const state = {
         models: [],
         venues: [],
         calendar: [],
+        events: [],
+        rates: [],
     },
     loading: false,
     filters: {},
@@ -40,12 +42,13 @@ export const state = {
 // --- Router ---
 const routes = {
     'login': renderLogin,
-    'users': renderUsers,
-    'hosts': renderHosts,
-    'models': renderModels,
-    'calendar': renderCalendar,
     'dashboard': renderDashboard,
-    'profile': renderProfile,
+    'users': renderUsers,
+    'models': renderModels,
+    'hosts': renderHosts,
+    'venues': renderVenues,
+    'events': renderEvents,
+    'exchange-rates': renderExchangeRates,
 };
 
 /**
@@ -73,12 +76,7 @@ function handleRoute() {
 
     // Redirect authenticated users away from login
     if (API.isAuthenticated() && hash === 'login') {
-        const user = API.getUser();
-        if (user.isAdmin) {
-            navigate('dashboard');
-        } else {
-            navigate('profile');
-        }
+        navigate('dashboard');
         return;
     }
 
@@ -136,15 +134,17 @@ function renderSidebar(activeView) {
     }
 
     const navItems = [
+        { id: 'dashboard', icon: 'dashboard', label: 'Dashboard' },
         { id: 'users', icon: 'group', label: 'Users' },
+        { id: 'models', icon: 'person_search', label: 'Models' },
         { id: 'hosts', icon: 'storefront', label: 'Hosts' },
-        { id: 'models', icon: 'accessibility_new', label: 'Models' },
-        { id: 'calendar', icon: 'calendar_month', label: 'Calendar' },
+        { id: 'venues', icon: 'location_on', label: 'Venues' },
+        { id: 'events', icon: 'event', label: 'Events' },
+        { id: 'exchange-rates', icon: 'currency_exchange', label: 'Rates' },
     ];
 
     return `
         <aside class="sidebar">
-            <!-- Brand -->
             <div class="sidebar-brand">
                 <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                     <span class="material-symbols-outlined text-primary">palette</span>
@@ -154,8 +154,7 @@ function renderSidebar(activeView) {
                     <p class="text-xs text-gray-500">Life Drawing Platform</p>
                 </div>
             </div>
-            
-            <!-- Navigation -->
+
             <nav class="sidebar-nav">
                 ${navItems.map(item => `
                     <a href="#${item.id}" 
@@ -165,8 +164,7 @@ function renderSidebar(activeView) {
                     </a>
                 `).join('')}
             </nav>
-            
-            <!-- Footer -->
+
             <div class="sidebar-footer">
                 <button onclick="handleLogout()" 
                         class="flex items-center gap-3 w-full px-3 py-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">
@@ -183,11 +181,13 @@ function renderSidebar(activeView) {
  */
 function getViewTitle(view) {
     const titles = {
-        'users': 'Users',
-        'hosts': 'Hosts',
-        'models': 'Models',
-        'calendar': 'Calendar',
         'dashboard': 'Dashboard',
+        'users': 'Users',
+        'models': 'Models',
+        'hosts': 'Hosts',
+        'venues': 'Venues',
+        'events': 'Events',
+        'exchange-rates': 'Exchange Rates',
     };
     return titles[view] || 'Neon Admin';
 }
@@ -219,11 +219,7 @@ function attachLoginHandlers() {
 
             showToast('Welcome back!');
 
-            if (state.user.isAdmin) {
-                navigate('dashboard');
-            } else {
-                navigate('profile');
-            }
+            navigate('dashboard');
         } catch (error) {
             errorEl.textContent = error.message || 'Invalid credentials';
             errorEl.classList.remove('hidden');
@@ -239,248 +235,28 @@ function attachLoginHandlers() {
  */
 function attachViewHandlers(view) {
     switch (view) {
+        case 'dashboard':
+            attachDashboardHandlers();
+            break;
         case 'users':
             attachUsersHandlers();
-            break;
-        case 'hosts':
-            attachHostsHandlers();
             break;
         case 'models':
             attachModelsHandlers();
             break;
-        case 'calendar':
-            attachCalendarHandlers();
+        case 'hosts':
+            attachHostsHandlers();
             break;
-        case 'dashboard':
-            attachDashboardHandlers();
+        case 'venues':
+            attachVenuesHandlers();
             break;
-        case 'profile':
-            attachProfileHandlers();
+        case 'events':
+            attachEventsHandlers();
+            break;
+        case 'exchange-rates':
+            attachExchangeRatesHandlers();
             break;
     }
-}
-
-// --- View Handlers ---
-
-async function attachUsersHandlers() {
-    // Load data if needed
-    if (state.data.users.length === 0) {
-        await loadUsers();
-    }
-
-    // Search
-    const searchInput = document.getElementById('search-users');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            filterUsers(e.target.value);
-        });
-    }
-
-    // Filter chips
-    document.querySelectorAll('[data-filter]').forEach(chip => {
-        chip.addEventListener('click', (e) => {
-            const filter = e.currentTarget.dataset.filter;
-            setUserFilter(filter);
-        });
-    });
-
-    // List items
-    document.querySelectorAll('[data-user-id]').forEach(item => {
-        item.addEventListener('click', (e) => {
-            const id = e.currentTarget.dataset.userId;
-            openUserDetail(id);
-        });
-    });
-
-    // Add User FAB
-    const addUserBtn = document.getElementById('add-user-btn');
-    addUserBtn?.addEventListener('click', () => {
-        openAddUserModal();
-    });
-}
-
-async function loadUsers() {
-    const container = document.getElementById('users-list');
-    if (!container) return;
-
-    container.innerHTML = '<div class="flex justify-center py-8"><div class="spinner"></div></div>';
-
-    try {
-        state.data.users = await API.getUsers();
-        render(); // Re-render with data
-    } catch (error) {
-        container.innerHTML = `<p class="text-center text-red-500 py-8">${error.message}</p>`;
-    }
-}
-
-function filterUsers(query) {
-    const items = document.querySelectorAll('[data-user-id]');
-    const q = query.toLowerCase();
-
-    items.forEach(item => {
-        const name = item.dataset.userName?.toLowerCase() || '';
-        const email = item.dataset.userEmail?.toLowerCase() || '';
-        const visible = name.includes(q) || email.includes(q);
-        item.style.display = visible ? '' : 'none';
-    });
-}
-
-function setUserFilter(filter) {
-    // Update chip states
-    document.querySelectorAll('[data-filter]').forEach(chip => {
-        if (chip.dataset.filter === filter) {
-            chip.classList.remove('chip-default');
-            chip.classList.add('chip-active');
-        } else {
-            chip.classList.remove('chip-active');
-            chip.classList.add('chip-default');
-        }
-    });
-
-    // Filter items
-    const items = document.querySelectorAll('[data-user-id]');
-
-    items.forEach(item => {
-        if (filter === 'all') {
-            item.style.display = '';
-            return;
-        }
-
-        const status = item.dataset.userStatus;
-        item.style.display = status === filter ? '' : 'none';
-    });
-}
-
-function openUserDetail(id) {
-    const user = state.data.users.find(u => u.id == id);
-    if (!user) return;
-
-    // Import dynamically to avoid circular deps
-    import('./views/user-detail.js').then(module => {
-        showModal(module.renderUserDetail(user), 'user-detail');
-        module.attachUserDetailHandlers(user);
-    });
-}
-
-function openAddUserModal() {
-    import('./views/user-detail.js').then(module => {
-        showModal(module.renderAddUser(), 'add-user');
-        module.attachAddUserHandlers();
-    });
-}
-
-async function attachHostsHandlers() {
-    if (state.data.hosts.length === 0) {
-        await loadHosts();
-    }
-
-    // Search
-    const searchInput = document.getElementById('search-hosts');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            filterHosts(e.target.value);
-        });
-    }
-}
-
-async function loadHosts() {
-    const container = document.getElementById('hosts-list');
-    if (!container) return;
-
-    container.innerHTML = '<div class="flex justify-center py-8"><div class="spinner"></div></div>';
-
-    try {
-        state.data.hosts = await API.getHosts();
-        render();
-    } catch (error) {
-        container.innerHTML = `<p class="text-center text-red-500 py-8">${error.message}</p>`;
-    }
-}
-
-function filterHosts(query) {
-    const items = document.querySelectorAll('[data-host-id]');
-    const q = query.toLowerCase();
-
-    items.forEach(item => {
-        const name = item.dataset.hostName?.toLowerCase() || '';
-        const visible = name.includes(q);
-        item.style.display = visible ? '' : 'none';
-    });
-}
-
-async function attachModelsHandlers() {
-    if (state.data.models.length === 0) {
-        await loadModels();
-    }
-
-    const searchInput = document.getElementById('search-models');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            filterModels(e.target.value);
-        });
-    }
-
-    // Attach click handlers to model cards
-    const list = document.getElementById('models-list');
-    if (list) {
-        list.addEventListener('click', async (e) => {
-            const card = e.target.closest('[data-model-id]');
-            if (card) {
-                const id = card.dataset.modelId;
-                const module = await import('./views/model-detail.js');
-                module.renderModelDetail(id);
-            }
-        });
-    }
-}
-
-async function loadModels() {
-    const container = document.getElementById('models-list');
-    if (!container) return;
-
-    container.innerHTML = '<div class="flex justify-center py-8"><div class="spinner"></div></div>';
-
-    try {
-        state.data.models = await API.getModels();
-        render();
-    } catch (error) {
-        container.innerHTML = `<p class="text-center text-red-500 py-8">${error.message}</p>`;
-    }
-}
-
-function filterModels(query) {
-    const items = document.querySelectorAll('[data-model-id]');
-    const q = query.toLowerCase();
-
-    items.forEach(item => {
-        const name = item.dataset.modelName?.toLowerCase() || '';
-        const visible = name.includes(q);
-        item.style.display = visible ? '' : 'none';
-    });
-}
-
-async function attachCalendarHandlers() {
-    if (state.data.calendar.length === 0) {
-        await loadCalendar();
-    }
-}
-
-async function loadCalendar() {
-    try {
-        state.data.calendar = await API.getCalendar();
-        render();
-    } catch (error) {
-        console.error('Failed to load calendar:', error);
-    }
-}
-
-function attachDashboardHandlers() {
-    // Dashboard click handlers
-    document.querySelectorAll('[data-navigate]').forEach(el => {
-        el.addEventListener('click', () => {
-            navigate(el.dataset.navigate);
-        });
-    });
 }
 
 // --- Logout ---
@@ -488,7 +264,7 @@ export function handleLogout() {
     API.logout();
     state.user = null;
     state.isAuthenticated = false;
-    state.data = { users: [], hosts: [], models: [], venues: [], calendar: [] };
+    state.data = { users: [], hosts: [], models: [], venues: [], calendar: [], events: [], rates: [] };
     navigate('login');
     showToast('Signed out');
 }

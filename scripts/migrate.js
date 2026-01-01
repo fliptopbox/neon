@@ -129,11 +129,20 @@ async function migrate() {
     const vals = Object.values(dbRow);
     const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ');
 
-    const q = `INSERT INTO "${tableName}" (${keys.map(k => `"${k}"`).join(', ')}) VALUES (${placeholders}) RETURNING id`;
+    const cols = tableDef.columns.map(c => c.name);
+    const hasId = cols.includes('id');
+
+    let q = `INSERT INTO "${tableName}" (${keys.map(k => `"${k}"`).join(', ')}) VALUES (${placeholders})`;
+    if (hasId) {
+      q += ' RETURNING id';
+    }
 
     try {
       const res = await sql(q, vals);
-      return res[0].id;
+      if (hasId && res.length > 0) {
+        return res[0].id;
+      }
+      return null;
     } catch (e) {
       if (!e.message.includes('duplicate key')) {
         console.error(`❌ Insert Error [${tableName}]:`, e.message, dbRow);
@@ -384,6 +393,7 @@ function parseDBML(dbml) {
 
           let constraints = [];
           let defaultValue = null;
+          let isIncrement = false;
 
           if (settingsStr.startsWith('[') && settingsStr.endsWith(']')) {
             settingsStr = settingsStr.slice(1, -1);
@@ -426,7 +436,7 @@ function parseDBML(dbml) {
               if (lower === 'primary key') constraints.push('PRIMARY KEY');
               else if (lower === 'not null') constraints.push('NOT NULL');
               else if (lower === 'unique') constraints.push('UNIQUE');
-              else if (lower === 'increment') { /* handled via integer usually */ }
+              else if (lower === 'increment') isIncrement = true;
               else if (lower.startsWith('default:')) {
                 let def = p.substring(8).trim();
                 if ((def.startsWith("'") && def.endsWith("'")) || (def.startsWith('`') && def.endsWith('`'))) {
@@ -437,7 +447,7 @@ function parseDBML(dbml) {
             }
           }
 
-          currentTable.columns.push({ name, type, constraints, defaultValue });
+          currentTable.columns.push({ name, type, constraints, defaultValue, isIncrement });
         }
       }
     }
@@ -458,6 +468,12 @@ function generateDDL(schema) {
     let cols = [];
     for (const c of t.columns) {
       let type = c.type;
+
+      if (c.isIncrement) {
+        if (type === 'integer') type = 'SERIAL';
+        else if (type === 'bigint') type = 'BIGSERIAL';
+      }
+
       if (type === 'timestamptz') type = 'TIMESTAMPTZ';
       else if (type === 'datetime') type = 'TIMESTAMP';
 

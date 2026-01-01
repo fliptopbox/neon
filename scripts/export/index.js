@@ -15,30 +15,37 @@ import { makeEvents } from './make-events.js';
 import { makeCalendar } from './make-calendar.js';
 import { fetchExchangeRates } from './get-exchange-rates.js';
 
-const exchangeRates = (async () => await fetchExchangeRates())();
 const staticData = fs.readFileSync(path.join(__dirname, '../../docs/google-export/database.json'), 'utf-8');
 const json = JSON.parse(staticData);
 
 delete json.test;
 delete json.members;
 
-const users = getUsers(json);
-const hosts = getVenues(json);
-const allusers = { ...users, ...hosts };
-const venues = makeVenues(allusers);
+async function runExport() {
+    const exchangeRates = await fetchExchangeRates();
 
-const homertonIndex = venues.findIndex(v => /homerton/i.test(v.name)); //?
+    const users = getUsers(json);
+    const hosts = getVenues(json);
+    const allusers = { ...users, ...hosts };
+    const venues = makeVenues(allusers);
 
-export const tables = saveToDisk({
-    users: makeUsers(allusers),
-    user_profiles: makeUserProfiles(allusers),
+    const homertonIndex = venues.findIndex(v => /homerton/i.test(v.name));
 
-    venues,
-    models: makeModels(allusers),
-    hosts: makeHosts(allusers),
+    saveToDisk({
+        users: makeUsers(allusers),
+        user_profiles: makeUserProfiles(allusers),
 
-    events: makeEvents(allusers),
+        venues,
+        models: makeModels(allusers),
+        hosts: makeHosts(allusers),
 
-    calendar: makeCalendar(json.calendar.records, allusers, homertonIndex),
-    exchange_rates: exchangeRates.records,
-});
+        events: makeEvents(allusers),
+
+        calendar: makeCalendar(json.calendar.records, allusers, homertonIndex),
+        exchange_rates: exchangeRates.records,
+    });
+}
+
+runExport();
+
+export const tables = {}; // Placeholder if needed by other imports, though likely not.

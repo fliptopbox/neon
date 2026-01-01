@@ -233,6 +233,15 @@ export async function updateHost(id, data) {
 }
 
 /**
+ * Delete host
+ */
+export async function deleteHost(id) {
+    return api(`/hosts/${id}`, {
+        method: 'DELETE',
+    });
+}
+
+/**
  * Get all models
  */
 export async function getModels() {
@@ -291,6 +300,78 @@ export async function createHost(data) {
  */
 export async function getVenues() {
     return api('/venues');
+}
+
+export async function createVenue(data) {
+    return api('/venues', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+export async function updateVenue(id, data) {
+    return api(`/venues/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+}
+
+export async function deleteVenue(id) {
+    return api(`/venues/${id}`, {
+        method: 'DELETE',
+    });
+}
+
+// --- Events ---
+
+export async function getEvents() {
+    return api('/events');
+}
+
+export async function createEvent(data) {
+    return api('/events', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+export async function updateEvent(id, data) {
+    return api(`/events/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+}
+
+export async function deleteEvent(id) {
+    return api(`/events/${id}`, {
+        method: 'DELETE',
+    });
+}
+
+// --- Exchange Rates ---
+
+export async function getExchangeRates() {
+    return api('/exchange-rates');
+}
+
+export async function createExchangeRate(data) {
+    return api('/exchange-rates', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+export async function updateExchangeRate(code, data) {
+    return api(`/exchange-rates/${code}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+}
+
+export async function deleteExchangeRate(code) {
+    return api(`/exchange-rates/${code}`, {
+        method: 'DELETE',
+    });
 }
 
 /**

@@ -13,8 +13,12 @@ export interface UserProfile {
   user_id: number;
   handle: string;
   fullname: string;
+  phone_number: string;
   description: string;
+  avatar_url: string;
+  currency_code: string;
   flag_emoji: string;
+  payment_methods: any; // JSON
   interest_tags: string[];
   affiliate_urls: string[];
   date_created: Date;

@@ -32,7 +32,7 @@ export function getUsers(data) {
             fullname: 'Bruce Thomas',
             handle: 'bruce-thomas',
             email: 'response.write@gmail.com',
-            password_hash: hashPassword('response.write@gmail.com:pa55word!'),
+            password_hash: hashPassword('response.write@gmail.com', 'pa55word!'),
             is_global_active: true,
             ...defaultUser,
 
@@ -46,7 +46,7 @@ export function getUsers(data) {
             fullname: 'Jayne Kilroy',
             handle: 'jayne-kilroy',
             email: 'jayne.kilroy@gmx.com',
-            password_hash: hashPassword('jayne.kilroy@gmx.com:jayne123'),
+            password_hash: hashPassword('jayne.kilroy@gmx.com', 'jayne123'),
             ...defaultUser,
         }
     };
