@@ -9,11 +9,13 @@ const app = new Hono<{ Bindings: Env }>();
 
 // Admin only: List all users with profile info
 app.get("/", authMiddleware, adminMiddleware, async (c) => {
-  const users = await query<User & UserProfile>(
+  const users = await query<User & UserProfile & { is_model: boolean; is_host: boolean }>(
     c.env,
     `SELECT u.id, u.email, u.is_global_active, u.date_created, u.date_last_seen, u.is_admin,
             up.fullname, up.handle, up.description, up.flag_emoji, up.is_profile_active,
-            up.phone_number, up.currency_code, up.payment_methods
+            up.phone_number, up.currency_code, up.payment_methods,
+            EXISTS(SELECT 1 FROM models m WHERE m.user_id = u.id) as is_model,
+            EXISTS(SELECT 1 FROM hosts h WHERE h.user_id = u.id) as is_host
      FROM users u
      LEFT JOIN user_profiles up ON u.id = up.user_id
      ORDER BY u.date_created DESC`
@@ -30,6 +32,8 @@ app.get("/", authMiddleware, adminMiddleware, async (c) => {
     date_created: u.date_created,
     date_last_seen: u.date_last_seen,
     is_admin: u.is_admin,
+    is_model: u.is_model,
+    is_host: u.is_host,
     profile: (u.fullname || u.handle || u.description)
       ? {
           fullname: u.fullname || '',

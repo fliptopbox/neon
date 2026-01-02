@@ -91,7 +91,17 @@ function renderEventCard(event) {
             </div>
 
              <div class="pt-4 border-t border-gray-50 flex items-center justify-between">
-                 <span class="text-xs text-gray-400">ID: ${event.id}</span>
+                 <div class="flex items-center gap-2">
+                     <span class="text-xs text-gray-400">ID: ${event.id}</span>
+                 </div>
+                 ${parseInt(event.calendar_count || 0) > 0 ? `
+                    <button class="calendar-link-btn text-gray-400 hover:text-primary transition-colors p-1 rounded-full hover:bg-primary/10"
+                            data-event-id="${event.id}"
+                            onclick="event.stopPropagation(); sessionStorage.setItem('calendar_event_filter', '${event.id}'); window.location.hash = '#calendar';"
+                            title="View Calendar">
+                        <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                    </button>
+                 ` : ''}
             </div>
         </div>
     `;
@@ -141,6 +151,12 @@ let optionsData = { venues: [], hosts: [] };
 async function loadEvents() {
     try {
         eventsData = await API.getEvents();
+        eventsData.sort((a, b) => {
+            const countA = parseInt(a.calendar_count || 0);
+            const countB = parseInt(b.calendar_count || 0);
+            if (countA !== countB) return countB - countA;
+            return a.name.localeCompare(b.name);
+        });
         updateEventsGrid();
         // Make it available globally for refresh
         window.loadEvents = loadEvents;
@@ -174,7 +190,47 @@ function updateEventsGrid() {
         return;
     }
 
-    grid.innerHTML = eventsData.map(renderEventCard).join('');
+    const activeEvents = eventsData.filter(e => parseInt(e.calendar_count || 0) > 0);
+    const otherEvents = eventsData.filter(e => parseInt(e.calendar_count || 0) === 0);
+
+    let content = '';
+
+    // Active Events
+    if (activeEvents.length > 0) {
+        if (otherEvents.length > 0) {
+            content += `
+                <div class="col-span-full mb-4">
+                    <div class="flex items-center gap-2 mb-4">
+                         <span class="material-symbols-outlined text-primary">calendar_month</span>
+                         <h3 class="text-lg font-bold text-gray-900">Active Events</h3>
+
+                    </div>
+                </div>
+            `;
+        }
+        content += activeEvents.map(renderEventCard).join('');
+    }
+
+    // Divider
+    if (activeEvents.length > 0 && otherEvents.length > 0) {
+        content += `
+            <div class="col-span-full py-8 text-center relative">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-200"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-gray-50 px-3 text-sm font-medium text-gray-500">Other Events</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // Other Events
+    if (otherEvents.length > 0) {
+        content += otherEvents.map(renderEventCard).join('');
+    }
+
+    grid.innerHTML = content;
 
     grid.querySelectorAll('[data-event-id]').forEach(card => {
         card.addEventListener('click', () => {

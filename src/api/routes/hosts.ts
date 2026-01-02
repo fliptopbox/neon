@@ -24,7 +24,8 @@ const app = new Hono<{ Bindings: Env; Variables: { user: any } }>();
 app.get("/", async (c) => {
   const hosts = await query(
     c.env,
-    `SELECT h.*, up.fullname as organizer_name, up.currency_code
+    `SELECT h.*, up.fullname as organizer_name, up.currency_code,
+     (SELECT COUNT(*) FROM calendar c JOIN events e ON c.event_id = e.id WHERE e.user_id = h.user_id) as calendar_count
      FROM hosts h
      LEFT JOIN user_profiles up ON h.user_id = up.user_id
      ORDER BY h.name`

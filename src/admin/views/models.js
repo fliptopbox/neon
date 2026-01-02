@@ -28,7 +28,11 @@ export function renderModels() {
                 
                 <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
                     <button class="filter-chip active px-4 py-2.5 rounded-lg border text-sm font-medium whitespace-nowrap transition-all bg-primary/10 border-primary/20 text-primary" data-status="all">
-                        All Models
+                        All
+                    </button>
+                    <button class="filter-chip px-3 py-2.5 rounded-lg border text-sm font-medium whitespace-nowrap transition-all bg-white border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center gap-1.5" data-status="new" title="Unbooked Models">
+                        <span class="material-symbols-outlined text-[20px]">event_busy</span>
+                        <span id="unbooked-count" class="font-medium"></span>
                     </button>
                     <!-- Add more filters if needed -->
                     <div class="w-px h-6 bg-gray-200 mx-2"></div>
@@ -61,77 +65,124 @@ export function renderModels() {
 
 function renderModelCard(model) {
     const displayName = model.display_name || model.fullname || 'Unknown Model';
-    const initials = displayName.slice(0, 2).toUpperCase();
     const handle = model.handle ? `@${model.handle}` : '';
+    const bookingCount = parseInt(model.calendar_count || 0);
 
-    // Determine status (active/inactive logic might need adjustment based on specific requirements)
-    // Assuming implicit active if present based on API logic
-    const isActive = true;
+    // Image Logic
+    let imageUrl = '';
+    let portraits = [];
+    try {
+        portraits = typeof model.portrait_urls === 'string' ? JSON.parse(model.portrait_urls) : model.portrait_urls;
+    } catch (e) { portraits = []; }
+
+    if (Array.isArray(portraits) && portraits.length > 0) {
+        let portraitPath = portraits[0];
+        // Legacy images with no folders need 1024/ prefix
+        if (!portraitPath.includes('/')) {
+            portraitPath = `1024/${portraitPath}`;
+        }
+        imageUrl = `https://ik.imagekit.io/fliptopbox/lifedrawing/model/${portraitPath}?tr=w-250,h-250,fo-face`;
+    }
+
+    const hasImage = !!imageUrl;
+
+    // Social Handles & Contact
+    let socials = {};
+    try {
+        socials = typeof model.social_handles === 'string' ? JSON.parse(model.social_handles) : (model.social_handles || {});
+    } catch (e) { }
+
+    const instagram = socials.instagram || '';
+    const email = model.email || '';
+    const phone = model.phone_number || '';
 
     return `
-        <div class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer group border border-gray-100"
+        <div class="bg-white p-3 pb-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer group hover:-translate-y-1 transform border border-gray-100"
+             style="max-width: 280px; margin: 0 auto;"
              data-model-id="${model.id}"
              data-model-name="${displayName}"
+             data-model-booking-count="${bookingCount}"
              data-model-handle="${model.handle || ''}">
             
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center text-purple-600 font-bold text-lg shadow-inner">
-                        ${initials}
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">${displayName}</h3>
-                         <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                             <span>${model.flag_emoji || '🏳️'}</span>
-                             <span>${handle}</span>
-                         </div>
-                    </div>
-                </div>
-                ${model.sex ? `<span class="px-2 py-1 rounded-md bg-gray-100 text-xs font-medium text-gray-600 capitalize">${model.sex}</span>` : ''}
-            </div>
-
-            <div class="space-y-3">
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">Hourly Rate</span>
-                    <span class="font-medium text-gray-900">${model.currency_code} ${model.rate_min_hour}</span>
-                </div>
-                 <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">Day Rate</span>
-                    <span class="font-medium text-gray-900">${model.currency_code} ${model.rate_min_day}</span>
-                </div>
-            </div>
-
-            <div class="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}">
-                    <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-400'}"></span>
-                    ${isActive ? 'Active' : 'Inactive'}
-                </span>
+            <!-- Image Area (Polaroid Window) -->
+            <div class="aspect-square w-full bg-gray-50 mb-4 overflow-hidden relative border border-gray-100">
+                ${hasImage
+            ? `<img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover">`
+            : `<div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                         <span class="material-symbols-outlined text-5xl">person</span>
+                       </div>`
+        }
                 
-                <span class="text-xs text-gray-400">ID: ${model.id}</span>
+                ${model.flag_emoji ? `
+                    <div class="absolute top-2 right-2 text-xl drop-shadow-md filter hover:scale-110 transition-transform cursor-help" title="Location/Origin">
+                        ${model.flag_emoji}
+                    </div>
+                ` : ''}
+
+                <div class="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm border border-gray-100 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-gray-500">calendar_month</span>
+                    <span class="text-xs font-bold text-gray-700">${model.calendar_count || 0}</span>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="px-1 text-center">
+                <h3 class="font-bold text-gray-900 text-lg mb-1 group-hover:text-primary transition-colors">${displayName}</h3>
+                ${handle ? `<p class="text-xs text-gray-400 mb-4 font-medium">${handle}</p>` : ''}
+
+                <!-- Icons Row -->
+                <!-- Icons Row -->
+                <div class="flex items-center justify-center gap-5 pt-2 border-t border-gray-50 mt-auto">
+                    ${email ? `
+                        <a href="mailto:${email}" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gray-900 transition-colors bg-white p-1 rounded-full hover:bg-gray-50" title="${email}">
+                            <span class="material-symbols-outlined text-[20px]">mail</span>
+                        </a>
+                    ` : '<span class="text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[20px]">mail</span></span>'}
+                    
+                    ${phone ? `
+                        <a href="tel:${phone}" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gray-900 transition-colors bg-white p-1 rounded-full hover:bg-gray-50" title="${phone}">
+                            <span class="material-symbols-outlined text-[20px]">call</span>
+                        </a>
+                    ` : '<span class="text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[20px]">call</span></span>'}
+
+                    ${instagram ? `
+                        <a href="https://instagram.com/${instagram.replace('@', '')}" target="_blank" onclick="event.stopPropagation()" class="text-gray-400 hover:text-pink-600 transition-colors bg-white p-1 rounded-full hover:bg-gray-50" title="@${instagram}">
+                             <span class="material-symbols-outlined text-[20px]">photo_camera</span>
+                        </a>
+                    ` : '<span class="text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[20px]">photo_camera</span></span>'}
+                </div>
             </div>
         </div>
     `;
 }
 
+// Global state update
+let currentFilter = 'all';
+
 export function attachModelsHandlers() {
     loadModels();
 
+    // Filter Handlers
+    const filterChips = document.querySelectorAll('.filter-chip');
+    filterChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            // Update active state
+            filterChips.forEach(c => {
+                c.classList.remove('active', 'bg-primary/10', 'border-primary/20', 'text-primary');
+                c.classList.add('bg-white', 'border-gray-200', 'text-gray-600');
+            });
+            chip.classList.add('active', 'bg-primary/10', 'border-primary/20', 'text-primary');
+            chip.classList.remove('bg-white', 'border-gray-200', 'text-gray-600');
+
+            currentFilter = chip.dataset.status;
+            updateModelsGrid();
+        });
+    });
+
     const searchInput = document.getElementById('search-models');
     if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('[data-model-id]');
-
-            cards.forEach(card => {
-                const name = (card.dataset.modelName || '').toLowerCase();
-                const handle = (card.dataset.modelHandle || '').toLowerCase();
-
-                if (name.includes(term) || handle.includes(term)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+        searchInput.addEventListener('input', () => {
+            updateModelsGrid();
         });
     }
 
@@ -158,6 +209,14 @@ async function loadModels() {
     try {
         const models = await API.getModels();
         modelsData = models; // Store for sorting
+
+        // Calculate Unbooked Count
+        const unbookedCount = models.filter(m => parseInt(m.calendar_count || 0) === 0).length;
+        const countSpan = document.getElementById('unbooked-count');
+        if (countSpan) {
+            countSpan.textContent = unbookedCount;
+        }
+
         sortModels(); // Initial sort
         updateModelsGrid();
     } catch (error) {
@@ -187,20 +246,41 @@ function updateModelsGrid() {
     const grid = document.getElementById('models-grid');
     if (!grid) return;
 
-    if (modelsData.length === 0) {
+    // Apply Filter & Search
+    const searchInput = document.getElementById('search-models');
+    const term = searchInput ? searchInput.value.toLowerCase() : '';
+
+    const filteredModels = modelsData.filter(model => {
+        // 1. Text Search
+        const name = (model.display_name || model.fullname || '').toLowerCase();
+        const handle = (model.handle || '').toLowerCase();
+        const matchesSearch = name.includes(term) || handle.includes(term);
+
+        // 2. Status Filter
+        let matchesFilter = true;
+        if (currentFilter === 'new') {
+            // Check if booking count is 0
+            const count = parseInt(model.calendar_count || 0);
+            matchesFilter = count === 0;
+        }
+
+        return matchesSearch && matchesFilter;
+    });
+
+    if (filteredModels.length === 0) {
         grid.innerHTML = `
             <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
                 <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-gray-400 text-3xl">person_off</span>
                 </div>
                 <h3 class="text-lg font-medium text-gray-900">No models found</h3>
-                <p class="text-gray-500 max-w-sm mt-2">There are no model profiles created yet.</p>
+                <p class="text-gray-500 max-w-sm mt-2">Try adjusting your search or filters.</p>
             </div>
         `;
         return;
     }
 
-    grid.innerHTML = modelsData.map(renderModelCard).join('');
+    grid.innerHTML = filteredModels.map(renderModelCard).join('');
 
     // Attach click handlers
     grid.querySelectorAll('[data-model-id]').forEach(card => {
@@ -213,12 +293,6 @@ function updateModelsGrid() {
             }
         });
     });
-
-    // Re-apply search filter if any
-    const searchInput = document.getElementById('search-models');
-    if (searchInput && searchInput.value) {
-        searchInput.dispatchEvent(new Event('input'));
-    }
 }
 
 // Make global for refresh

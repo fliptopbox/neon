@@ -54,12 +54,14 @@ export function renderHosts() {
 }
 
 function renderHostCard(host) {
-    const initials = (host.name || 'U').slice(0, 2).toUpperCase();
+    const mainName = host.organizer_name || 'Unknown Host';
+    const subName = host.name || '';
+    const initials = mainName.slice(0, 2).toUpperCase();
 
     return `
         <div class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer group border border-gray-100"
              data-host-id="${host.id}"
-             data-host-name="${host.name}">
+             data-host-name="${mainName} ${subName}">
             
             <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center gap-3">
@@ -67,27 +69,38 @@ function renderHostCard(host) {
                         ${initials}
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">${host.name}</h3>
-                        <p class="text-xs text-gray-500 line-clamp-1">${host.organizer_name || 'Organizer'}</p>
+                        <h3 class="font-bold text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">${mainName}</h3>
+                        <p class="text-xs text-gray-500 line-clamp-1">${subName}</p>
                     </div>
                 </div>
             </div>
 
             <p class="text-sm text-gray-600 line-clamp-2 mb-4 h-10">${host.description || 'No description provided.'}</p>
 
-            <div class="space-y-2 text-sm text-gray-600">
-                <div class="flex justify-between">
-                    <span>Max Hourly:</span>
-                    <span class="font-medium">${host.currency_code || 'GBP'} ${host.rate_max_hour}</span>
+            <div class="flex items-center justify-between text-sm text-gray-600 bg-gray-50 rounded-lg p-2.5">
+                <div class="flex flex-col">
+                    <span class="text-xs text-gray-500 uppercase tracking-wider">Hourly</span>
+                    <span class="font-bold text-gray-900">${host.currency_code || 'GBP'} ${host.rate_max_hour}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span>Max Daily:</span>
-                    <span class="font-medium">${host.currency_code || 'GBP'} ${host.rate_max_day}</span>
+                <div class="w-px h-8 bg-gray-200"></div>
+                <div class="flex flex-col text-right">
+                    <span class="text-xs text-gray-500 uppercase tracking-wider">Daily</span>
+                    <span class="font-bold text-gray-900">${host.currency_code || 'GBP'} ${host.rate_max_day}</span>
                 </div>
             </div>
             
             <div class="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
-                <span class="text-xs text-gray-400">ID: ${host.id}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400">ID: ${host.id}</span>
+                </div>
+                ${parseInt(host.calendar_count || 0) > 0 ? `
+                    <button class="calendar-link-btn text-gray-400 hover:text-primary transition-colors p-1 rounded-full hover:bg-primary/10"
+                            data-host-id="${host.user_id}"
+                            onclick="event.stopPropagation(); sessionStorage.setItem('calendar_host_filter', '${host.user_id}'); window.location.hash = '#calendar';"
+                            title="View Calendar">
+                        <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                    </button>
+                ` : ''}
             </div>
         </div>
     `;
@@ -151,6 +164,14 @@ async function loadHosts() {
 
 function sortHosts() {
     hostsData.sort((a, b) => {
+        // Primary Sort: Calendar Count (Descending)
+        const countA = parseInt(a.calendar_count || 0);
+        const countB = parseInt(b.calendar_count || 0);
+        if (countA !== countB) {
+            return countB - countA;
+        }
+
+        // Secondary Sort: Name (Respecting Global Sort Order)
         const nameA = a.name.toLowerCase();
         const nameB = b.name.toLowerCase();
         return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
@@ -166,7 +187,47 @@ function updateHostsGrid() {
         return;
     }
 
-    grid.innerHTML = hostsData.map(renderHostCard).join('');
+    const activeHosts = hostsData.filter(h => parseInt(h.calendar_count || 0) > 0);
+    const otherHosts = hostsData.filter(h => parseInt(h.calendar_count || 0) === 0);
+
+    let content = '';
+
+    // Active Hosts Section (if any)
+    if (activeHosts.length > 0) {
+        if (otherHosts.length > 0) {
+            content += `
+                <div class="col-span-full mb-4">
+                    <div class="flex items-center gap-2 mb-4">
+                         <span class="material-symbols-outlined text-primary">calendar_month</span>
+                         <h3 class="text-lg font-bold text-gray-900">Active Hosts</h3>
+                         <span class="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">${activeHosts.length}</span>
+                    </div>
+                </div>
+             `;
+        }
+        content += activeHosts.map(renderHostCard).join('');
+    }
+
+    // Divider (if both exist)
+    if (activeHosts.length > 0 && otherHosts.length > 0) {
+        content += `
+            <div class="col-span-full py-8 text-center relative">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-200"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-gray-50 px-3 text-sm font-medium text-gray-500">Other Hosts</span>
+                </div>
+            </div>
+         `;
+    }
+
+    // Other Hosts Section
+    if (otherHosts.length > 0) {
+        content += otherHosts.map(renderHostCard).join('');
+    }
+
+    grid.innerHTML = content;
 
     grid.querySelectorAll('[data-host-id]').forEach(card => {
         card.addEventListener('click', () => {

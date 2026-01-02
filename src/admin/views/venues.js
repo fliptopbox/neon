@@ -72,15 +72,19 @@ function renderVenueCard(venue) {
                         <p class="text-xs text-gray-500">${venue.address_city || 'No City'}</p>
                     </div>
                 </div>
-                 <div class="flex flex-col items-end">
-                    <span class="text-xs font-semibold text-gray-500">${venue.event_count || 0} Events</span>
-                </div>
+
             </div>
 
             <div class="space-y-2 mb-4">
                  <div class="flex items-start gap-2 text-sm text-gray-600 min-h-[40px]">
                     <span class="material-symbols-outlined text-gray-400 text-lg mt-0.5">location_on</span>
-                    <span class="line-clamp-2">${venue.address_line_1}, ${venue.address_postcode}</span>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${venue.address_line_1}, ${venue.address_city || ''}, ${venue.address_postcode}`)}" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="line-clamp-2 hover:text-primary hover:underline transition-colors"
+                       onclick="event.stopPropagation()">
+                        ${venue.address_line_1}, ${venue.address_postcode}
+                    </a>
                 </div>
             </div>
             

@@ -25,10 +25,11 @@ export function renderUsers() {
 
             <!-- Filters -->
             <div class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-                <button class="chip chip-active whitespace-nowrap" data-filter="all">All Users</button>
-                <button class="chip chip-default whitespace-nowrap" data-filter="admin">Admins</button>
-                <button class="chip chip-default whitespace-nowrap" data-filter="active">Active</button>
-                <button class="chip chip-default whitespace-nowrap" data-filter="inactive">Inactive</button>
+                <button class="chip chip-active whitespace-nowrap" data-filter="all">All <span class="opacity-60 text-xs ml-1 bg-black/10 px-1.5 py-0.5 rounded-full" id="count-all">0</span></button>
+                <button class="chip chip-default whitespace-nowrap" data-filter="admin">Admins <span class="opacity-60 text-xs ml-1 bg-black/10 px-1.5 py-0.5 rounded-full" id="count-admin">0</span></button>
+                <button class="chip chip-default whitespace-nowrap" data-filter="hosts">Hosts <span class="opacity-60 text-xs ml-1 bg-black/10 px-1.5 py-0.5 rounded-full" id="count-hosts">0</span></button>
+                <button class="chip chip-default whitespace-nowrap" data-filter="models">Models <span class="opacity-60 text-xs ml-1 bg-black/10 px-1.5 py-0.5 rounded-full" id="count-models">0</span></button>
+                <button class="chip chip-default whitespace-nowrap" data-filter="inactive">Inactive <span class="opacity-60 text-xs ml-1 bg-black/10 px-1.5 py-0.5 rounded-full" id="count-inactive">0</span></button>
                 
                 <div class="flex-1"></div>
                 
@@ -63,7 +64,9 @@ function renderUserCard(user) {
              data-user-name="${displayName}"
              data-user-email="${user.email}"
              data-user-status="${user.is_global_active ? 'active' : 'inactive'}"
-             data-user-role="${user.is_admin ? 'admin' : 'user'}">
+             data-user-role="${user.is_admin ? 'admin' : 'user'}"
+             data-is-host="${user.is_host}"
+             data-is-model="${user.is_model}">
             
             <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center gap-3">
@@ -118,6 +121,17 @@ async function loadUsers() {
 
     try {
         usersData = await API.getUsers();
+
+        // Update counts
+        const setCnt = (id, count) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = count;
+        };
+        setCnt('count-all', usersData.length);
+        setCnt('count-admin', usersData.filter(u => u.is_admin).length);
+        setCnt('count-hosts', usersData.filter(u => u.is_host).length);
+        setCnt('count-models', usersData.filter(u => u.is_model).length);
+        setCnt('count-inactive', usersData.filter(u => !u.is_global_active).length);
 
         if (usersData.length === 0) {
             container.innerHTML = `
@@ -209,11 +223,15 @@ export async function attachUsersHandlers() {
             cards.forEach(card => {
                 const role = card.dataset.userRole;
                 const status = card.dataset.userStatus;
+                const isHost = card.dataset.isHost === 'true';
+                const isModel = card.dataset.isModel === 'true';
 
                 let visible = true;
                 if (filter === 'admin') visible = role === 'admin';
                 if (filter === 'active') visible = status === 'active';
                 if (filter === 'inactive') visible = status === 'inactive';
+                if (filter === 'hosts') visible = isHost;
+                if (filter === 'models') visible = isModel;
 
                 card.style.display = visible ? '' : 'none';
             });

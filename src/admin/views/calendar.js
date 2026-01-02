@@ -10,11 +10,28 @@ let optionsData = { events: [], models: [] };
 let viewState = {
     mode: 'dashboard',   // 'dashboard' | 'detail'
     detailView: 'calendar', // 'calendar' | 'agenda'
-    selectedEventId: null
+    selectedEventId: null,
+    hostFilter: null
 };
 let currentMonth = new Date();
 
 export function renderCalendar() {
+    // Check filter from external navigation
+    const pendingHostFilter = sessionStorage.getItem('calendar_host_filter');
+    if (pendingHostFilter) {
+        viewState.hostFilter = parseInt(pendingHostFilter);
+        sessionStorage.removeItem('calendar_host_filter'); // Consume it
+        viewState.mode = 'dashboard';
+    }
+
+    const pendingEventFilter = sessionStorage.getItem('calendar_event_filter');
+    if (pendingEventFilter) {
+        viewState.selectedEventId = parseInt(pendingEventFilter);
+        sessionStorage.removeItem('calendar_event_filter'); // Consume it
+        viewState.mode = 'detail'; // Go directly to detailed calendar view
+        viewState.detailView = 'calendar';
+    }
+
     return `<div id="calendar-root">${renderCalendarContent()}</div>`;
 }
 
@@ -39,6 +56,8 @@ function renderCalendarContent() {
     }
 }
 
+// ... (renderCalendarContent same as before) 
+
 // --- Views ---
 
 function renderDashboard() {
@@ -49,7 +68,6 @@ function renderDashboard() {
                      <h2 class="text-2xl font-bold text-gray-900">Calendar</h2>
                      <p class="text-sm text-gray-500">Select an event to view its schedule</p>
                 </div>
-                <!-- Global add button removed as per list layout request with per-item actions -->
             </div>
 
             <div id="content-area">
@@ -104,16 +122,30 @@ function renderDetailView(eventName) {
 
 function renderDashboardList() {
     const eventsMap = new Map();
+    let filterBanner = '';
 
-    // Populate events map logic same as before but also ensuring all events 
-    // from optionsData are present even if they have no sessions (if desired, but user said 'make layout a list')
-    // We'll stick to displaying events that have sessions or distinct event_ids in session data for now, 
-    // matching previous logic but formatted as list. 
-    // Wait, if an event has 0 sessions, it might not be in sessionsData.
-    // Ideally we merge with optionsData.events if available.
+    // Filter logic
+    let displaySessions = sessionsData;
+    if (viewState.hostFilter) {
+        displaySessions = sessionsData.filter(s => s.host_user_id === viewState.hostFilter);
+        // Find host name for banner
+        const hostName = displaySessions[0]?.host_name || 'Host';
 
-    // First, map distinct events from sessions
-    sessionsData.forEach(session => {
+        filterBanner = `
+            <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-xl flex items-center justify-between mb-6 border border-blue-100">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined">filter_alt</span>
+                    <span class="font-medium">Filtered by Host: ${hostName}</span>
+                </div>
+                <button id="clear-filter-btn" class="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline">
+                    Clear Filter
+                </button>
+            </div>
+        `;
+    }
+
+    // Populate events map
+    displaySessions.forEach(session => {
         if (!session.event_id) return;
         if (!eventsMap.has(session.event_id)) {
             eventsMap.set(session.event_id, {
@@ -158,6 +190,7 @@ function renderDashboardList() {
 
     if (eventsMap.size === 0) {
         return `
+            ${filterBanner}
             <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-500">
                 <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">event_note</span>
                 <p>No events found.</p>
@@ -166,6 +199,7 @@ function renderDashboardList() {
     }
 
     return `
+        ${filterBanner}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -211,6 +245,12 @@ function renderDashboardList() {
         </div>
     `;
 }
+
+// ...
+
+// In attachSubHandlers (Dashboard Handlers section)
+// Warning: This replace block targets renderDashboardList fully, I need to add handler code separately or ensure it's in scope.
+// Splitting this into two replacements for safety. This one handles renderDashboardList.
 
 function renderAgenda() {
     // Filter by selected Event ID and sort by date descending
@@ -412,6 +452,14 @@ function refreshView() {
 function attachSubHandlers() {
     // Dashboard Handlers
     if (viewState.mode === 'dashboard') {
+        const clearBtn = document.getElementById('clear-filter-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                viewState.hostFilter = null;
+                refreshView();
+            });
+        }
+
         const eventsList = document.querySelector('tbody');
         if (eventsList) {
             eventsList.addEventListener('click', (e) => {

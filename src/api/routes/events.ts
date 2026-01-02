@@ -20,6 +20,7 @@ app.get("/", async (c) => {
       e.images,
       e.pricing_tags,
       e.user_id,
+      (SELECT COUNT(*) FROM calendar c WHERE c.event_id = e.id) as calendar_count,
       
       -- Venue Details
       v.id as venue_id,

@@ -11,9 +11,11 @@ const app = new Hono<{ Bindings: Env; Variables: { user: JWTPayload } }>();
 app.get("/", async (c) => {
   const models = await query(
     c.env,
-    `SELECT m.*, up.fullname, up.handle, up.flag_emoji, up.user_id, up.currency_code
+    `SELECT m.*, up.fullname, up.handle, up.flag_emoji, up.user_id, up.currency_code, up.phone_number, u.email,
+     (SELECT COUNT(*) FROM calendar c WHERE c.user_id = m.user_id) as calendar_count
      FROM models m
      LEFT JOIN user_profiles up ON m.user_id = up.user_id
+     LEFT JOIN users u ON m.user_id = u.id
      WHERE up.is_profile_active = true
      ORDER BY m.id DESC`
   );
