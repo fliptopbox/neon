@@ -8,11 +8,8 @@ import venuesRoutes from "./routes/venues";
 import hostsRoutes from "./routes/hosts";
 import eventsRoutes from "./routes/events";
 import modelsRoutes from "./routes/models";
-import artistsRoutes from "./routes/artists";
-import usersRoutes from "./routes/users";
-import imagesRoutes from "./routes/images";
-import venueTagsRoutes from "./routes/venue-tags";
 import calendarRoutes from "./routes/calendar";
+import usersRoutes from "./routes/users";
 import dashboardRoutes from "./routes/dashboard";
 import exchangeRatesRoutes from "./routes/exchange-rates";
 
@@ -51,12 +48,9 @@ app.route("/api/dashboard", dashboardRoutes);
 app.route("/api/hosts", hostsRoutes);
 app.route("/api/venues", venuesRoutes);
 app.route("/api/events", eventsRoutes);
-app.route("/api/venue-tags", venueTagsRoutes);
 app.route("/api/calendar", calendarRoutes);
 app.route("/api/models", modelsRoutes);
-app.route("/api/artists", artistsRoutes);
 app.route("/api/users", usersRoutes);
-app.route("/api/images", imagesRoutes);
 app.route("/api/exchange-rates", exchangeRatesRoutes);
 
 // 404 handler

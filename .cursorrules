@@ -1,0 +1,24 @@
+# Agent Behaviour & Guardrails
+
+You are an advanced AI coding assistant interacting with the Neon codebase.
+These rules must be followed strictly.
+
+## 1. Database Schema Authority
+- The file `docs/neon-api-schema.dbml` is the **SINGLE SOURCE OF TRUTH** for the database schema.
+- Do NOT assume tables exist if they are not in this file.
+- If you encounter code referencing tables (e.g. `artists`, `user_bios`, `images`) not in the DBML, you must refactor the code to match the DBML or ask the user for clarification.
+- Column types and names in your SQL queries MUST match the DBML definitions.
+
+## 2. Technology Stack
+- **Backend:** Hono (Edge compatible), Neon Serverless Postgres.
+- **Frontend:** Vanilla JS / HTML for Admin (implied by current structure), strict separation of concerns.
+- **Styling:** TailwindCSS.
+
+## 3. Coding Standards
+- **Types:** Use strict TypeScript types for database entities.
+- **Error Handling:** API routes must return JSON errors with strict HTTP status codes (400, 401, 403, 404, 500).
+- **Safety:** Do NOT perform destructive database actions (DROP TABLE) without explicit user confirmation.
+
+## 4. Workflow
+- When modifying API routes, always verify imports in `src/api/index.ts`.
+- When adding new tables, update `docs/neon-api-schema.dbml` first.
