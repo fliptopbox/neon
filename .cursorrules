@@ -6,8 +6,8 @@ These rules must be followed strictly.
 ## 1. Database Schema Authority
 - The file `docs/neon-api-schema.dbml` is the **SINGLE SOURCE OF TRUTH** for the database schema.
 - Do NOT assume tables exist if they are not in this file.
-- If you encounter code referencing tables (e.g. `artists`, `user_bios`, `images`) not in the DBML, you must refactor the code to match the DBML or ask the user for clarification.
-- Column types and names in your SQL queries MUST match the DBML definitions.
+- If you encounter code referencing tables not in the DBML, you must tell the operator, list the references and wait for additional instructions to refactor 
+
 
 ## 2. Technology Stack
 - **Backend:** Hono (Edge compatible), Neon Serverless Postgres.
