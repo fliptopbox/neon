@@ -202,13 +202,6 @@ function renderDashboardList() {
         ${filterBanner}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        <th class="px-6 py-4">Event</th>
-                        <th class="px-6 py-4 text-center">Sessions</th>
-                        <th class="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                </thead>
                 <tbody class="divide-y divide-gray-50">
                     ${Array.from(eventsMap.values()).map(event => `
                         <tr class="hover:bg-gray-50 transition-colors group">
@@ -235,9 +228,8 @@ function renderDashboardList() {
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <button class="quick-add-btn flex items-center gap-1.5 ml-auto bg-primary text-white text-xs px-3 py-1.5 rounded-lg font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow active:scale-95" data-event-id="${event.id}">
-                                    <span class="material-symbols-outlined text-sm">add</span>
-                                    <span>New Session</span>
+                                <button class="quick-add-btn w-10 h-10 flex items-center justify-center ml-auto bg-primary text-white rounded-full hover:bg-primary/90 transition-all shadow-sm hover:shadow active:scale-95" data-event-id="${event.id}" title="New Session">
+                                    <span class="material-symbols-outlined">add</span>
                                 </button>
                             </td>
                         </tr>
