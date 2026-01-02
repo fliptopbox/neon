@@ -22,3 +22,8 @@ These rules must be followed strictly.
 ## 4. Workflow
 - When modifying API routes, always verify imports in `src/api/index.ts`.
 - When adding new tables, update `docs/neon-api-schema.dbml` first.
+
+## 5. Git commands
+- NEVER commit and push changes to 'main' branch, unless the operator explicitly instructs you to do so.
+- When the operator instructs you to commit and push changes first clean-up any redundant files and folders before committing.
+    
