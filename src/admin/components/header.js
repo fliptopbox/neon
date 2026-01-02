@@ -27,11 +27,7 @@ export function renderHeader(title, options = {}) {
                 
                 <div class="flex items-center gap-1 w-12 justify-end">
                     ${actionButton ? actionButton : ''}
-                    ${showLogout ? `
-                        <button onclick="handleLogout()" class="btn-icon" title="Sign out">
-                            <span class="material-symbols-outlined text-gray-500">logout</span>
-                        </button>
-                    ` : ''}
+
                 </div>
             </div>
         </header>
