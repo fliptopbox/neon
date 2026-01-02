@@ -268,19 +268,9 @@ function renderAgenda() {
 
     return `
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            <th class="px-6 py-4 w-48">Date</th>
-                            <th class="px-6 py-4">Sessions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50">
-                        ${grouped.size > 0 ? Array.from(grouped.entries()).map(([date, sessions]) => renderAgendaGroup(date, sessions)).join('') :
-            `<tr><td colspan="2" class="px-6 py-12 text-center text-gray-500">No sessions found for this event.</td></tr>`}
-                    </tbody>
-                </table>
+            <div class="divide-y divide-gray-100">
+                ${grouped.size > 0 ? Array.from(grouped.entries()).map(([date, sessions]) => renderAgendaGroup(date, sessions)).join('') :
+            `<div class="p-12 text-center text-gray-500">No sessions found for this event.</div>`}
             </div>
         </div>
     `;
@@ -288,9 +278,6 @@ function renderAgenda() {
 
 function renderAgendaGroup(dateKey, sessions) {
     const dateObj = new Date(dateKey);
-    // Adjust for timezone issues if dateKey is UTC but we want local display? 
-    // Actually dateKey from ISO string is usually OK if we just interpret it as YYYY-MM-DD.
-    // Let's make it look nice.
     const day = dateObj.toLocaleDateString(undefined, { weekday: 'short' });
     const dayNum = dateObj.getDate();
     const month = dateObj.toLocaleDateString(undefined, { month: 'short' });
@@ -300,20 +287,21 @@ function renderAgendaGroup(dateKey, sessions) {
     sessions.sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
 
     return `
-        <tr class="hover:bg-gray-50/50 transition-colors">
-            <td class="px-6 py-6 align-top border-r border-gray-50 bg-gray-50/30">
-                <div class="flex flex-col items-center text-center">
-                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${day}</span>
-                    <span class="text-2xl font-bold text-gray-900 leading-none mt-1">${dayNum}</span>
-                    <span class="text-xs font-medium text-gray-500 mt-1">${month} ${year}</span>
+        <div class="group">
+            <div class="flex flex-col md:flex-row md:items-start p-4 md:p-6 gap-4 border-b last:border-0 border-gray-50 hover:bg-gray-50/50 transition-colors">
+                <!-- Date Column -->
+                <div class="flex flex-row md:flex-col items-center md:items-center gap-3 md:gap-0 md:w-24 md:border-r md:border-gray-100 md:pr-6 shrink-0">
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-wider md:mb-1">${day}</div>
+                    <div class="text-2xl font-bold text-gray-900 leading-none">${dayNum}</div>
+                    <div class="text-xs font-medium text-gray-500 md:mt-1">${month}</div>
                 </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <div class="space-y-3">
+
+                <!-- Sessions List -->
+                <div class="flex-1 space-y-3 min-w-0 w-full">
                     ${sessions.map(renderAgendaSessionItem).join('')}
                 </div>
-            </td>
-        </tr>
+            </div>
+        </div>
     `;
 }
 
@@ -331,18 +319,30 @@ function renderAgendaSessionItem(session) {
     const statusClass = statusColors[session.status] || 'bg-gray-50 text-gray-600 border-gray-200';
 
     return `
-        <div class="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer session-row" data-id="${session.id}">
-            <div class="font-mono text-sm font-medium text-gray-500 min-w-[60px]">${time}</div>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer session-row w-full" data-id="${session.id}">
             
+            <!-- Time & Status Mobile Header -->
+            <div class="flex items-center justify-between sm:w-auto">
+                <div class="font-mono text-sm font-medium text-gray-500">${time}</div>
+                <span class="sm:hidden inline-flex px-2 py-0.5 rounded text-[10px] font-semibold ${statusClass} border capitalize">
+                    ${session.status}
+                </span>
+            </div>
+            
+            <!-- Model Info -->
             <div class="flex-1 min-w-0">
                 <div class="font-medium text-gray-900 truncate">${session.model_name || session.model_email || 'Unknown Model'}</div>
-                <div class="text-xs text-gray-500 flex items-center gap-2">
+                <div class="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
                     <span>${session.duration}h</span>
-                    ${session.pose_format ? `<span class="w-1 h-1 rounded-full bg-gray-300"></span><span class="truncate max-w-[200px]">${session.pose_format}</span>` : ''}
+                    ${session.pose_format ? `
+                        <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                        <span class="truncate max-w-[150px] sm:max-w-[200px]">${session.pose_format}</span>
+                    ` : ''}
                 </div>
             </div>
 
-            <div>
+            <!-- Desktop Status -->
+            <div class="hidden sm:block shrink-0">
                 <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-semibold ${statusClass} border capitalize select-none">
                     ${session.status}
                 </span>
