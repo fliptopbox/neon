@@ -204,8 +204,7 @@ function renderDashboardList() {
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        <th class="px-6 py-4">Event Name</th>
-                        <th class="px-6 py-4">Host</th>
+                        <th class="px-6 py-4">Event</th>
                         <th class="px-6 py-4 text-center">Sessions</th>
                         <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
@@ -214,13 +213,16 @@ function renderDashboardList() {
                     ${Array.from(eventsMap.values()).map(event => `
                         <tr class="hover:bg-gray-50 transition-colors group">
                             <td class="px-6 py-4 cursor-pointer event-row" data-event-id="${event.id}">
-                                <div class="font-bold text-gray-900 group-hover:text-primary transition-colors">${event.name}</div>
+                                <div>
+                                    <div class="block text-lg font-bold text-gray-900 group-hover:text-primary transition-colors mb-0.5">${event.name}</div>
+                                    <div class="text-sm text-gray-500 flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[16px]">person</span>
+                                        ${event.host || '—'}
+                                    </div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 cursor-pointer event-row" data-event-id="${event.id}">
-                                <div class="text-sm text-gray-600">${event.host || '—'}</div>
-                            </td>
-                            <td class="px-6 py-4 cursor-pointer event-row" data-event-id="${event.id}">
-                                <div class="flex items-center justify-center gap-2">
+                            <td class="px-6 py-4 cursor-pointer event-row text-center" data-event-id="${event.id}">
+                                <div class="inline-flex items-center gap-2">
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs font-medium" title="Past">
                                         ${event.past}
                                     </span>
