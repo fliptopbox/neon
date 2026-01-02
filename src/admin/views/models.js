@@ -1,6 +1,7 @@
 
 import * as API from '../client.js';
 import { renderModelDetail, attachModelDetailHandlers } from './model-detail.js';
+import { reStoreDomains } from '../utils/storefront-platforms.js';
 
 let modelsData = [];
 let sortOrder = 'asc'; // 'asc' or 'desc'
@@ -98,6 +99,8 @@ function renderModelCard(model) {
 
     const instagram = socials.instagram || '';
     const email = model.email || '';
+    const phone = model.phone_number || '';
+
     // Website
     let website = '';
     try {
@@ -110,6 +113,8 @@ function renderModelCard(model) {
             website = parsedWeb.url || '';
         }
     } catch (e) { }
+
+    const websiteIcon = reStoreDomains.test(website) ? 'photo_library' : 'public';
 
     return `
         <div class="bg-white p-3 pb-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer group hover:-translate-y-1 transform border border-gray-100"
@@ -160,7 +165,7 @@ function renderModelCard(model) {
 
                     ${website ? `
                         <a href="${website.startsWith('http') ? website : 'https://' + website}" target="_blank" onclick="event.stopPropagation()" class="text-gray-400 hover:text-blue-600 transition-colors bg-white p-1 rounded-full hover:bg-gray-50" title="${website}">
-                             <span class="material-symbols-outlined text-[20px]">public</span>
+                             <span class="material-symbols-outlined text-[20px]">${websiteIcon}</span>
                         </a>
                     ` : '<span class="text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[20px]">public</span></span>'}
 
