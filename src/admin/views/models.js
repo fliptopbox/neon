@@ -87,12 +87,29 @@ function renderModelCard(model) {
     // Social Handles & Contact
     let socials = {};
     try {
-        socials = typeof model.social_handles === 'string' ? JSON.parse(model.social_handles) : (model.social_handles || {});
+        const parsed = typeof model.social_handles === 'string' ? JSON.parse(model.social_handles) : (model.social_handles || {});
+        // Handle array format [ { instagram: '...' } ] vs object format { instagram: '...' }
+        if (Array.isArray(parsed)) {
+            socials = parsed.length > 0 ? parsed[0] : {};
+        } else {
+            socials = parsed;
+        }
     } catch (e) { }
 
     const instagram = socials.instagram || '';
     const email = model.email || '';
-    const phone = model.phone_number || '';
+    // Website
+    let website = '';
+    try {
+        const parsedWeb = typeof model.website_urls === 'string' ? JSON.parse(model.website_urls) : (model.website_urls || []);
+        if (Array.isArray(parsedWeb) && parsedWeb.length > 0) {
+            // Handle [{"url": "..."}] or ["..."]
+            const first = parsedWeb[0];
+            website = typeof first === 'object' ? (first.url || '') : first;
+        } else if (typeof parsedWeb === 'object') {
+            website = parsedWeb.url || '';
+        }
+    } catch (e) { }
 
     return `
         <div class="bg-white p-3 pb-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer group hover:-translate-y-1 transform border border-gray-100"
@@ -128,8 +145,6 @@ function renderModelCard(model) {
                 <h3 class="font-bold text-gray-900 text-lg mb-1 group-hover:text-primary transition-colors">${displayName}</h3>
                 ${handle ? `<p class="text-xs text-gray-400 mb-4 font-medium">${handle}</p>` : ''}
 
-                <!-- Icons Row -->
-                <!-- Icons Row -->
                 <div class="flex items-center justify-center gap-5 pt-2 border-t border-gray-50 mt-auto">
                     ${email ? `
                         <a href="mailto:${email}" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gray-900 transition-colors bg-white p-1 rounded-full hover:bg-gray-50" title="${email}">
@@ -142,6 +157,12 @@ function renderModelCard(model) {
                             <span class="material-symbols-outlined text-[20px]">call</span>
                         </a>
                     ` : '<span class="text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[20px]">call</span></span>'}
+
+                    ${website ? `
+                        <a href="${website.startsWith('http') ? website : 'https://' + website}" target="_blank" onclick="event.stopPropagation()" class="text-gray-400 hover:text-blue-600 transition-colors bg-white p-1 rounded-full hover:bg-gray-50" title="${website}">
+                             <span class="material-symbols-outlined text-[20px]">public</span>
+                        </a>
+                    ` : '<span class="text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[20px]">public</span></span>'}
 
                     ${instagram ? `
                         <a href="https://instagram.com/${instagram.replace('@', '')}" target="_blank" onclick="event.stopPropagation()" class="text-gray-400 hover:text-pink-600 transition-colors bg-white p-1 rounded-full hover:bg-gray-50" title="@${instagram}">
