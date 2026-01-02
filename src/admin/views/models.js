@@ -10,11 +10,9 @@ export function renderModels() {
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Models</h2>
-                    <p class="text-sm text-gray-500">Manage model profiles</p>
-                </div>
-                <!-- Action Buttons could go here -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <!-- Buttons removed from header title area -->
+            </div>
             </div>
 
             <!-- Filters & Search -->

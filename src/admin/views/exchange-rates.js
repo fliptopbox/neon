@@ -10,10 +10,6 @@ export function renderExchangeRates() {
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Exchange Rates</h2>
-                    <p class="text-sm text-gray-500">Manage currency conversion rates (Base: USD)</p>
-                </div>
                 <button id="add-rate-btn" class="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow active:scale-95">
                     <span class="material-symbols-outlined">add</span>
                     <span>Add Currency</span>

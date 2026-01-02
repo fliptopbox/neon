@@ -11,10 +11,6 @@ export function renderHosts() {
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Hosts</h2>
-                    <p class="text-sm text-gray-500">Manage host profiles</p>
-                </div>
                 <button id="add-host-btn" class="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-all shadow-sm hover:shadow">
                     <span class="material-symbols-outlined">add</span>
                     Add Host

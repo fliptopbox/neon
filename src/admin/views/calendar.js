@@ -64,10 +64,7 @@ function renderDashboard() {
     return `
         <div class="space-y-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                     <h2 class="text-2xl font-bold text-gray-900">Calendar</h2>
-                     <p class="text-sm text-gray-500">Select an event to view its schedule</p>
-                </div>
+                <!-- Header removed as per request -->
             </div>
 
             <div id="content-area">
