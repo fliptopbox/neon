@@ -1,6 +1,7 @@
 
 import * as API from '../client.js';
 import { renderHostDetail, attachHostDetailHandlers } from './host-detail.js';
+import { showModal } from '../components/modal.js';
 
 let hostsData = [];
 let sortOrder = 'asc';
@@ -14,6 +15,10 @@ export function renderHosts() {
                     <h2 class="text-2xl font-bold text-gray-900">Hosts</h2>
                     <p class="text-sm text-gray-500">Manage host profiles</p>
                 </div>
+                <button id="add-host-btn" class="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-all shadow-sm hover:shadow">
+                    <span class="material-symbols-outlined">add</span>
+                    Add Host
+                </button>
             </div>
 
             <!-- Filters -->
@@ -76,7 +81,7 @@ function renderHostCard(host) {
                     <span class="font-medium">${host.currency_code || 'GBP'} ${host.rate_max_hour}</span>
                 </div>
                 <div class="flex justify-between">
-                     <span>Max Daily:</span>
+                    <span>Max Daily:</span>
                     <span class="font-medium">${host.currency_code || 'GBP'} ${host.rate_max_day}</span>
                 </div>
             </div>
@@ -90,6 +95,14 @@ function renderHostCard(host) {
 
 export function attachHostsHandlers() {
     loadHosts();
+
+    const addBtn = document.getElementById('add-host-btn');
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            showModal(renderHostDetail({}), 'host-detail');
+            attachHostDetailHandlers({});
+        });
+    }
 
     const searchInput = document.getElementById('search-hosts');
     if (searchInput) {

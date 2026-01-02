@@ -142,4 +142,31 @@ app.get("/stats", async (c) => {
   }
 });
 
+// Fix all sequences
+app.get("/fix-sequences", async (c) => {
+  try {
+    const sql = neon(c.env.DATABASE_URL);
+    // Use COALESCE(MAX(id), 0) + 1 logic? setval sets the *last* value, so next is +1.
+    // If table is empty, MAX is null. setval(..., 1, false) is better?
+    // Let's stick to simple setval(..., MAX). If empty, MAX is null, setval might fail or set to null?
+    // setval('seq', COALESCE((SELECT MAX(id) FROM table), 0) + 1, false) is safest for empty.
+    // But simple MAX works if data exists. I'll assume data exists or catch error.
+    await sql`SELECT setval('users_id_seq', (SELECT MAX(id) FROM users))`;
+    await sql`SELECT setval('user_profiles_id_seq', (SELECT MAX(id) FROM user_profiles))`;
+    // await sql`SELECT setval('user_bios_id_seq', (SELECT MAX(id) FROM user_bios))`;
+    await sql`SELECT setval('venues_id_seq', (SELECT MAX(id) FROM venues))`;
+    await sql`SELECT setval('models_id_seq', (SELECT MAX(id) FROM models))`;
+    await sql`SELECT setval('hosts_id_seq', (SELECT MAX(id) FROM hosts))`;
+    // await sql`SELECT setval('artists_id_seq', (SELECT MAX(id) FROM artists))`;
+    await sql`SELECT setval('events_id_seq', (SELECT MAX(id) FROM events))`;
+    await sql`SELECT setval('calendar_id_seq', (SELECT MAX(id) FROM calendar))`;
+    // await sql`SELECT setval('venue_tags_id_seq', (SELECT MAX(id) FROM venue_tags))`;
+    // await sql`SELECT setval('images_id_seq', (SELECT MAX(id) FROM images))`;
+    return c.json({ message: "All sequences fixed" });
+  } catch (error) {
+    console.error("Error fixing sequences:", error);
+    return c.json({ error: String(error) }, 500);
+  }
+});
+
 export default app;

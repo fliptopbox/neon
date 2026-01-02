@@ -98,7 +98,8 @@ export function attachHostDetailHandlers(host) {
                 await API.updateHost(host.id, data);
                 showToast('Host updated successfully');
             } else {
-                // await API.createHost(data); // Not implemented in UI typically
+                await API.createHost(data);
+                showToast('Host created successfully');
             }
 
             closeModal();
