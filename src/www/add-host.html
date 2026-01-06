@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Host | Neon Playground</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Add New Host</h1>
+    <div class="form-card">
+        <form>
+            <div class="form-group">
+                <label for="organizer_name">Organizer / Host Name</label>
+                <input type="text" id="organizer_name" name="organizer_name" required placeholder="e.g. Life Drawing London">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="contact@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="rate_hour">Hourly Rate (GBP)</label>
+                <input type="number" id="rate_hour" name="rate_max_hour" step="0.01" placeholder="20.00">
+            </div>
+
+            <div class="form-group">
+                <label for="rate_day">Daily Rate (GBP)</label>
+                <input type="number" id="rate_day" name="rate_max_day" step="0.01" placeholder="100.00">
+            </div>
+
+            <button type="submit">Create Host</button>
+        </form>
+    </div>
+    <a href="index.html" class="back-link">&larr; Back to Playground</a>
+    <script src="script.js"></script>
+</body>
+</html>

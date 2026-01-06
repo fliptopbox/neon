@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Add Model | Neon Playground</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <form>
+            <header>
+                <h1>Model Register</h1>
+                <p>This is a description of the purpose and content of the form</p>
+            </header>
+            <main class="form-card">
+                <!-- 1. User Account -->
+                <h3>User Account</h3>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" unique required placeholder="jane@example.com">
+                    <small style="color: #6b7280; font-size: 0.8em;">Must be unique across the platform</small>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••">
+                </div>
+                <!-- 2. User Profile -->
+                <h3>User Profile</h3>
+                <input type="hidden" id="timezone" name="timezone">
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" unique required placeholder="e.g. Jane Doe">
+                </div>
+                <div class="form-group">
+                    <label for="handle">Unique Handle</label>
+                    <input type="text" id="handle" name="handle" unique required placeholder="@janedoe" pattern="^@?[a-zA-Z0-9._-]+$">
+                    <small style="color: #6b7280; font-size: 0.8em;">Unique username for your profile URL</small>
+                </div>
+                <div class="form-group">
+                    <label for="date_birthday">Date of Birth</label>
+                    <input type="date" id="date_birthday" name="date_birthday" required>
+                </div>
+                <div style="display:flex; gap:16px;">
+                    <div class="form-group" style="flex: 1 0 auto">
+                        <label for="sex">Sex</label>
+                        <select id="sex" name="sex">
+                            <option value="unspecified">Unspecified</option>
+                            <option value="female">Female</option>
+                            <option value="male">Male</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pronouns">Pronouns</label>
+                        <input type="text" id="pronouns" name="pronouns" placeholder="e.g. she/her">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+                    <div style="display:flex; gap:0.5rem;">
+                        <select id="phone_prefix" name="phone_prefix" style="width:100px; padding:0.5rem; border:1px solid #d1d5db; border-radius:6px; background:white;">
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+33">🇫🇷 +33</option>
+                            <option value="+49">🇩🇪 +49</option>
+                            <option value="+34">🇪🇸 +34</option>
+                            <option value="+39">🇮🇹 +39</option>
+                            <option value="+81">🇯🇵 +81</option>
+                            <option value="+61">🇦🇺 +61</option>
+                        </select>
+                        <input type="tel" id="phone_number" name="phone_number" unique required placeholder="7123 456789" style="flex:1;" pattern="^[0-9\s-]{6,}$">
+                    </div>
+                    <small style="color: #6b7280; font-size: 0.8em;">Select country code and enter number</small>
+                </div>
+                <div class="form-group">
+                    <label for="portraits">Portrait Images (1-3)</label>
+                    <input type="file" id="portraits" name="portraits" multiple accept="image/*" required>
+                    <small style="color: #6b7280; font-size: 0.8em;">Please upload 1 to 3 professional portrait photos</small>
+                </div>
+                <!-- 3. Model Details -->
+                <h3>Model Details</h3>
+                <div class="form-group">
+                    <label for="display_name">Stage Name / Known As</label>
+                    <input type="text" id="display_name" name="display_name" placeholder="e.g. The Art Model">
+                </div>
+                <div class="form-group">
+                    <label for="description">Short Description</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Tell us about yourself..." style="width:100%; padding:14px 16px; font-size:16px; color:var(--android-text-primary); background-color:var(--input-bg); border:none; border-bottom:1px solid #8e918f; border-radius:4px 4px 0 0; box-sizing:border-box; font-family:inherit;"></textarea>
+                </div>
+                <div style="display:flex; gap:16px;">
+                    <div class="form-group" style="flex:1;">
+                        <label for="rate_min_hour">Min Hourly Rate</label>
+                        <input type="number" id="rate_min_hour" name="rate_min_hour" step="0.01" placeholder="20.00">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label for="rate_min_day">Min Daily Rate</label>
+                        <input type="number" id="rate_min_day" name="rate_min_day" step="0.01" placeholder="120.00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Work Preferences</label>
+                    <div style="display:flex; flex-direction:column; gap:8px; padding-top:8px;">
+                        <label style="display:flex; align-items:center; font-weight:400; font-size:16px; margin:0;">
+                            <input type="checkbox" name="work_inperson" value="true" checked style="width:auto; margin-right:12px;">In-Person
+                    
+                        
+                        </label>
+                        <label style="display:flex; align-items:center; font-weight:400; font-size:16px; margin:0;">
+                            <input type="checkbox" name="work_online" value="true" style="width:auto; margin-right:12px;">Online
+                    
+                        
+                        </label>
+                        <label style="display:flex; align-items:center; font-weight:400; font-size:16px; margin:0;">
+                            <input type="checkbox" name="work_photography" value="true" style="width:auto; margin-right:12px;">Photography
+                    
+                        
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="work_seeks">Work Categories</label>
+                    <input type="text" id="work_seeks" name="work_seeks" placeholder="e.g. nude, portrait, costume, fashion">
+                    <small style="color: #6b7280; font-size: 0.8em;">Comma separated tags</small>
+                </div>
+                <div class="form-group">
+                    <label>Social Handles</label>
+                    <div id="social-handles-container">
+                    <!-- Dynamic Social Inputs will go here -->
+                    </div>
+                    <button type="button" id="add-social-btn" style="margin-top:0.5rem; font-size:0.9em; padding:0.25rem 0.5rem;">+ Add Social Handle</button>
+                </div>
+                <div class="form-group">
+                    <label>Website URLs</label>
+                    <div id="websites-container">
+                    <!-- Dynamic Website Inputs will go here -->
+                    </div>
+                    <button type="button" id="add-website-btn" style="margin-top:0.5rem; font-size:0.9em; padding:0.25rem 0.5rem;">+ Add Website</button>
+                </div>
+            </main>
+            <footer>
+                <button type="reset">Cancel</button>
+                <button type="submit">Save</button>
+            </footer>
+        </form>
+        <script src="script.js" defer></script>
+    </body>
+</html>
