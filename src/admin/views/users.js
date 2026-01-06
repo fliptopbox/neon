@@ -16,6 +16,7 @@ export function renderUsers() {
                     <input type="text" id="search-users" placeholder="Search users by name or email..." 
                         class="pl-10 pr-4 py-2.5 w-full border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                 </div>
+            </div>
                 
             <!-- FAB Added -->
             <button id="add-user-btn" class="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all flex items-center justify-center hover:scale-105 active:scale-95" title="Add User">
