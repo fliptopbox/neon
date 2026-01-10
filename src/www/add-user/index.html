@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add User | Neon Playground</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+  <form id="addUserForm">
+    <header>
+      <h1>Add New User</h1>
+      <p>This form allows you to create a new user account.</p>
+    </header>
+    <main class="form-card">
+      <h3>User Account</h3>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="is_global_active" name="is_global_active" checked>
+        <label for="is_global_active">Is Global Active</label>
+      </div>
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="is_admin" name="is_admin">
+        <label for="is_admin">Is Admin</label>
+      </div>
+    </main>
+    <footer>
+      <button type="reset">Cancel</button>
+      <button type="submit">Add User</button>
+    </footer>
+  </form>
+
+  <div id="response" class="response-message"></div>
+
+  <script src="script.js" defer></script>
+</body>
+
+</html>

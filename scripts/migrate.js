@@ -153,20 +153,10 @@ async function migrate() {
 
   // --- 5. Insert Data ---
 
-  // SYSTEM FALLBACK USER (ID 9999)
-  console.log('🛡 Creating System Fallback User...');
-  const SYS_ID = 9999;
-  await insertClean('users', {
-    email: 'system@neon.local',
-    password_hash: 'system',
-    is_global_active: true,
-    is_admin: true,
-    date_created: new Date().toISOString()
-  }, SYS_ID);
-  mapEmailToUserId.set('system@neon.local', SYS_ID);
-
   // USERS
-  console.log('👤 Inserting Users...');
+  console.log('� Inserting Users...');
+  let SYS_ID = null;
+
   if (data.users) {
     let idCounter = 1;
     for (const u of data.users) {
@@ -177,8 +167,19 @@ async function migrate() {
       if (id) {
         mapEmailToUserId.set(email, id);
         idCounter++;
+
+        if (email === 'response.write@gmail.com') {
+          SYS_ID = id;
+          console.log(`🛡 System Fallback User set to: ${email} (ID: ${id})`);
+        }
       }
     }
+  }
+
+  // Fallback if not found
+  if (!SYS_ID) {
+    console.warn('⚠️ Warning: response.write@gmail.com not found. SYS_ID defaulting to 1.');
+    SYS_ID = 1;
   }
 
   // USER PROFILES
@@ -334,6 +335,25 @@ async function migrate() {
     }
   }
 
+  // --- 6. Reset Sequences ---
+  console.log('🔄 Resetting Auto-Increment Sequences...');
+  const tablesWithSeq = ['users', 'user_profiles', 'venues', 'models', 'hosts', 'events', 'calendar'];
+
+  for (const t of tablesWithSeq) {
+    try {
+      // Check if table has rows first to avoid setval error on empty table
+      const countRes = await sql(`SELECT count(*) as c FROM "${t}"`);
+      if (countRes[0].c > 0) {
+        await sql(`SELECT setval('${t}_id_seq', (SELECT MAX(id) FROM "${t}"))`);
+        console.log(`   - ${t}_id_seq synced`);
+      } else {
+        // Optional: reset to 1 if empty, but usually not needed if dropped
+      }
+    } catch (e) {
+      console.warn(`⚠️ Could not reset sequence for ${t}: ${e.message}`);
+    }
+  }
+
   console.log('✨ Migration Complete!');
   process.exit(0);
 }
@@ -370,14 +390,27 @@ function parseDBML(dbml) {
       currentTable = null;
       currentEnum = null;
     } else if (line.toLowerCase().startsWith('ref:')) {
-      const match = line.match(/"([^"]+)"\."([^"]+)"\s*<\s*"([^"]+)"\."([^"]+)"/);
+      // Updated regex to capture optional settings [...]
+      const match = line.match(/"([^"]+)"\."([^"]+)"\s*<\s*"([^"]+)"\."([^"]+)"(\s*\[(.*)\])?/);
       if (match) {
-        schema.refs.push({
+        const refObj = {
           fromTable: match[1],
           fromCol: match[2],
           toTable: match[3],
-          toCol: match[4]
-        });
+          toCol: match[4],
+          settings: {}
+        };
+
+        if (match[6]) {
+          const settingsStr = match[6];
+          const props = settingsStr.split(',').map(s => s.trim());
+          for (const p of props) {
+            const [key, val] = p.split(':').map(s => s.trim().toLowerCase());
+            if (key === 'delete') refObj.settings.onDelete = val;
+            if (key === 'update') refObj.settings.onUpdate = val;
+          }
+        }
+        schema.refs.push(refObj);
       }
     } else {
       if (currentEnum) {
@@ -499,7 +532,14 @@ function generateDDL(schema) {
 
   // Refs
   for (const r of schema.refs) {
-    stmts.push(`ALTER TABLE "${r.fromTable}" ADD FOREIGN KEY ("${r.fromCol}") REFERENCES "${r.toTable}" ("${r.toCol}")`);
+    let stmt = `ALTER TABLE "${r.fromTable}" ADD FOREIGN KEY ("${r.fromCol}") REFERENCES "${r.toTable}" ("${r.toCol}")`;
+    if (r.settings.onDelete) {
+      stmt += ` ON DELETE ${r.settings.onDelete.toUpperCase()}`;
+    }
+    if (r.settings.onUpdate) {
+      stmt += ` ON UPDATE ${r.settings.onUpdate.toUpperCase()}`;
+    }
+    stmts.push(stmt);
   }
 
   return stmts;

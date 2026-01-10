@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Host | Neon Playground</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+  <form id="addHostForm">
+    <header>
+      <h1>Add New Host</h1>
+      <p>This form allows you to register a new host account.</p>
+    </header>
+    <main class="form-card">
+      <h3>Host Details</h3>
+      <div class="form-group">
+        <label for="name">Organizer / Host Name</label>
+        <input type="text" id="name" name="name" required placeholder="e.g. Life Drawing London">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required placeholder="contact@example.com">
+      </div>
+
+      <div class="form-group">
+        <label for="rate_max_hour">Max Hourly Rate (GBP)</label>
+        <input type="number" id="rate_max_hour" name="rate_max_hour" step="0.01" placeholder="25.00">
+      </div>
+
+      <div class="form-group">
+        <label for="rate_max_day">Max Daily Rate (GBP)</label>
+        <input type="number" id="rate_max_day" name="rate_max_day" step="0.01" placeholder="150.00">
+      </div>
+    </main>
+    <footer>
+      <button type="reset">Cancel</button>
+      <button type="submit">Create Host</button>
+    </footer>
+  </form>
+  <div id="response" class="response-message"></div>
+  <script src="script.js" defer></script>
+</body>
+
+</html>

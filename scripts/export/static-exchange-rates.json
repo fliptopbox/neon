@@ -1,105 +1,105 @@
 {
-  "timestamp": "2026-01-06T17:02:55.722Z",
+  "timestamp": "2026-01-10T11:07:07.773Z",
   "records": [
     {
       "currency_code": "USD",
       "rate_to_usd": 1,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "EUR",
-      "rate_to_usd": 1.170217,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 1.163788,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "GBP",
-      "rate_to_usd": 1.349626,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 1.341103,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "JPY",
-      "rate_to_usd": 0.006385,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.006338,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "CAD",
-      "rate_to_usd": 0.726228,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.719586,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "AUD",
-      "rate_to_usd": 0.669661,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.668636,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "CHF",
-      "rate_to_usd": 1.260454,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 1.248561,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "CNY",
-      "rate_to_usd": 0.142842,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.143004,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "NZD",
-      "rate_to_usd": 0.578106,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.573055,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "INR",
-      "rate_to_usd": 0.011074,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.011084,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "BRL",
-      "rate_to_usd": 0.18444,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.185876,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "RUB",
-      "rate_to_usd": 0.012367,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.012586,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "ZAR",
-      "rate_to_usd": 0.060987,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.060595,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "MXN",
-      "rate_to_usd": 0.055715,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.055598,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "SGD",
-      "rate_to_usd": 0.77872,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.777056,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "HKD",
-      "rate_to_usd": 0.128423,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.128295,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "SEK",
-      "rate_to_usd": 0.108744,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.108518,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "NOK",
-      "rate_to_usd": 0.09953,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.099002,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "KRW",
-      "rate_to_usd": 0.000692,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.000686,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     },
     {
       "currency_code": "TRY",
-      "rate_to_usd": 0.023229,
-      "updated_at": "2026-01-06T17:02:55.722Z"
+      "rate_to_usd": 0.023189,
+      "updated_at": "2026-01-10T11:07:07.773Z"
     }
   ]
 }

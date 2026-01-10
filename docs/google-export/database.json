@@ -3946,7 +3946,7 @@
         "sex": "m",
         "instagram": "chris.lifemodel",
         "email": "chrisrobertson324@gmail.com",
-        "portrait": "chris-robertson/chris-robertson-0911.jpg",
+        "portrait": "chris-robertson/chris-robertson-1926.jpg",
         "phone": "07834771428",
         "website": "",
         "account_holder": "",
@@ -4803,6 +4803,54 @@
         "account": "",
         "sortcode": "",
         "dateAdded": "2025-12-21T23:32:34.056Z"
+      },
+      {
+        "fullname": "Lauren Elcock",
+        "confirmed": "0",
+        "hosted": "0",
+        "refs": "",
+        "sex": "",
+        "instagram": "lauren_e_creative",
+        "email": "laurenelcock1995@gmail.com",
+        "portrait": "lauren-elcock/lauren-elcock-7940.jpg",
+        "phone": "07542672048",
+        "website": "",
+        "account_holder": "Lauren Elcock",
+        "account": "",
+        "sortcode": "",
+        "dateAdded": "2026-01-05T17:05:29.061Z"
+      },
+      {
+        "fullname": "Mario Witkowski",
+        "confirmed": "0",
+        "hosted": "0",
+        "refs": "",
+        "sex": "",
+        "instagram": "mario_lifemodel",
+        "email": "mwitkows77@gmail.com",
+        "portrait": "mariusz-witkowski/mariusz-witkowski-2311.jpg",
+        "phone": "07746174063",
+        "website": "",
+        "account_holder": "Mariusz Witkowski",
+        "account": "",
+        "sortcode": "",
+        "dateAdded": "2026-01-07T20:15:39.994Z"
+      },
+      {
+        "fullname": "Megan Lakin",
+        "confirmed": "0",
+        "hosted": "0",
+        "refs": "",
+        "sex": "",
+        "instagram": "megirama_art",
+        "email": "mlakin14@gmail.com",
+        "portrait": "megan-lakin/megan-lakin-4064.jpg",
+        "phone": "07452958582",
+        "website": "https://www.instagram.com/megirama_art",
+        "account_holder": "Megan Lakin",
+        "account": "",
+        "sortcode": "",
+        "dateAdded": "2026-01-09T19:31:35.294Z"
       }
     ]
   },
@@ -6211,9 +6259,9 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 22 Jan - Marina Borodulya (TBC)",
+        "pk": "Thu 22 Jan - Marina Borodulya",
         "date": "Thu, 22 Jan 26 ",
-        "fullname": "Marina Borodulya (TBC)",
+        "fullname": "Marina Borodulya",
         "sex": "f",
         "flag": "",
         "inperson": "0",
@@ -6263,10 +6311,10 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 19 Feb - Chris Robertson",
+        "pk": "Thu 19 Feb - Jodie Stone",
         "date": "Thu, 19 Feb 26 ",
-        "fullname": "Chris Robertson",
-        "sex": "m",
+        "fullname": "Jodie Stone",
+        "sex": "f",
         "flag": "",
         "inperson": "0",
         "online": "0",
@@ -6289,10 +6337,10 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 05 Mar - Available • (OPEN CALL)",
+        "pk": "Thu 05 Mar - Chris Robertson",
         "date": "Thu, 05 Mar 26 ",
-        "fullname": "",
-        "sex": "",
+        "fullname": "Chris Robertson",
+        "sex": "m",
         "flag": "",
         "inperson": "0",
         "online": "0",
@@ -6328,9 +6376,9 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 26 Mar - Available • (OPEN CALL)",
+        "pk": "Thu 26 Mar - Lana Gabriel",
         "date": "Thu, 26 Mar 26 ",
-        "fullname": "",
+        "fullname": "Lana Gabriel",
         "sex": "",
         "flag": "",
         "inperson": "0",
@@ -6367,9 +6415,9 @@
         "duration": "2"
       },
       {
-        "pk": "Thu 16 Apr - Available • (OPEN CALL)",
+        "pk": "Thu 16 Apr - Adrian Gillan",
         "date": "Thu, 16 Apr 26 ",
-        "fullname": "",
+        "fullname": "Adrian Gillan",
         "sex": "",
         "flag": "",
         "inperson": "0",
