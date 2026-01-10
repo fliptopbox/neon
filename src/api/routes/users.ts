@@ -9,11 +9,11 @@ const app = new Hono<{ Bindings: Env }>();
 
 // Admin only: List all users with profile info
 app.get("/", authMiddleware, adminMiddleware, async (c) => {
-  const users = await query<User & UserProfile & { is_model: boolean; is_host: boolean }>(
+  const users = await query<User & UserProfile & { is_model: boolean; is_host: boolean; avatar_url: string }>(
     c.env,
     `SELECT u.id, u.email, u.is_global_active, u.date_created, u.date_last_seen, u.is_admin,
             up.fullname, up.handle, up.description, up.flag_emoji, up.is_profile_active,
-            up.phone_number, up.currency_code, up.payment_methods,
+            up.phone_number, up.currency_code, up.payment_methods, up.avatar_url,
             EXISTS(SELECT 1 FROM models m WHERE m.user_id = u.id) as is_model,
             EXISTS(SELECT 1 FROM hosts h WHERE h.user_id = u.id) as is_host
      FROM users u
@@ -39,6 +39,7 @@ app.get("/", authMiddleware, adminMiddleware, async (c) => {
           fullname: u.fullname || '',
           handle: u.handle || '',
           description: u.description || '',
+          avatar_url: u.avatar_url || '',
           flag_emoji: u.flag_emoji || '🏳️',
           is_profile_active: !!u.is_profile_active,
           phone_number: u.phone_number || '',
@@ -236,6 +237,82 @@ app.delete("/:id", authMiddleware, adminMiddleware, async (c) => {
   await query(c.env, "DELETE FROM users WHERE id = $1", [id]);
 
   return c.json({ message: "User deleted" });
+});
+
+// Admin: Delete user by various identifiers (id, email, password_hash, handle, fullname)
+app.delete("/delete-by", authMiddleware, adminMiddleware, async (c) => {
+  try {
+    const data = await c.req.json();
+    const { id, email, password_hash, handle, fullname } = data;
+
+    let userId: number | null = null;
+
+    // Priority order: id > email > password_hash > handle > fullname
+    if (id) {
+      // Direct ID lookup
+      const user = await queryOne<{ id: number }>(
+        c.env,
+        "SELECT id FROM users WHERE id = $1",
+        [id]
+      );
+      userId = user?.id || null;
+    } else if (email) {
+      // Email lookup
+      const user = await queryOne<{ id: number }>(
+        c.env,
+        "SELECT id FROM users WHERE email = $1",
+        [email]
+      );
+      userId = user?.id || null;
+    } else if (password_hash) {
+      // Password hash lookup
+      const user = await queryOne<{ id: number }>(
+        c.env,
+        "SELECT id FROM users WHERE password_hash = $1",
+        [password_hash]
+      );
+      userId = user?.id || null;
+    } else if (handle) {
+      // Handle lookup from user_profiles
+      const profile = await queryOne<{ user_id: number }>(
+        c.env,
+        "SELECT user_id FROM user_profiles WHERE handle = $1",
+        [handle]
+      );
+      userId = profile?.user_id || null;
+    } else if (fullname) {
+      // Fullname lookup from user_profiles
+      const profile = await queryOne<{ user_id: number }>(
+        c.env,
+        "SELECT user_id FROM user_profiles WHERE fullname = $1",
+        [fullname]
+      );
+      userId = profile?.user_id || null;
+    } else {
+      return c.json(
+        { error: "Must provide one of: id, email, password_hash, handle, or fullname" },
+        400
+      );
+    }
+
+    if (!userId) {
+      return c.json({ error: "User not found" }, 404);
+    }
+
+    // Delete user (CASCADE will handle all related rows)
+    // Related tables with CASCADE delete:
+    // - user_profiles, models, hosts, events, calendar, tracking
+    await query(c.env, "DELETE FROM users WHERE id = $1", [userId]);
+
+    return c.json({ 
+      message: "User and all related data deleted successfully", 
+      userId,
+      deletedBy: id ? "id" : email ? "email" : password_hash ? "password_hash" : handle ? "handle" : "fullname"
+    });
+  } catch (err: any) {
+    console.error("Delete user error:", err);
+    return c.json({ error: err.message }, 500);
+  }
 });
 
 export default app;

@@ -58,6 +58,11 @@ function renderUserCard(user) {
     const displayName = profile.fullname || (profile.handle ? `@${profile.handle}` : user.email.split('@')[0]);
     const initials = (displayName || user.email).slice(0, 2).toUpperCase();
 
+    const CDN_URL = 'https://ik.imagekit.io/fliptopbox/lifedrawing/model';
+    const avatarUrl = profile.avatar_url ?
+        (profile.avatar_url.startsWith('http') ? profile.avatar_url : `${CDN_URL}/${profile.avatar_url}`)
+        : null;
+
     return `
         <div class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer group border border-gray-100"
              data-user-id="${user.id}"
@@ -70,8 +75,8 @@ function renderUserCard(user) {
             
             <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg shadow-inner">
-                        ${profile.avatar_url ? `<img src="${profile.avatar_url}" class="w-full h-full object-cover rounded-xl" />` : initials}
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg shadow-inner overflow-hidden">
+                        ${avatarUrl ? `<img src="${avatarUrl}" class="w-full h-full object-cover" />` : initials}
                     </div>
                     <div>
                         <h3 class="font-bold text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">${displayName}</h3>
