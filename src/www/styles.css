@@ -576,6 +576,28 @@ input.invalid {
     background: white;
 }
 
+/* Textarea Standard - Styled textarea for descriptions */
+.textarea-standard {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 16px;
+    color: var(--android-text-primary);
+    background-color: var(--input-bg);
+    border: none;
+    border-bottom: 1px solid #8e918f;
+    border-radius: 4px 4px 0 0;
+    box-sizing: border-box;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.textarea-standard:focus {
+    outline: none;
+    border-bottom: 2px solid var(--android-accent);
+    background-color: #f5f5f5;
+}
+
+
 
 
 
