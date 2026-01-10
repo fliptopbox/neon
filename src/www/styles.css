@@ -47,6 +47,10 @@ body {
     gap: 10px;
 }
 
+form {
+    width: 100%;
+}
+
 header, footer {
     position: absolute;
     right: 0;
@@ -62,9 +66,12 @@ header {
     top: 0;
     padding: 3rem 2rem 0.1rem;
     text-align: left;
-    background: #292929d1;
+    background: linear-gradient(0deg, #162161, #394586b3);
     display: flex;
     flex-direction: column;
+    box-shadow: 0 0 70px -10px #111111;
+    border-bottom: 1px solid #000000;
+    border-radius: 0 0 5px 5px;
     h1 {
         color: white;
         font-size: 2.1rem;
@@ -74,27 +81,26 @@ header {
 
     p {
         line-height: 1;
-        color: white;
+        color: #ffffff7a;
         font-size: 1rem;
     }
 }
 
 footer {
     bottom: 0;
-    padding: 0.5rem;
+    padding: 0.5rem 2rem;
     text-align: center;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
     gap: 0.5rem;
+    backdrop-filter: blur(10px);
 }
 
 main {
     padding: 10rem 2rem 6rem;
     flex: 1;
     overflow: auto;
-    
-    
     h3 {
         margin: 3rem 0 1rem;
         border-bottom: 1px solid #eee;
@@ -145,8 +151,7 @@ h3 {
     /* Truly flat, using border/color contrast instead of shadow */
     box-shadow: none;
     /* border: 1px solid rgba(0,0,0,0.03); /* Extremely subtle definition */
-    */
-    overflow: hidden;
+    */ overflow: hidden;
     /* Fix: auto width prevents 100% + padding/border overflow issues */
     width: auto;
     align-self: stretch;
@@ -222,6 +227,13 @@ button {
     display: block;
 }
 
+button.cta-link {
+    text-decoration: underline;
+    color: red;
+    background: none;
+    border: none;
+}
+
 button:hover {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
@@ -235,7 +247,7 @@ button[type="button"] {
     background-color: transparent;
     color: var(--android-accent);
     border: 1px solid var(--android-accent-container);
-    margin-top: 8px;
+    margin: 0;
 }
 
 button[type="button"]:hover {
@@ -297,9 +309,273 @@ a.menu-link:hover {
     font-weight: 500;
 }
 
-
 input.invalid {
     border: 1px solid red;
     background: pink;
     color: red!important;
 }
+
+.form-group.invalid label {
+    color: red;
+}
+
+.portrait-upload-container-new {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-placeholder {
+    width: 3em;
+    height: 4em;
+    border: 1px dotted var(--android-outline);
+    /* Dotted border */
+    border-radius: 0.5rem;
+    /* Circular shape */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    overflow: hidden;
+    /* position: relative; */
+    background-color: var(--input-bg);
+    transition: all 0.2s;
+    font-size: 24px;
+}
+
+.image-placeholder:hover {
+    border-color: var(--android-accent);
+}
+
+.image-placeholder .plus-icon {
+    font-size: 40px;
+    color: var(--android-outline);
+}
+
+.image-placeholder:hover .plus-icon {
+    color: var(--android-accent);
+}
+
+.image-placeholder.has-image {
+    border-style: solid;
+}
+
+.image-placeholder .discard-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    background-color: black;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    line-height: 1;
+}
+
+.image-placeholder:hover .discard-btn {
+    opacity: 1;
+}
+
+.image-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+}
+
+.chip {
+    padding: 0px 16px 0 6px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--android-outline);
+    border-radius: var(--radius-button);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.chip::before {
+    content: '\25CB ';
+    /* Unicode Hollow Circle */
+    margin: -2px 4px 0px 0;
+    font-weight: bold;
+    color: var(--android-outline);
+    /* Adjust color for unchecked state */
+    font-size: 2.2em;
+    /* Make icon bigger */
+    line-height: 1;
+    display: inline-block;
+}
+
+.chip.selected::before {
+    content: '\25CF ';
+    /* Unicode Solid Circle */
+    color: var(--android-accent);
+    /* Adjust color for checked state */
+}
+
+/* CTA Icon Button - Red × remove button */
+.cta-icon-button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background-color: #ef4444 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1.25em;
+    line-height: 1;
+    margin: 0;
+    transition: background 0.2s;
+    display: block;
+}
+
+.cta-icon-button:hover {
+    background: #dc2626;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.cta-icon-button:active {
+    background: #b91c1c;
+}
+
+/* CTA Text Small - Red text links (e.g., "Add" links in form headings) */
+.cta-text-small {
+    color: #ef4444;
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.cta-text-small:hover {
+    color: #dc2626;
+    text-decoration: underline;
+}
+
+.cta-text-small:active {
+    color: #b91c1c;
+}
+
+/* Input Aux - Auxiliary input fields for dynamic rows */
+.input-aux {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    color: var(--android-text-primary);
+    background-color: white;
+}
+
+.input-aux:focus {
+    outline: none;
+    border-color: var(--android-accent);
+    box-shadow: 0 0 0 2px rgba(56, 93, 171, 0.1);
+}
+
+/* Helper Text - Small gray helper text */
+.helper-text {
+    color: #6b7280;
+    font-size: 0.8em;
+    margin-top: 6px;
+    padding-left: 16px;
+    line-height: 1.4;
+    display: block;
+}
+
+/* Flex Row - Horizontal flex container with gap */
+.flex-row {
+    display: flex;
+    gap: 16px;
+}
+
+.flex-row-tight {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Flex 1 - Flex item that grows */
+.flex-1 {
+    flex: 1;
+}
+
+/* Input Row - Row for input fields with tight spacing */
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Form Group Header - Label with space-between layout */
+.form-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Dynamic Rows Container - Vertical flex container for dynamic rows */
+.dynamic-rows-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Input Label Inline - Inline label for input fields */
+.input-label-inline {
+    width: 100px;
+    color: #6b7280;
+    font-size: 0.9em;
+}
+
+/* Input Prefix - Prefix symbol (@ etc.) */
+.input-prefix {
+    color: #6b7280;
+    font-size: 1em;
+}
+
+/* Input Narrow - Narrow input field for platform names */
+.input-narrow {
+    width: 120px;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    color: var(--android-text-primary);
+    background-color: white;
+}
+
+.input-narrow:focus {
+    outline: none;
+    border-color: var(--android-accent);
+    box-shadow: 0 0 0 2px rgba(56, 93, 171, 0.1);
+}
+
+/* Select Narrow - Narrow select dropdown */
+.select-narrow {
+    width: 100px;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+}
+
+
+
+
