@@ -84,6 +84,8 @@ Table models {
   user_id integer [not null]
   display_name varchar // known as Palendromic
   description text [not null, default: '']
+  
+  currency_code char(3) [not null, default: 'GBP']
 
   portrait_urls json [default: '[]'] // main profile image
 
@@ -190,11 +192,11 @@ Table tracking {
   timestamp timestamptz
 }
 
-Ref: "user_profiles"."user_id" < "users"."id"
-Ref: "models"."user_id" < "users"."id"
-Ref: "hosts"."user_id" < "users"."id"
-Ref: "events"."user_id" < "users"."id"
-Ref: "events"."venue_id" < "venues"."id"
-Ref: "calendar"."user_id" < "users"."id"
-Ref: "tracking"."user_id" < "users"."id"
-Ref: "calendar"."event_id" < "events"."id"
+Ref: "user_profiles"."user_id" < "users"."id" [delete: cascade]
+Ref: "models"."user_id" < "users"."id" [delete: cascade]
+Ref: "hosts"."user_id" < "users"."id" [delete: cascade]
+Ref: "events"."user_id" < "users"."id" [delete: cascade]
+Ref: "events"."venue_id" < "venues"."id" [delete: set null]
+Ref: "calendar"."user_id" < "users"."id" [delete: cascade]
+Ref: "tracking"."user_id" < "users"."id" [delete: cascade]
+Ref: "calendar"."event_id" < "events"."id" [delete: cascade]

@@ -27,7 +27,7 @@ app.get("/by-user/:userId", async (c) => {
   const userId = c.req.param("userId");
   const model = await queryOne(
     c.env,
-    `SELECT m.*, up.fullname, up.handle, up.flag_emoji, up.currency_code
+    `SELECT m.*, up.fullname, up.handle, up.flag_emoji, up.currency_code, up.avatar_url
      FROM models m
      JOIN user_profiles up ON m.user_id = up.user_id
      WHERE m.user_id = $1`,
@@ -89,18 +89,20 @@ app.post("/", authMiddleware, async (c) => {
       `INSERT INTO models (
         user_id,
         display_name, description,
+        currency_code,
         rate_min_hour, rate_min_day,
         tz, work_inperson, work_online, work_photography,
         work_seeks, social_handles, website_urls,
         date_birthday, date_experience,
         sex, pronouns, date_created
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12::jsonb, $13, $14, $15, $16, NOW()
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13::jsonb, $14, $15, $16, $17, NOW()
       ) RETURNING *`,
       [
         targetUserId,
         data.display_name,
         data.description,
+        data.currency_code || 'GBP',
         data.rate_min_hour || 20.0,
         data.rate_min_day || 120.0,
         data.tz || 'Europe/London',
@@ -158,10 +160,7 @@ app.put("/:id", authMiddleware, async (c) => {
 
   try {
     // Update models table
-    // Note: currency_code, phone_number, product_urls removed as they are not in schema for models table?
-    // Checking schema: phone_number is in user_profiles. currency_code is in user_profiles.
-    // product_urls? Not in models schema. website_urls IS. social_handles IS.
-    
+    // Update models table
     const [updatedModel] = await query<Model>(
       c.env,
       `UPDATE models SET 
@@ -170,8 +169,8 @@ app.put("/:id", authMiddleware, async (c) => {
         tz = $5, work_inperson = $6, work_online = $7, work_photography = $8,
         work_seeks = $9::jsonb, social_handles = $10::jsonb, website_urls = $11::jsonb,
         date_birthday = $12, date_experience = $13,
-        sex = $14, pronouns = $15
-       WHERE id = $16
+        sex = $14, pronouns = $15, currency_code = $16
+       WHERE id = $17
        RETURNING *`,
       [
         val('display_name'),
@@ -189,6 +188,7 @@ app.put("/:id", authMiddleware, async (c) => {
         val('date_experience'),
         val('sex'),
         val('pronouns'),
+        val('currency_code'),
         id
       ]
     );
