@@ -4,6 +4,17 @@
     const workPreferencesGroup = form.querySelector('#work-preferences').parentElement;
     const workSeeksGroup = form.querySelector('#work-seeks').parentElement;
 
+    // --- Timezone Logic ---
+    try {
+        const tzInput = document.getElementById('timezone');
+        if (tzInput) {
+            tzInput.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        }
+    } catch (e) {
+        console.warn('Could not determine timezone', e);
+    }
+    // --- End Timezone Logic ---
+
     // --- Portrait Upload Logic ---
     const portraitsInput = document.getElementById('portraits');
     const imagePlaceholders = form.querySelectorAll('.image-placeholder');
@@ -191,6 +202,16 @@ Please ensure your image meets the following requirements:
     let socialHandleCounter = 0;
 
 
+    const MAX_SOCIALS = 4;
+
+    function updateSocialBtnState() {
+        const count = socialHandlesContainer.querySelectorAll('.input-row').length;
+        // Total rows (including presets). The requirement is "inputs on the page".
+        // But since we have presets (2), we might want to check dynamics.
+        // Assuming "inputs on the page" means total.
+        addSocialBtn.style.display = count >= MAX_SOCIALS ? 'none' : 'inline-block';
+    }
+
     function addSocialHandleRow() {
         const rowId = `social-row-${socialHandleCounter++}`;
         const row = document.createElement('div');
@@ -219,6 +240,7 @@ Please ensure your image meets the following requirements:
                 delete socialHandlesData[platform];
             }
             row.remove();
+            updateSocialBtnState();
         };
 
         // Update data when either input changes
@@ -246,7 +268,10 @@ Please ensure your image meets the following requirements:
     addSocialBtn.addEventListener('click', (e) => {
         e.preventDefault();
         addSocialHandleRow();
+        updateSocialBtnState();
     });
+    // Initialize
+    updateSocialBtnState();
     // --- End Social Handles Logic ---
 
     // --- Website URLs Logic ---
@@ -256,6 +281,9 @@ Please ensure your image meets the following requirements:
     let websiteCounter = 0;
 
     function addWebsiteRow() {
+        // Limit check
+        if (websitesContainer.querySelectorAll('input').length >= 4) return;
+
         const rowId = `website-row-${websiteCounter++}`;
         const row = document.createElement('div');
         row.id = rowId;
@@ -277,6 +305,7 @@ Please ensure your image meets the following requirements:
                 websiteUrlsData.splice(index, 1);
             }
             row.remove();
+            updateWebsiteBtnState();
         };
 
         input.addEventListener('input', (e) => {
@@ -299,10 +328,19 @@ Please ensure your image meets the following requirements:
     }
 
 
+    const MAX_WEBSITES = 4;
+    function updateWebsiteBtnState() {
+        const count = websitesContainer.querySelectorAll('input').length;
+        addWebsiteBtn.style.display = count >= MAX_WEBSITES ? 'none' : 'inline-block';
+    }
+
     addWebsiteBtn.addEventListener('click', (e) => {
         e.preventDefault();
         addWebsiteRow();
+        updateWebsiteBtnState();
     });
+    // Initialize
+    updateWebsiteBtnState();
     // --- End Website URLs Logic ---
 
 
@@ -344,7 +382,8 @@ Please ensure your image meets the following requirements:
 
         // Validation checks...
         requiredInputs.forEach(input => {
-            if (input.value.trim() === '') {
+            // Use browser native validation API (respects required, minlength, pattern, type)
+            if (!input.checkValidity()) {
                 input.classList.add('invalid');
                 allValid = false;
             } else {
@@ -352,18 +391,14 @@ Please ensure your image meets the following requirements:
             }
         });
 
+        // Optional: Work preferences defaults
         if (workPreferencesGroup.querySelectorAll('.chip.selected').length === 0) {
-            workPreferencesGroup.classList.add('invalid');
-            allValid = false;
-        } else {
-            workPreferencesGroup.classList.remove('invalid');
+            // It's optional now, backend has defaults (In-Person)
         }
 
+        // Optional: Work Seeks
         if (workSeeksGroup.querySelectorAll('.chip.selected').length === 0) {
-            workSeeksGroup.classList.add('invalid');
-            allValid = false;
-        } else {
-            workSeeksGroup.classList.remove('invalid');
+            // Optional
         }
 
         if (portraitFiles.every(file => file === null)) {
@@ -374,25 +409,61 @@ Please ensure your image meets the following requirements:
         }
 
         // Validate Year of birth
+        // Validate Year of birth ONLY if entered
         const year = yearOfBirthInput.value;
-        if (year.length !== 4 || parseInt(year) < 1900 || parseInt(year) > new Date().getFullYear()) {
-            yearOfBirthFormGroup.classList.add('invalid');
-            allValid = false;
-        } else {
-            yearOfBirthFormGroup.classList.remove('invalid');
+        if (year) {
+            if (year.length !== 4 || parseInt(year) < 1900 || parseInt(year) > new Date().getFullYear()) {
+                yearOfBirthFormGroup.classList.add('invalid');
+                allValid = false;
+            } else {
+                yearOfBirthFormGroup.classList.remove('invalid');
+            }
         }
 
         // Validate Experience
-        if (dateExperienceSelect.value === '') {
-            dateExperienceFormGroup.classList.add('invalid');
-            allValid = false;
-        } else {
-            dateExperienceFormGroup.classList.remove('invalid');
-        }
+        // Validate Experience ONLY if entered (it is not required now)
+        // No custom validation needed as it is a dropdown, just don't flag if empty.
 
+
+        // Validate Website URLs (ensure valid absolute URLs)
+        const websiteInputs = websitesContainer.querySelectorAll('input');
+        websiteInputs.forEach(input => {
+            const val = input.value.trim();
+            if (val) {
+                // Use URL.canParse
+                if (URL.canParse(val)) {
+                    input.classList.remove('invalid');
+                } else {
+                    input.classList.add('invalid');
+                    allValid = false;
+                }
+            } else {
+                input.classList.remove('invalid');
+            }
+        });
 
         if (!allValid) {
             console.log('Validation failed');
+            // Visual feedback on save button
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalColor = submitBtn.style.backgroundColor;
+            submitBtn.style.backgroundColor = 'var(--error-color, #ff4444)';
+            submitBtn.textContent = 'Fix Errors';
+
+            setTimeout(() => {
+                submitBtn.style.backgroundColor = originalColor;
+                submitBtn.textContent = 'Save';
+            }, 2000);
+
+            // Scroll to first error
+            const firstInvalid = form.querySelector('.invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // If it's an input, focus it
+                if (firstInvalid.tagName === 'INPUT' || firstInvalid.tagName === 'TEXTAREA' || firstInvalid.tagName === 'SELECT') {
+                    firstInvalid.focus();
+                }
+            }
             return;
         }
 
@@ -459,6 +530,21 @@ Please ensure your image meets the following requirements:
 
         console.log('Submitting model data:', modelData);
 
+        // Auto-generate handle if missing (since it is now optional/hidden)
+        if (!modelData.handle) {
+            // Prefer Instagram handle (it is required), fallback to name
+            let source = modelData.instagram || modelData.display_name || modelData.fullname || 'user';
+
+            let base = source.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+                .replace(/[^a-z0-9]/g, '-') // replace non-alphanumeric (like . or _) with -
+                .replace(/-+/g, '-') // collapse multiple hyphens
+                .replace(/^-|-$/g, ''); // trim hyphens
+
+            if (!base) base = 'user';
+            modelData.handle = base;
+        }
+
         // Send data to the new registration endpoint
         try {
             const response = await fetch('http://localhost:8787/api/register/model', {
@@ -494,4 +580,87 @@ Please ensure your image meets the following requirements:
             console.error('Network error: ' + error.message, error);
         }
     });
+
+    // --- Character Count Logic ---
+    const descriptionInput = document.getElementById('description');
+    const descriptionCount = document.getElementById('description-count');
+
+    if (descriptionInput && descriptionCount) {
+        // Read max length from the HTML attribute
+        const maxLen = parseInt(descriptionInput.getAttribute('maxlength'), 10) || 512;
+
+        const updateCount = (e) => {
+            const val = descriptionInput.value;
+
+            // Security: Check for HTML markup
+            // Matches <tag> or </tag> pattern
+            if (/<[a-z][\s\S]*>/i.test(val)) {
+                alert('Security Warning: HTML markup is not allowed. The input has been cleared.');
+                descriptionInput.value = '';
+                descriptionCount.textContent = `${maxLen} remaining`;
+                return;
+            }
+
+            const remaining = maxLen - descriptionInput.value.length;
+            descriptionCount.textContent = `${remaining} remaining`;
+        };
+        descriptionInput.addEventListener('input', updateCount);
+        // Initialize
+        updateCount();
+    }
+    // --- End Character Count Logic ---
+
+    // --- Populate Nationality Select ---
+    const flagSelect = document.getElementById('flag_emoji');
+    if (flagSelect) {
+        try {
+            const response = await fetch('/js/countries.json');
+            if (response.ok) {
+                let countries = await response.json();
+
+                // Sort: Primary by priority (descending), Secondary by name (ascending)
+                countries.sort((a, b) => {
+                    const priorityA = a.priority || 0;
+                    const priorityB = b.priority || 0;
+                    if (priorityA !== priorityB) {
+                        return priorityB - priorityA; // Descending priority
+                    }
+                    return a.name.localeCompare(b.name); // Ascending name
+                });
+
+                // Clear existing options (if any)
+                flagSelect.innerHTML = '<option value="">-- Select --</option>';
+
+                // Create document fragment for better performance
+                const fragment = document.createDocumentFragment();
+
+                let lastPriority = -1;
+
+                countries.forEach((country, index) => {
+                    // check for priority change to add a separator line
+                    const currentPriority = country.priority || 0;
+                    if (index > 0 && currentPriority !== lastPriority && lastPriority === 1) {
+                        const separator = document.createElement('option');
+                        separator.disabled = true;
+                        separator.textContent = '──────────';
+                        fragment.appendChild(separator);
+                    }
+                    lastPriority = currentPriority;
+
+                    const option = document.createElement('option');
+                    option.value = country.code.toLowerCase();
+                    option.textContent = `${country.emoji} - ${country.name}`;
+                    fragment.appendChild(option);
+                });
+
+                flagSelect.appendChild(fragment);
+            } else {
+                console.warn('Could not load countries.json');
+            }
+        } catch (err) {
+            console.error('Failed to populate nationality select:', err);
+        }
+    }
+    // --- End Populate Nationality Select ---
+
 })();

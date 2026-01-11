@@ -6,7 +6,7 @@
     --android-text-secondary: #44474f;
     --android-outline: #74777f;
     /* Pixel Blue Accent */
-    --android-accent: #385dab;
+    --android-accent: #212121;
     --android-accent-container: #d8e2ff;
     --android-on-accent: #ffffff;
     /* Input Fields */
@@ -15,6 +15,15 @@
     --radius-page: 24px;
     --radius-field: 4px;
     --radius-button: 100px;
+    --one: #000000ff;
+    --zero: #000000d9;
+}
+
+.concentric-circles {
+    background: repeating-radial-gradient( circle at center, var(--one) 0px, var(--one) 10px, var(--zero) 10px, var(--zero) 20px );
+    background-size: 900px 450px;
+    background-position: -102px -203px;
+    background-repeat: repeat;
 }
 
 /* Global Reset for Safety */
@@ -64,14 +73,19 @@ header, footer {
 
 header {
     top: 0;
-    padding: 3rem 2rem 0.1rem;
+    padding: 2rem 2rem;
     text-align: left;
     background: linear-gradient(0deg, #162161, #394586b3);
     display: flex;
     flex-direction: column;
     box-shadow: 0 0 70px -10px #111111;
     border-bottom: 1px solid #000000;
-    border-radius: 0 0 5px 5px;
+    border-radius: 0 0 10px 10px;
+    justify-content: space-between;
+    gap: 2rem;
+    align-items: flex-start;
+    align-content: center;
+    flex-wrap: nowrap;
     h1 {
         color: white;
         font-size: 2.1rem;
@@ -81,8 +95,10 @@ header {
 
     p {
         line-height: 1;
-        color: #ffffff7a;
+        color: #949494;
         font-size: 1rem;
+        margin: 0;
+        padding: 0;
     }
 }
 
@@ -98,7 +114,7 @@ footer {
 }
 
 main {
-    padding: 10rem 2rem 6rem;
+    padding: 10rem 1.6rem 6rem;
     flex: 1;
     overflow: auto;
     h3 {
@@ -264,7 +280,7 @@ button[type="button"]:hover {
     width: 44px;
     min-width: 44px;
     margin-top: 0;
-    background-color: #f2b8b5;
+    background-color: #ff4137;
     /* M3 Error Container Low-ish */
     color: #601410;
     border: none;
@@ -398,7 +414,7 @@ input.invalid {
 }
 
 .chip {
-    padding: 0px 16px 0 6px;
+    padding: 0px 12px 0 4px;
     background-color: var(--input-bg);
     border: 1px solid var(--android-outline);
     border-radius: var(--radius-button);
@@ -410,7 +426,7 @@ input.invalid {
 }
 
 .chip::before {
-    content: '\25CB ';
+    content: '\25CB';
     /* Unicode Hollow Circle */
     margin: -2px 4px 0px 0;
     font-weight: bold;
@@ -423,7 +439,7 @@ input.invalid {
 }
 
 .chip.selected::before {
-    content: '\25CF ';
+    content: '\25CF';
     /* Unicode Solid Circle */
     color: var(--android-accent);
     /* Adjust color for checked state */
@@ -434,7 +450,7 @@ input.invalid {
     width: 40px;
     height: 40px;
     padding: 0;
-    background-color: #ef4444 !important;
+    background-color: #ff0000 !important;
     color: white !important;
     border: none !important;
     border-radius: 20px;
@@ -447,17 +463,17 @@ input.invalid {
 }
 
 .cta-icon-button:hover {
-    background: #dc2626;
+    background: #ff5f5f;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .cta-icon-button:active {
-    background: #b91c1c;
+    background: #ff0000;
 }
 
 /* CTA Text Small - Red text links (e.g., "Add" links in form headings) */
 .cta-text-small {
-    color: #ef4444;
+    color: #ff0000;
     font-size: 0.9em;
     font-weight: 500;
     cursor: pointer;
@@ -465,7 +481,7 @@ input.invalid {
 }
 
 .cta-text-small:hover {
-    color: #dc2626;
+    color: #ff6666;
     text-decoration: underline;
 }
 
@@ -596,8 +612,3 @@ input.invalid {
     border-bottom: 2px solid var(--android-accent);
     background-color: #f5f5f5;
 }
-
-
-
-
-
