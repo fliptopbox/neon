@@ -12,7 +12,7 @@
     "build": "npm run build:api && npm run build:admin",
     "deploy:api": "wrangler deploy --env production",
     "deploy:admin": "wrangler pages deploy dist/admin --project-name=neon-admin",
-    "db:migrate": "node scripts/migrate.js",
+    "db:migrate": "node scripts/export/index.js && node scripts/migrate.js",
     "db:setup": "node scripts/migrate.js",
     "test": "vitest",
     "test:ui": "vitest --ui",

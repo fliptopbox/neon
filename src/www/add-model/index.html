@@ -83,7 +83,7 @@
               maxlength="20"
               placeholder="e.g. +44 (0)7123456789"
               class="flex-1"
-              pattern="^[0-9+\s()-.]{7,20}$"
+              pattern="^\+?[0-9\s\(\)\-\.]{7,20}$"
             />
           </div>
         </div>
@@ -130,9 +130,9 @@
             type="text"
             id="instagram"
             name="instagram"
-            required
             placeholder="@yourhandle"
             pattern="^[a-zA-Z0-9._]{1,30}$"
+            title="Instagram usernames may contain letters, numbers, periods, and underscores (max 30 characters)"
           />
           <small class="helper-text"
             >Used as the default DM platform and to confirm modeling or

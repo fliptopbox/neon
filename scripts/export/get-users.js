@@ -16,7 +16,7 @@ const defaultUser = {
         revolut: 'https://revolut.me/brucethomas',
         paypal: 'https://paypal.me/brucethomas',
         bank: {
-            name: 'Bruce Thomas',
+            name: 'System Administrator',
             sort_code: '123456',
             account_number: '12345678',
             iban: null, //'GB1234567812345678',
@@ -28,6 +28,17 @@ export function getUsers(data) {
     const collection = Object.values(data);
 
     const users = {
+        [toSlug('System Administrator')]: {
+            fullname: 'System Administrator',
+            handle: 'system-admin',
+            email: process.env.SYSTEM_ADMIN_EMAIL || 'lifedrawing@gmx.com',
+            password_hash: hashPassword(process.env.SYSTEM_ADMIN_EMAIL || 'lifedrawing@gmx.com', process.env.SYSTEM_ADMIN_PASSWORD || 'lifedrawing!!!'),
+            is_global_active: true,
+            ...defaultUser,
+
+            is_admin: true,
+        },
+
         [toSlug('Bruce Thomas')]: {
             fullname: 'Bruce Thomas',
             handle: 'bruce-thomas',
@@ -38,7 +49,6 @@ export function getUsers(data) {
 
             is_admin: true,
         },
-
         // 'Life Drawing Art'
         // See db-seed-host-contacts.json
 

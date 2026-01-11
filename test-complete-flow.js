@@ -1,15 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import 'dotenv/config';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const API_BASE = 'http://localhost:8787';
 
-// Admin credentials from database query
-const ADMIN_EMAIL = 'response.write@gmail.com';
-const ADMIN_PASSWORD = 'your-password-here'; // ← YOU NEED TO UPDATE THIS
+// Admin credentials from database query or env
+const ADMIN_EMAIL = process.env.SYSTEM_ADMIN_EMAIL || 'lifedrawing@gmx.com';
+const ADMIN_PASSWORD = process.env.SYSTEM_ADMIN_PASSWORD || 'pa55word!';
 
 console.log('═══════════════════════════════════════════════════════');
 console.log('  Complete Add Model → Delete User Test');
@@ -47,8 +48,8 @@ async function loginAsAdmin() {
             console.error('   Status:', response.status);
             console.error('   Error:', result.error);
             console.log('');
-            console.log('💡 HINT: Update the ADMIN_PASSWORD in this script.');
-            console.log('   The admin user is: response.write@gmail.com (Bruce Thomas)');
+            console.log('💡 HINT: Update the ADMIN_PASSWORD in this script or .env file.');
+            console.log(`   The admin user is: ${ADMIN_EMAIL} (Bruce Thomas)`);
             return null;
         }
     } catch (error) {
@@ -155,7 +156,7 @@ async function deleteUserByFullname(fullname, token) {
         console.log('');
         console.log('To fix this:');
         console.log('1. Update ADMIN_PASSWORD in this script');
-        console.log('2. Or reset the password for response.write@gmail.com');
+        console.log('2. Or reset the password for ' + ADMIN_EMAIL);
         console.log('');
         process.exit(1);
     }

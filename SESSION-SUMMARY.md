@@ -18,7 +18,7 @@ Completed comprehensive data migration from Google Sheets exports into PostgreSQ
   - Tags: semicolon-separated → CSV text format
   - Active status: derived from comments field
 - **Key Fields**: name, address, postcode, tags, time, day, price_inperson, price_online, duration, capacity, website, comments, is_active
-- **All venues linked to user_id**: 4 (response.write@gmail.com)
+- **All venues linked to user_id**: 4 (lifedrawing@gmx.com)
 
 ### 2. Venue Tags Utility Table ✅
 
@@ -161,7 +161,7 @@ All scripts follow consistent pattern:
 ### Credentials
 
 - **Admin User**: admin@example.com / admin123
-- **Import User**: response.write@gmail.com (user_id: 4)
+- **Import User**: lifedrawing@gmx.com (user_id: 4)
 - **Default Venue**: "Life Drawing Art" (venue_id: 164)
 
 ## Files Modified/Created This Session

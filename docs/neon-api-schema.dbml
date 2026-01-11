@@ -6,6 +6,8 @@ Table users {
   is_global_active boolean [default: true]
   is_admin boolean [default: false]
   
+  tz varchar(50) [not null, default: 'Europe/London']
+
   date_last_seen timestamptz
   date_created timestamptz [default: `now()` ]
 }
@@ -92,8 +94,6 @@ Table models {
   rate_min_hour decimal [default: 20.0]
   rate_min_day decimal [default: 120.0]
   
-  tz varchar(50) [not null, default: 'Europe/London']
-  
   work_inperson boolean [default: true]
   work_online boolean [default: false]
   work_photography boolean [default: false]
@@ -132,8 +132,6 @@ Table hosts {
   rate_max_hour decimal [not null, default: 25.00] // per hour
   rate_max_day decimal [not null, default: 150.00] // six hours
 
-  tz varchar(50) [not null, default: 'Europe/London']
-
   date_created timestamptz [not null, default: `now()`]
   host_tags json [not null, default: '[]'] // from database.json venues "tag" eg. ["heating", "materials", "lights", "snacks"]
 }
@@ -168,6 +166,8 @@ Table events {
   name varchar [not null] //eg. "Drawing in the Library"
   description varchar // eg. "Join us for the weekly session in the Homerton Library"
   images json [not null, default: '[]'] // String[] eg. ["https://domain.com/image.jpg"]
+
+  tz varchar(50) [not null, default: 'Europe/London']
 
   frequency frequency_enum [not null, default: 'weekly']
   week_day week_day_enum [not null, default: 'unknown']

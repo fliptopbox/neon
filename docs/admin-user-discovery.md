@@ -5,7 +5,7 @@
 I queried the database directly to find users with `is_admin = true`:
 
 ```sql
-SELECT 
+SELECT
     u.id,
     u.email,
     u.is_admin,
@@ -22,11 +22,11 @@ ORDER BY u.id
 ### ✅ Admin User Found
 
 **User ID:** 1  
-**Email:** `response.write@gmail.com`  
+**Email:** `lifedrawing@gmx.com`  
 **Fullname:** Bruce Thomas  
 **Handle:** `bruce-thomas`  
 **Active:** Yes  
-**Created:** 2026-01-10T11:21:18.499Z  
+**Created:** 2026-01-10T11:21:18.499Z
 
 This is the **first user** registered in the system, which automatically became an admin (as per the registration logic in `/src/api/routes/auth.ts`).
 
@@ -42,13 +42,13 @@ To test the `/api/users/delete-by` endpoint, you need to:
 ### 1. Authenticate as Admin
 
 ```javascript
-const response = await fetch('http://localhost:8787/api/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:8787/api/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    email: 'response.write@gmail.com',
-    password: 'YOUR_PASSWORD'
-  })
+    email: "lifedrawing@gmx.com",
+    password: "YOUR_PASSWORD",
+  }),
 });
 
 const { token } = await response.json();
@@ -57,35 +57,43 @@ const { token } = await response.json();
 ### 2. Use Token to Delete User
 
 ```javascript
-const deleteResponse = await fetch('http://localhost:8787/api/users/delete-by', {
-  method: 'DELETE',
-  headers: { 
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  },
-  body: JSON.stringify({ 
-    fullname: 'Crème Brûlée' 
-  })
-});
+const deleteResponse = await fetch(
+  "http://localhost:8787/api/users/delete-by",
+  {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      fullname: "Crème Brûlée",
+    }),
+  }
+);
 ```
 
 ## 📝 Test Scripts Created
 
 ### 1. `find-admin-users.js`
+
 Queries the database directly to find all admin users.
 
 **Usage:**
+
 ```bash
 node find-admin-users.js
 ```
 
 ### 2. `test-complete-flow.js`
+
 Complete end-to-end test that:
+
 1. Logs in as admin (Bruce Thomas)
 2. Registers a new model using `request.json`
 3. Deletes the user by fullname
 
 **Usage:**
+
 ```bash
 # First, update the ADMIN_PASSWORD constant in the file
 node test-complete-flow.js
@@ -94,15 +102,18 @@ node test-complete-flow.js
 ## 🔑 Key Findings
 
 1. **`users.is_admin` Boolean Field**
+
    - Located in the `users` table
    - `true` = admin user
    - `false` = regular user
 
 2. **First User is Admin**
+
    - The first registered user automatically gets `is_admin = true`
-   - This is Bruce Thomas (`response.write@gmail.com`)
+   - This is Bruce Thomas (`lifedrawing@gmx.com`)
 
 3. **Authentication Required**
+
    - The `/api/users/delete-by` endpoint requires:
      - Valid JWT token (via `authMiddleware`)
      - Admin role (via `adminMiddleware`)
@@ -117,6 +128,7 @@ node test-complete-flow.js
 ## 📚 Documentation Created
 
 1. **`docs/authentication-patterns.md`**
+
    - Complete authentication guide
    - JWT structure and middleware
    - All protected endpoints
@@ -130,7 +142,7 @@ node test-complete-flow.js
 
 To run the complete test:
 
-1. **Get the admin password** for `response.write@gmail.com`
+1. **Get the admin password** for `lifedrawing@gmx.com`
 2. **Update** `test-complete-flow.js` with the password
 3. **Run** the test:
    ```bash
@@ -138,6 +150,7 @@ To run the complete test:
    ```
 
 The test will:
+
 - ✅ Login as admin
 - ✅ Register a model from `request.json`
 - ✅ Delete the user by fullname

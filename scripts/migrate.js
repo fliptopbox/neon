@@ -168,7 +168,7 @@ async function migrate() {
         mapEmailToUserId.set(email, id);
         idCounter++;
 
-        if (email === 'response.write@gmail.com') {
+        if (email === (process.env.SYSTEM_ADMIN_EMAIL || 'lifedrawing@gmx.com')) {
           SYS_ID = id;
           console.log(`🛡 System Fallback User set to: ${email} (ID: ${id})`);
         }
@@ -178,7 +178,7 @@ async function migrate() {
 
   // Fallback if not found
   if (!SYS_ID) {
-    console.warn('⚠️ Warning: response.write@gmail.com not found. SYS_ID defaulting to 1.');
+    console.warn(`⚠️ Warning: ${process.env.SYSTEM_ADMIN_EMAIL || 'lifedrawing@gmx.com'} not found. SYS_ID defaulting to 1.`);
     SYS_ID = 1;
   }
 
