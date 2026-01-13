@@ -64,7 +64,10 @@ async function migrate() {
       await sql(`DROP TABLE IF EXISTS "${t}" CASCADE`);
     }
     const enums = schema.enums.map(e => e.name);
-    for (const e of enums) {
+    // Explicitly drop known old/renamed enums to ensure cleanliness
+    const knownEnums = [...new Set([...enums, 'status_enum', 'user_status_enum', 'event_status_enum'])];
+
+    for (const e of knownEnums) {
       await sql(`DROP TYPE IF EXISTS "${e}" CASCADE`);
     }
 

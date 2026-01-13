@@ -11,6 +11,8 @@ const defaultUser = {
     affiliate_urls: '[]',
     is_global_active: true,
     is_admin: false,
+    user_status: 'unconfirmed',
+
     payment_methods: JSON.stringify({
         monzo: null, //'https://monzo.me/raffaellaqueiroz',
         revolut: 'https://revolut.me/brucethomas',
@@ -36,6 +38,7 @@ export function getUsers(data) {
             is_global_active: true,
             ...defaultUser,
 
+            user_status: 'active',
             is_admin: true,
         },
 
@@ -47,6 +50,7 @@ export function getUsers(data) {
             is_global_active: true,
             ...defaultUser,
 
+            user_status: 'active',
             is_admin: true,
         },
         // 'Life Drawing Art'
@@ -99,6 +103,7 @@ export function getUsers(data) {
                 fullname: fullname,
                 email: email.trim().toLowerCase(),
                 password_hash: hashPassword(email),
+                user_status: 'unconfirmed',
                 is_global_active: isGlobalActive,
                 is_admin: false,
 

@@ -1,3 +1,11 @@
+Enum user_status_enum {  
+  unconfirmed
+  suspicious
+  dormant
+  banned
+  active
+}
+
 Table users {
   id integer [primary key, increment]
   email varchar [unique, not null]
@@ -5,6 +13,7 @@ Table users {
   
   is_global_active boolean [default: true]
   is_admin boolean [default: false]
+  user_status user_status_enum [default: 'unconfirmed']
   
   tz varchar(50) [not null, default: 'Europe/London']
 
@@ -55,7 +64,7 @@ Table venues {
   date_modified timestamptz [not null, default: `now()`]
 }
 
-Enum status_enum {  
+Enum event_status_enum {  
   cancelled
   closed
   confirmed
@@ -69,7 +78,7 @@ Table calendar {
   event_id integer
   user_id integer
 
-  status status_enum
+  status event_status_enum
 
   attendance_inperson integer [default: 0]
   attendance_online integer [default: 0]
