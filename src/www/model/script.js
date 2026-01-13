@@ -4,6 +4,8 @@
     const workPreferencesGroup = form.querySelector('#work-preferences').parentElement;
     const workSeeksGroup = form.querySelector('#work-seeks').parentElement;
 
+
+
     // --- Timezone Logic ---
     try {
         const tzInput = document.getElementById('timezone');
@@ -556,23 +558,14 @@ Please ensure your image meets the following requirements:
             const result = await response.json();
 
             if (response.ok) {
-                console.log('Model registered successfully! User ID:', result.userId, result);
-                form.reset();
-                // Clear UI
-                document.querySelectorAll('.chip.selected').forEach(chip => chip.classList.remove('selected'));
-                requiredInputs.forEach(input => input.classList.remove('invalid'));
-                workPreferencesGroup.classList.remove('invalid');
-                workSeeksGroup.classList.remove('invalid');
-                portraitFormGroup.classList.remove('invalid');
-                portraitFiles.fill(null);
-                portraitDataUrls.fill(null);
-                imagePlaceholders.forEach(p => {
-                    p.innerHTML = '<div class="plus-icon">+</div>';
-                    p.classList.remove('has-image');
-                });
-                yearOfBirthFormGroup.classList.remove('invalid');
-                dateExperienceFormGroup.classList.remove('invalid');
-                dateBirthdayHiddenInput.value = '';
+                console.log('✅ Model registered successfully!');
+                console.log('   User ID:', result.userId);
+                console.log('');
+
+                // Redirect to activation page
+                window.location.href = '/activate.html';
+
+                return result;
             } else {
                 console.error('Error: ' + (result.details || 'An unknown error occurred.'), result);
             }

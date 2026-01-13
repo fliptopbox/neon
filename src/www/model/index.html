@@ -55,7 +55,7 @@
             placeholder="jane@example.com"
           />
           <small class="helper-text"
-            >We will use this email to confirm and activate your account.</small
+            >We will use this email to confirm your account.</small
           >
         </div>
         <div class="form-group">
@@ -194,7 +194,7 @@
               <div class="form-group flex-1">
                 <label for="date_experience">Experience</label>
                 <select id="date_experience" name="date_experience">
-                  <option value="">-- Select --</option>
+                  <option value="">Select:</option>
                   <option value="none">None. Just starting</option>
                   <option value="less_than_12_months">
                     Less than 12 months
@@ -211,7 +211,7 @@
               <div class="form-group flex-1">
                 <label for="sex">Sex</label>
                 <select id="sex" name="sex">
-                  <option value="unspecified">Select ...</option>
+                  <option value="unspecified">Select:</option>
                   <option value="female">Female</option>
                   <option value="male">Male</option>
                 </select>
@@ -244,7 +244,7 @@
                 </select>
               </div>
               <div class="form-group flex-1">
-                <label for="rate_min_hour">Min Hourly Rate</label>
+                <label for="rate_min_hour">Hour Rate</label>
                 <input
                   type="number"
                   id="rate_min_hour"
@@ -254,7 +254,7 @@
                 />
               </div>
               <div class="form-group flex-1">
-                <label for="rate_min_day">Min Daily Rate</label>
+                <label for="rate_min_day">Day Rate</label>
                 <input
                   type="number"
                   id="rate_min_day"
@@ -338,6 +338,7 @@
         <button type="submit">Save</button>
       </footer>
     </form>
+
     <script src="script.js" defer></script>
   </body>
 </html>

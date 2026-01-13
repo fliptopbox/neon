@@ -69,6 +69,7 @@ header, footer {
     width: 100%;
     padding: 0.5rem;
     backdrop-filter: blur(3px);
+    z-index: 1;
 }
 
 header {
@@ -86,6 +87,7 @@ header {
     align-items: flex-start;
     align-content: center;
     flex-wrap: nowrap;
+    z-index: 1;
     h1 {
         color: white;
         font-size: 2.1rem;
@@ -111,6 +113,7 @@ footer {
     justify-content: space-evenly;
     gap: 0.5rem;
     backdrop-filter: blur(10px);
+    border-top: 1px solid #0000000f;
 }
 
 main {
@@ -172,6 +175,12 @@ h3 {
     width: auto;
     align-self: stretch;
     /* max-width: 600px; */
+    display: flex;
+    position: absolute;
+    z-index: 0;
+    height: 100%;
+    align-content: center;
+    flex-direction: column;
 }
 
 /* Form Item Layout */
@@ -208,6 +217,14 @@ input[type="text"], input[type="email"], input[type="password"], input[type="tel
     transition: background 0.2s, border-color 0.2s;
 }
 
+input#activation-code {
+    text-align: center;
+    font-size: 2rem;
+    letter-spacing: 1rem;
+    font-family: monospace;
+    font-weight: 700;
+}
+
 input:focus, select:focus {
     outline: none;
     border-bottom: 2px solid var(--android-accent);
@@ -227,19 +244,14 @@ small {
 
 /* Buttons - "Pill" style */
 button {
-    /* height: 44px; */
     border-radius: var(--radius-button);
     background-color: var(--android-accent);
     color: var(--android-on-accent);
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.1px;
+    font-size: 1rem;
+    font-weight: 700;
     border: none;
-    padding: 0.8rem 2.1rem;
+    padding: 0.8rem 2rem;
     cursor: pointer;
-    /* width: 100%; */
-    /* transition: opacity 0.2s; */
-    /* margin: 0 auto; */
     display: block;
 }
 
@@ -611,4 +623,53 @@ input.invalid {
     outline: none;
     border-bottom: 2px solid var(--android-accent);
     background-color: #f5f5f5;
+}
+
+/* Success panel – appears after a successful registration */
+.success-panel {
+    margin: 2rem auto 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    /* top: 0; */
+    /* bottom: 0; */
+    /* left: 0; */
+    /* right: 0; */
+    /* height: 100%; */
+    h2, p {
+        margin: 0;
+        padding: 0;
+    }
+
+    label {
+        margin: -.8rem 0 0 0;
+    }
+}
+
+.success-panel .thumbs-up {
+    font-size: 6rem;
+    margin: 0;
+    line-height: 1;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Primary button style – reuse existing look */
+.btn-primary {
+    background: var(--android-accent, #212121);
+    color: var(--android-on-accent, #fff);
+    padding: .5rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-button, 100px);
+    cursor: pointer;
+    margin: 1rem auto;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
 }

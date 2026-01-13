@@ -1,89 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Neon Playground</title>
-        <style>
-            :root {
-                --color-backdrop: #9813139c;
-            }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Playground</title>
+    <style>
+      :root {
+        --color-backdrop: #9813139c;
+      }
 
-            dialog::backdrop {
-                background: var(--color-backdrop);
-                backdrop-filter: blur(1rem);
-            }
+      dialog::backdrop {
+        background: var(--color-backdrop);
+        backdrop-filter: blur(1rem);
+      }
 
-            body {
-                margin: 0;
-                padding: 0;
-                font-family: sans-serif;
-            }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+      }
 
-            dialog {
-                width: auto;
-                height: auto;
-                border: 2px solid black;
-                border-radius: 1rem;
-                overflow: hidden;
-                padding: 0;
-                box-sizing: content-box;
-                backdrop-filter: blur(20px);
-                max-width: 370px;
-                margin: auto;
-                max-height: 825px;
-            }
+      dialog {
+        width: auto;
+        height: auto;
+        border: 0px solid black;
+        border-radius: 0.3rem;
+        overflow: hidden;
+        padding: 0;
+        box-sizing: content-box;
+        backdrop-filter: blur(20px);
+        max-width: 370px;
+        margin: auto;
+        max-height: 825px;
+        box-shadow: 0 28px 36px -16px #000000bf;
+      }
 
-            iframe {
-                background: #ffffff;
-                border: none;
-                margin: 0;
-                padding: 0;
-            }
+      iframe {
+        background: #ffffff;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
 
-            button.close {
-                position: absolute;
-                top: 0px;
-                right: 0px;
-                width: 2rem;
-                height: 2rem;
-                font-weight: 900;
-                color: white;
-                margin: 0.4rem;
-                border-radius: 1rem;
-                background: black;
-                border-width: 0px;
-                border-style: initial;
-                border-color: initial;
-                border-image: initial;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Neon Static Playground</h1>
-        <p style="color: #6b7280; margin-bottom: 2rem;">Development and testing forms interactions.</p>
-        <ul>
-            <li>
-                <a href="add-model/" onclick="return showDialog(this)" class="menu-link">Add Model Form</a>
-            </li>
-            <li>
-                <a href="add-host/" onclick="return showDialog(this)" class="menu-link">Add Host Form</a>
-            </li>
-            <li>
-                <a href="add-user/" onclick="return showDialog(this)" class="menu-link">Add User Form</a>
-            </li>
-        </ul>
-        <dialog>
-            <button class="close" onclick="this.parentElement.close()">✕</button>
-            <iframe src="" width="100%" height="100%"></iframe>
-        </dialog>
-        <script>
-            function showDialog(el) {
-                document.querySelector('dialog').showModal();
-                document.querySelector('iframe').src = el.href;
-                console.log(el);
-                return false;
-            }
-        </script>
-    </body>
+      button.close {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        width: 2rem;
+        height: 2rem;
+        font-weight: 900;
+        color: white;
+        margin: 0.4rem;
+        border-radius: 1rem;
+        background: black;
+        border-width: 0px;
+        border-style: initial;
+        border-color: initial;
+        border-image: initial;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Neon Static Playground</h1>
+    <p style="color: #6b7280; margin-bottom: 2rem">
+      Development and testing forms interactions.
+    </p>
+    <ul>
+      <li>
+        <a href="model/" onclick="return showDialog(this)" class="menu-link"
+          >Add Model Form</a
+        >
+      </li>
+      <li>
+        <a href="host/" onclick="return showDialog(this)" class="menu-link"
+          >Add Host Form</a
+        >
+      </li>
+      <li>
+        <a href="user/" onclick="return showDialog(this)" class="menu-link"
+          >Add User Form</a
+        >
+      </li>
+    </ul>
+    <dialog>
+      <button class="close" onclick="this.parentElement.close()">✕</button>
+      <iframe src="" width="100%" height="100%"></iframe>
+    </dialog>
+    <script>
+      function showDialog(el) {
+        document.querySelector("dialog").showModal();
+        document.querySelector("iframe").src = el.href;
+        console.log(el);
+        return false;
+      }
+    </script>
+  </body>
 </html>

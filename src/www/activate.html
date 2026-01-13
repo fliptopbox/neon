@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Activate Account | Neon Playground</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="concentric-circles">
+      <h1>Activate Account</h1>
+      <p>Verify your details to enable your profile.</p>
+    </header>
+    <main class="form-card">
+      <div id="submission-success" class="success-panel">
+        <div class="thumbs-up">👍</div>
+        <h2>Profile submitted!</h2>
+        <p>
+          Your profile has been created, 
+          we sent you an email, for your 
+          records, with a confirmation code
+          to activate your profile.
+        </p>
+
+
+        <input
+          type="text"
+          id="activation-code"
+          class="mt-1 w-full p-2 border rounded"
+          placeholder=""
+          autocomplete="off"
+        />
+        <label for="activation-code" class="block mt-4">
+          Enter your confirmation code
+        </label>
+        
+        <p id="activation-msg" class="mt-2 text-sm text-gray-600"></p>
+      </div>
+    </main>
+    <footer>
+      <button id="activate-btn" class="mt-2 btn-primary">Activate</button>
+    </footer>
+    <script src="activate.js" defer></script>
+  </body>
+</html>
