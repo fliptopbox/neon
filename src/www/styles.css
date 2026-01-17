@@ -376,8 +376,9 @@ input.invalid {
 }
 
 .image-placeholder .plus-icon {
-    font-size: 40px;
+    font-size: 50px;
     color: var(--android-outline);
+    font-weight: 200;
 }
 
 .image-placeholder:hover .plus-icon {
