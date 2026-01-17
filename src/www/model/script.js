@@ -622,7 +622,7 @@ Please ensure your image meets the following requirements:
                 });
 
                 // Clear existing options (if any)
-                flagSelect.innerHTML = '<option value="">-- Select --</option>';
+                flagSelect.innerHTML = '<option value="">Select</option>';
 
                 // Create document fragment for better performance
                 const fragment = document.createDocumentFragment();
@@ -655,5 +655,14 @@ Please ensure your image meets the following requirements:
         }
     }
     // --- End Populate Nationality Select ---
+
+    // --- Cancel/Reset Button Logic ---
+    const resetButton = form.querySelector('button[type="reset"]');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            window.parent.postMessage("closeDialog", "*");
+        });
+    }
+    // --- End Cancel/Reset Button Logic ---
 
 })();

@@ -93,6 +93,12 @@
         console.log(el);
         return false;
       }
+
+      window.addEventListener("message", (event) => {
+        if (event.data === "closeDialog") {
+          document.querySelector("dialog").close();
+        }
+      });
     </script>
   </body>
 </html>
