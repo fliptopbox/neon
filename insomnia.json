@@ -1,0 +1,569 @@
+{
+    "_type": "export",
+    "__export_format": 4,
+    "__export_date": "2024-01-25T12:00:00.000Z",
+    "__export_source": "insomnia.desktop.app:v2023.5.8",
+    "resources": [
+        {
+            "_id": "req_auth_register",
+            "parentId": "fld_auth",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/auth/register",
+            "name": "Register User",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"email\": \"test@example.com\",\n\t\"password\": \"password123\",\n\t\"fullname\": \"Test User\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706184000000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_auth_login",
+            "parentId": "fld_auth",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/auth/login",
+            "name": "Login",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"email\": \"test@example.com\",\n\t\"password\": \"password123\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706183900000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_register_model",
+            "parentId": "fld_register",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/register/model",
+            "name": "Register Model",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"email\": \"model@example.com\",\n\t\"password\": \"password123\",\n\t\"fullname\": \"Model User\",\n\t\"handle\": \"model-user\",\n\t\"display_name\": \"Model Display Name\",\n\t\"description\": \"A description\",\n\t\"rate_min_hour\": 30,\n\t\"rate_min_day\": 200,\n\t\"work_preferences\": {\n\t\t\"work_inperson\": true,\n\t\t\"work_online\": true\n\t},\n\t\"portrait_urls\": []\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706184000000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_u_list",
+            "parentId": "fld_users",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/users",
+            "name": "List Users (Admin)",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ token }}"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706184000000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_u_me",
+            "parentId": "fld_users",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/users/me",
+            "name": "Get Current User",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ token }}"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706183900000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_u_update_me",
+            "parentId": "fld_users",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/users/me/profile",
+            "name": "Update Current Profile",
+            "description": "",
+            "method": "PUT",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"fullname\": \"Updated Name\",\n\t\"handle\": \"updated-handle\",\n\t\"description\": \"Updated description\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ token }}"
+                },
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706183800000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_u_delete_by",
+            "parentId": "fld_users",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/users/delete-by",
+            "name": "Delete User By (Admin)",
+            "description": "",
+            "method": "DELETE",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"email\": \"user@example.com\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ token }}"
+                },
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706183700000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_v_list",
+            "parentId": "fld_venues",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/venues",
+            "name": "List Venues",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {},
+            "metaSortKey": -1706184000000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_v_create",
+            "parentId": "fld_venues",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/venues",
+            "name": "Create Venue (Admin)",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"name\": \"New Venue\",\n\t\"address_line_1\": \"123 Street\",\n\t\"address_city\": \"London\",\n\t\"address_postcode\": \"SW1A 1AA\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ token }}"
+                },
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706183900000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_m_list",
+            "parentId": "fld_models",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/models",
+            "name": "List Models",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {},
+            "metaSortKey": -1706184000000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_m_create",
+            "parentId": "fld_models",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/models",
+            "name": "Create Model (Auth)",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"display_name\": \"My Model Profile\",\n\t\"description\": \"Description\",\n\t\"rate_min_hour\": 25\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ token }}"
+                },
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706183900000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_e_list",
+            "parentId": "fld_events",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/events",
+            "name": "List Events",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {},
+            "metaSortKey": -1706184000000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_e_create",
+            "parentId": "fld_events",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/events",
+            "name": "Create Event (Auth)",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"name\": \"Life Drawing Session\",\n\t\"description\": \"A great session\",\n\t\"frequency\": \"weekly\",\n\t\"week_day\": \"monday\",\n\t\"pose_format\": \"Mixed\",\n\t\"pricing_text\": \"£15\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ token }}"
+                },
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1706183900000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_c_list",
+            "parentId": "fld_calendar",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/calendar",
+            "name": "List Calendar",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {},
+            "metaSortKey": -1706184000000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_dash_stats",
+            "parentId": "fld_dashboard",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "url": "{{ base_url }}/dashboard/stats",
+            "name": "Get Stats",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {},
+            "metaSortKey": -1706184000000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "env_local",
+            "parentId": "env_root",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Local",
+            "data": {
+                "base_url": "http://localhost:8787/api",
+                "token": "YOUR_JWT_TOKEN_HERE"
+            },
+            "dataPropertyOrder": {
+                "&base_url": "base_url",
+                "&token": "token"
+            },
+            "color": null,
+            "isPrivate": false,
+            "metaSortKey": 1706184000000,
+            "_type": "environment"
+        },
+        {
+            "_id": "env_root",
+            "parentId": "wrk_1",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Base Environment",
+            "data": {},
+            "dataPropertyOrder": {},
+            "color": null,
+            "isPrivate": false,
+            "metaSortKey": 1706184000000,
+            "_type": "environment"
+        },
+        {
+            "_id": "wrk_1",
+            "parentId": null,
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Neon API",
+            "description": "",
+            "scope": "collection",
+            "_type": "workspace"
+        },
+        {
+            "_id": "fld_auth",
+            "parentId": "wrk_1",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Auth",
+            "description": "",
+            "weight": 0,
+            "_type": "request_group"
+        },
+        {
+            "_id": "fld_register",
+            "parentId": "wrk_1",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Register",
+            "description": "",
+            "weight": 10,
+            "_type": "request_group"
+        },
+        {
+            "_id": "fld_users",
+            "parentId": "wrk_1",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Users",
+            "description": "",
+            "weight": 20,
+            "_type": "request_group"
+        },
+        {
+            "_id": "fld_venues",
+            "parentId": "wrk_1",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Venues",
+            "description": "",
+            "weight": 30,
+            "_type": "request_group"
+        },
+        {
+            "_id": "fld_models",
+            "parentId": "wrk_1",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Models",
+            "description": "",
+            "weight": 40,
+            "_type": "request_group"
+        },
+        {
+            "_id": "fld_events",
+            "parentId": "wrk_1",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Events",
+            "description": "",
+            "weight": 50,
+            "_type": "request_group"
+        },
+        {
+            "_id": "fld_calendar",
+            "parentId": "wrk_1",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Calendar",
+            "description": "",
+            "weight": 60,
+            "_type": "request_group"
+        },
+        {
+            "_id": "fld_dashboard",
+            "parentId": "wrk_1",
+            "modified": 1706184000000,
+            "created": 1706184000000,
+            "name": "Dashboard",
+            "description": "",
+            "weight": 70,
+            "_type": "request_group"
+        }
+    ]
+}
